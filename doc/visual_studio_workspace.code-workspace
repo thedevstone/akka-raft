@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"plantuml.diagramsRoot": "plantuml/",
+		"plantuml.exportFormat": "png",
+		"plantuml.exportSubFolder": false,
+		"plantuml.exportOutDir": "plantuml/rendered",
+		"plantuml.render": "PlantUMLServer",
+		"plantuml.server": "https://www.plantuml.com/plantuml",
+		"plantuml.includepaths": ["plantuml/"],
+	}
+}

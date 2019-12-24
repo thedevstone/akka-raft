@@ -1,10 +1,41 @@
 \documentclass{scrartcl}
 \usepackage[utf8]{inputenc}
+%Disable all warnings issued by latex starting with "You have..."
+\usepackage{silence}
+\WarningFilter{latex}{You have requested package}
+
+\usepackage{marvosym}
+\usepackage{fancyvrb}
+\usepackage[usenames]{color}
 \usepackage[hidelinks]{hyperref}
 \usepackage{url}
 \usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{xcolor}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{caption}
+\usepackage{enumerate}
+\usepackage{multicol}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{tocloft}
+\usepackage[most]{tcolorbox}
+\usepackage{pgfplots}
+\usepackage{style/pgfplotsthemetol}
+\pgfplotsset{compat=1.16}
+\definecolor{lstgrey}{rgb}{0.94,0.95,1}
+\lstset{
+    backgroundcolor=\color{lstgrey},
+    frame=single,
+    rulecolor=\color{lstgrey}, % make frame "invisible"
+    captionpos=t,
+    tabsize=2,
+    numberbychapter=false,
+    showstringspaces=false,
+    breaklines=true,
+}
 %LINK CLICCABILI
 \hypersetup{
     colorlinks,
@@ -12,8 +43,16 @@
     citecolor={blue!50!black},
     urlcolor={blue!80!black}
 }
+%TABELLE TBCOLORBOX
+\tcbset{
+        enhanced,
+        colback=red!5!white,
+        boxrule=0.1pt,
+        colframe=red!75!black,
+        fonttitle=\bfseries
+       }
 %PATH IMMAGINI
-\graphicspath{{images/} }
+\graphicspath{{images/} {plantuml/rendered/} }
 \newcommand{\emailaddr}[1]{\href{mailto:#1}{\texttt{#1}}}
 
 \title{\LARGE
