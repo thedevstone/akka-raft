@@ -1,0 +1,51 @@
+\documentclass{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{xcolor}
+%LINK CLICCABILI
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+%PATH IMMAGINI
+\graphicspath{{images/} }
+\newcommand{\emailaddr}[1]{\href{mailto:#1}{\texttt{#1}}}
+
+\title{\LARGE
+    RAFT - Report Finale
+}
+
+\author{
+    Author 1 \\ \emailaddr{sara.kiade@studio.unibo.it}
+    \and 
+    Author 2 \\ \emailaddr{gyiordan.caminati@studio.unibo.it} 
+    \and 
+    Author 3 \\ \emailaddr{luca.giulianini2@studio.unibo.it}
+}
+
+\date{January 2019}
+
+\begin{document}
+\maketitle
+%\tableofcontents
+
+\input{tex/Abstract}
+\input{tex/Requirements}
+\input{tex/Analysis}
+\input{tex/Design}
+\input{tex/Implementation}
+\input{tex/Validation}
+\input{tex/Deployment}
+\input{tex/Usage}
+\input{tex/Conclusion}
+\input{tex/Notes}
+\nocite{*} % Includes all references from the `references.bib` file
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
