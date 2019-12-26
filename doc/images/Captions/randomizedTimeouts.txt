@@ -1,0 +1,1 @@
+Come evidenziato dal grafico, utilizzare un timeout randomico rende molto frequente che un server vada in timeout, si candidi e vinca le elezioni prima che anche gli altri arrivino a 0. In questo modo si riesce agevolmente a diminuire i casi in cui più candidati competano in un elezione, riducendo il rischio di pareggio.
