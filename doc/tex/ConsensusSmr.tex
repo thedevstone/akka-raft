@@ -18,11 +18,33 @@ Fra le sfide più importanti che i sistemi distribuiti devono affrontare al gior
 		\item{\textit{accetta e risponde} a vari tipi di interazioni o \textbf{stimoli esterni}.}
 		\item{Gli stimoli possono essere nella forma di \textit{comandi} che provengono da clients e hanno lo scopo di gestire lo \textbf{stato interno} della macchina.}
 	\end{itemize}
-	Al giorno d'oggi le state machine rappresentano un modello generale di computazione estremamente diffuso. Gran parte dei sistemi a larga scala (as-a-service) che utilizziamo solitamente sono nella forma di macchine a stati.
+	Al giorno d'oggi le state machine rappresentano un modello generale di computazione estremamente diffuso. Gran parte dei sistemi a larga scala (As-A-Service) che utilizziamo solitamente sono nella forma di macchine a stati.
 
+	\subsection{Struttura di un server con SMR}
+	Come si può vedere nella figura \ref{fig:figure1}, all'interno di un sistema sono presenti solitamente diversi server di tipo SMR. Il numero di unità presenti è direttamente correlato alla robustezza della State Machine replicata.
+
+		\subsubsection{Consistenza nella computazione del log}
+			\paragraph{Log $\rightarrow$}
+			Le macchine a stati replicate sono implementate solitamente utilizzando un \textbf{log replicato}  (modulo \texttt{log} fig: \ref{fig:figure1}). Ogni server implementa un log il quale contiene all'interno una \textbf{serie di comandi} che sono mantenuti sempre aggiornati e in \textbf{ordine} in modo \textit{consistente} con gli altri componenti presenti nel sistema.
+			\paragraph{State Machine $\rightarrow$}
+			I comandi presenti all'interno del log vengono \textbf{eseguiti in ordine}, sotto particolari condizioni, dalla state machine (modulo \texttt{state machine} (fig: \ref{fig:figure1}). Le state machine sono macchine \textbf{deterministiche} questo sta a significare che producono lo stesso output e si portano sullo stesso stato a fonte dello stesso input. Questo fatto è fondamentale per il sistema!
+			\paragraph{Osservazione 1:} \emph{Se il log è mantenuto sempre in ordine e la sua computazione da parte della state machine è deterministica allora siamo certi che tutte le state machine agiranno nello stesso modo a fronte dello stessa serie di comandi presente nel log}.
+
+		\subsubsection{Consistenza nello stato del log}
+			Quello di mantenere consistente lo stato del log è un lavoro dell'algoritmo di consenso il quale è contenuto in un modulo a parte (modulo \texttt{consenso} (fig: \ref{fig:figure1}).
+			\paragraph{Modulo Consenso $\rightarrow$}
+			Il modulo del consenso ha uno scopo ben preciso che può essere riassunto come segue:\begin{enumerate}
+				\item Una volta che il server riceve un comando da parte di un client, il \textbf{comando viene appeso} in fondo al log. 
+				\item Il modulo di consenso si assicura che la \textbf{maggior parte} dei server presentino l'ultima \textbf{entry} del log (in questo caso una richiesta da parte del client) nello \textbf{stesso ordine} e nella \textbf{stessa posizione} del log. 
+				\item Se una percentuale inaccettabile di server è inconsistente allora l'algoritmo può decidere di continuare ad \textbf{attendere} fino a quando il numero di server consistenti aumenta.
+				\item Una volta che il numero è stato raggiunto allora la entry viene definita \textbf{committed}.
+				\item Ogni state machine, ricevuto il commitment dell'entry, può finalmente \textbf{eseguire} il comando.
+				\item L'output è infine ritornato al client.
+			\end{enumerate}
+			\paragraph{Osservazione 2:} \emph{Se l'algoritmo di consenso da il via libera per il commit di un comando allora è lecito pensare che il sistema sia safe e possa essere consistente da quel momento in poi in tutto il sistema}.
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.99\columnwidth]{statemachine}
+		\includegraphics[width=0.80\columnwidth]{statemachine}
 		\caption{Un modello di state machine semplificato}
 		\label{fig:figure1}
-	\end{figure}  
+	\end{figure}
