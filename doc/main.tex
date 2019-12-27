@@ -1,15 +1,24 @@
 \documentclass{report}
 \usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+
 %Disable all warnings issued by latex starting with "You have..."
 \usepackage{silence}
 \WarningFilter{latex}{You have requested package}
 
+%Bib
+\usepackage[style=numeric]{biblatex}
+\addbibresource{references.bib}
+\DeclareNameAlias{default}{last-first}
+\usepackage{csquotes}
+%\usepackage{natbib}
+
+%Import
 \usepackage{marvosym}
 \usepackage{fancyvrb}
 \usepackage[usenames]{color}
 \usepackage[hidelinks]{hyperref}
 \usepackage{url}
-\usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
@@ -40,7 +49,7 @@
 \hypersetup{
     colorlinks = true,
     linkcolor = .,
-    citecolor = .,
+    citecolor = {blue},
     linkbordercolor = {white},
 }
 %TABELLE TBCOLORBOX
@@ -74,12 +83,12 @@
 \tableofcontents
 
 \input{tex/Abstract}
+\include{tex/Intro}
+\include{tex/ConsensusSmr}
 \include{tex/Raft}
 \include{tex/RaftImplementation}
 \include{tex/Conclusion}
 
-\nocite{*} % Includes all references from the `references.bib` file
-\bibliographystyle{plain}
-\bibliography{references}
+\printbibliography
 
 \end{document}
