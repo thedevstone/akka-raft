@@ -10,3 +10,19 @@ Fra le sfide più importanti che i sistemi distribuiti devono affrontare al gior
 	Si parte dunque con un insieme di \textbf{macchine} singolarmente \textbf{inaffidabili} e si fa in modo che esse si comportino come un'\textbf{unica macchina super-affidabile} che garantisce di operare in modo reliable anche nel caso in cui alcune macchine falliscano.\\
 	All'interno di un gruppo di consenso (\textbf{consensus group}) i fallimenti sono gestiti in un modo studiato e comprovato, questo permette di avere un \textit{modello di funzionamento} robusto e affidabile.\\
 	Data l'estremam \textbf{availability} e \textbf{raliability} dei consensus group, altri sistemi possono decidere di usare un consensus group come fondamenta per garantire fault tolerance; questo porta gli algoritmi di consenso a giocano un ruolo fondamentale nella costruzione di sistemi reliable di grandi dimensioni. 
+
+	\section{Replicated State Machine}
+	Gli algoritmi di consenso sono generalmente utilizzati nel contesto di quelle che chiamiamo replicated state machines. Prima di parlare di macchine a stati replicate bisogna definire cos'è una macchina a stati.\\
+	Una macchina a stati è generalmente un programma che: 
+	\begin{itemize}
+		\item{\textit{accetta e risponde} a vari tipi di interazioni o \textbf{stimoli esterni}.}
+		\item{Gli stimoli possono essere nella forma di \textit{comandi} che provengono da clients e hanno lo scopo di gestire lo \textbf{stato interno} della macchina.}
+	\end{itemize}
+	Al giorno d'oggi le state machine rappresentano un modello generale di computazione estremamente diffuso. Gran parte dei sistemi a larga scala (as-a-service) che utilizziamo solitamente sono nella forma di macchine a stati.
+
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.99\columnwidth]{statemachine}
+		\caption{Un modello di state machine semplificato}
+		\label{fig:figure1}
+	\end{figure}  
