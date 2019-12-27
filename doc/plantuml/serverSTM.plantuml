@@ -1,7 +1,6 @@
 @startuml
   !define NL5 \n\n\n\n\n
   !define TAB5 \t\t\t\t\t
-  skinparam maxMessageSize 2000
 
 [*] --> Agent :Start
 Agent --> [*] :Stop
@@ -80,10 +79,4 @@ state "Candidate" as Candidate {
   }
 
 }
-
-
-   
-
-
-
 @enduml
