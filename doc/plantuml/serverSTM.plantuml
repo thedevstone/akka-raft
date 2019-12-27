@@ -1,4 +1,7 @@
 @startuml
+
+scale 1080 height
+scale 1920 width
   !define NL5 \n\n\n\n\n
   !define TAB5 \t\t\t\t\t
 
@@ -22,13 +25,13 @@ state "Follower" as Follower {
   [*] --> Idle
   Idle -r-> FollowerElaborate : Hadle msg\n[msgavaiable() = True]\n/getMsg()
   
-  FollowerElaborate -l-> Idle : Vote\n[msg.type = VoteRquest]\n/sendVote(addr,choice)
-  FollowerElaborate -d-> Idle : Append new entry\n[msg.type = NewEntry]\n/AddNewEntry(Msg.get())
+  FollowerElaborate -l-> Idle : Vote\n[msg.type = VoteRequest]\n/sendVote(addr,choice)
+  FollowerElaborate -d-> Idle : Append new entry\n[msg.type = NewEntry]\n/AddNewEntry(msg.get())
   FollowerElaborate -d-> Commit : Commit entry\n[msg.type = Commit]
   
   Commit --> Idle : Return in idle state
 
-  Follower -l-> Candidate : Time expired\n[Time=0 && in_idle=true]
+  Follower -l-> Candidate : Time expired\n[Time=0 && inIdle=true]
 
 }
 
@@ -40,13 +43,13 @@ state "Candidate" as Candidate {
   state "Waiting Votation" as WaitingVotation
   state "Elaborate" as CandidateElaborate
 
-  WaitingVotation -r-> CandidateElaborate : Hadle msg\n[msgavaiable() = True]\n/getMsg()
+  WaitingVotation -r-> CandidateElaborate : Handle msg\n[msgavaiable() = True]\n/getMsg()
 
   CandidateElaborate -r-> WaitingVotation : Vote request accepted\n numVote++
   CandidateElaborate --> WaitingVotation :Vote request rejected
   CandidateElaborate -u-> Follower : Received one message from leader\n[msg.getTerm > agetTerm]
 
-  Candidate --> Candidate :Time expired\n[Time=0 && in_idle=true]
+  Candidate --> Candidate :Time expired\n[Time=0 && \nin_idle=true]
   Candidate -l-> Leader : numVote > (sizeCluster/2)-1 
 }
 
@@ -75,7 +78,7 @@ state "Candidate" as Candidate {
   [*] --> AgentMessageHandler
   state "Agent Message Handler" as AgentMessageHandler{
     AgentMessageHandler : Entry do:\n Time = Random(min,max)
-    AgentMessageHandler --> AgentMessageHandler: New message Arrived\n/addMsg(new_msg) 
+    AgentMessageHandler --> AgentMessageHandler: New message Arrived\n/addMsg(newMsg) 
   }
 
 }
