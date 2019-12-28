@@ -1,0 +1,54 @@
+@startuml
+    
+
+  box "Server Cluster" #99CCFF 
+    participant "Followers" as Followers
+    participant "Old Leader" as OldLeader
+    participant "Candidate" as Candidate
+    participant "New Leader" as Leader
+  activate OldLeader
+
+  note right OldLeader
+    In questo schema, è espressa la
+    leader election di un Follower
+    dopo il crash del vecchio leader,
+    questo è uno schema semplificato,
+    che non tiene conto dei failure 
+    della rete
+  end note
+  == Normale funzionamento ==
+  loop Indefinite
+    OldLeader ->> Followers : AppendEntries()
+    activate Followers
+    Followers --> OldLeader : Ack and state
+    deactivate Followers
+  end group
+    destroy OldLeader 
+  note over OldLeader :Il vecchio leader si blocca
+  == Leader election ==
+  Followers -> Candidate ** : One follower got timeout
+  activate Candidate
+  Candidate ->> Followers : Send N vote request
+  Followers --> Candidate : Receive back the votes
+  
+  Candidate -->> Leader ** : Become the new leader
+  activate Leader
+  deactivate Candidate 
+  destroy Candidate
+  Leader ->> OldLeader : AppendEntries()
+  activate OldLeader
+  note Over OldLeader 
+    Una volta risvegliato,
+    riceve un AppendEntries
+    dal nuovo leader,
+    e torna Follower
+  end note
+  destroy OldLeader
+  loop Indefinite
+    Leader ->> Followers : AppendEntries()
+    activate Followers
+    Followers --> Leader : Ack and state
+    deactivate Followers
+  end group
+end box
+@enduml
