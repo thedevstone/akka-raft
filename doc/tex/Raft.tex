@@ -20,10 +20,16 @@
 		In questo tipo di sistema i \textbf{client} possono \textbf{comunicare solamente con il leader}; nel caso in cui un client conttati un server diverso dal leader viene immediatamente \textbf{rediretto} al leader corrente.
 	\end{itemize}
 	\section{L'algoritmo PAXOS}
-	\section{L'algoritmo RAFT}
+	\section{RAFT Core}
+		\subsection{Basics}
 		\subsection{Leader Election}
-		\subsection{Normal Operation}
+		\subsection{Normal Operation | Log Replication}
 		\subsection{Safety e Consistency}
-		\subsection{Neutralize Old Leaders}
+			\subsubsection{Election restriction}
+			\subsubsection{Committing entries from previous terms}
+			\subsubsection{Neutralize Old Leaders}
+			\subsubsection{Follower and Candidate Crash}
+	\section{RAFT Extensions}
 		\subsection{Client Protocol}
 		\subsection{Configuration Changes}
+		\subsection{Log Compaction}
