@@ -2,9 +2,9 @@
     
   actor "Client"  
   box "Server Cluster" #99CCFF
-  participant "Follower" as Follower
-  participant "Leader" as Leader
-  participant "OtherFollower" as OtherFollower
+    participant "Follower" as Follower
+    participant "Leader" as Leader
+    participant "OtherFollower" as OtherFollower
 	end box
   activate Leader
 
@@ -18,17 +18,17 @@
     non si tengono in considerazione i
     classici failure della rete
   end note
+  == Richiesta esterna ==
   alt Indirect request
   Client ->> Follower : Send request 
   activate Follower
   Follower --> Client : return leader address
   Client ->> Leader : Send request
-
   deactivate Follower
   else Direct request
   Client ->> Leader : Send request
   end group
-
+  == Elaborazione della richiesta nel cluster ==
   loop Indefinite
     Leader ->> Follower : AppendEntries()
     activate Follower
@@ -41,5 +41,14 @@
       opt if ackNum > sizeCluster/2-1
         Leader --> Client : return result
     end group
+    note Over Client 
+      Le richieste dei client, 
+      vengono eseguite solo una volta,
+      dopodiche il cluster continuerà,
+      questa sequenza di messaggi
+      anche se non ci sono 
+      effettivamente delle entry
+      da diffondere
+    end note
   end group
 @enduml
