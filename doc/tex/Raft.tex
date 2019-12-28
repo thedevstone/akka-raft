@@ -16,7 +16,7 @@
 		In questa tipologia i server hanno tutti lo \textbf{stesso ruolo} e tutti lo stesso potere decisionale in qualsiasi momento.\\
 		I \textbf{client} possono quindi \textbf{contattare} e fare richiesto verso \textbf{qualunque server} presente all'interno del cluster. 
 		\item{\textbf{Asymmetric | Leader-base:}}
-		In qualsiasi momento i server non hanno \textbf{mai} lo \textbf{stesso ruolo} e lo stesso potere decisionale. Esiste infatti sempre un server che si trova \textbf{in carica}, questo particolare server viene denominato \textbf{Leader}. Il leader gestisce solitamente tutte le operazioni del cluster, mentre gli altri server sono denominati \textbf{Serveant} e portano a compimento le richieste del leader.\\
+		In qualsiasi momento i server non hanno \textbf{mai} lo \textbf{stesso ruolo} e lo stesso potere decisionale. Esiste infatti sempre un server che si trova \textbf{in carica}, questo particolare server viene denominato \textbf{Leader}. Il leader gestisce solitamente tutte le operazioni del cluster, mentre gli altri server sono denominati \textbf{Servant} e portano a compimento le richieste del leader.\\
 		In questo tipo di sistema i \textbf{client} possono \textbf{comunicare solamente con il leader}; nel caso in cui un client conttati un server diverso dal leader viene immediatamente \textbf{rediretto} al leader corrente.
 	\end{itemize}
 	\section{L'algoritmo PAXOS}
