@@ -1,0 +1,85 @@
+% -*- root: ../main.tex -*-
+\chapter{Introduzione}
+	Lo sviluppo in ambito ICT avvenuto negli ultimi anni unito alla informatizzazione massiva dei processi ha portato molte aziende a dover ripensare gran parte dei propri sistemi. Questi sistemi, infatti, erano progettati specificatamente per \textbf{environment statici} e a fronte di richieste di grande \textbf{scalabilità} ed elevata \textbf{dinamicità} mostrarono subito le loro debolezze.
+
+	\section{Sistemi Distribuiti}
+	Gran parte dei sistemi più complessi al giorno d'oggi sono \textbf{sistemi distribuiti}, ossia sistemi in cui la computazione non avviene in modo \textit{situato} nella medesima macchina nel medesimo processo ma in modo distribuito fra differenti macchine. Il concetto di distribuzione porta ad una computazione che esula dal \textbf{tempo} e dallo \textbf{spazio} nella loro rappresentazione \textbf{assoluta}.
+	\begin{itemize}
+		\item{\textbf{Tempo:}}
+		Esiste solo una concezione di \textbf{tempo logico} ossia un tempo relativo al singolo sistema distribuito. Per fare ciò vengono usate delle astrazioni \textit{logiche} di tempo chiamate: \textbf{vector clocks} \cite[Lamport:1978]{Lamport:1978}.\\
+		Vedremo che con l'algoritmo RAFT verrà utilizzata una astrazione simile per il concetto di \texttt{term}.
+		\item{\textbf{Spazio:}}
+		Un sistema distribuito nella sua forma più semplice consiste di un insieme di macchine interconnesse fra loro che eseguono una \textit{computazione} in modo \textit{coordinato} e \textit{decentralizzato}. Il sistema idealmente dovrebbe \textit{astrarre} dalla distribuzione spaziale delle singole unità che lo compongono.
+	\end{itemize}
+
+	\section{Il Teorema CAP}
+	Ogni sistema distribuito è caratterizzato da 3 proprietà fondamentali:
+	\begin{itemize}
+	  	\item{\textbf{Consistency:}}
+	  	Vogliamo che un sistema si comporti correttamente, ossia che possa fornire output corretti a fronte di qualsiasi input.
+	  	\item{\textbf{Availability:}}
+	  	Vogliamo che il sistema sia sempre disponibile.
+	  	\item{\textbf{Partition Tolerance:}}
+	  	Vogliamo che il sistema sia robusto contro contro partizioni dello stesso e quindi crash di qualsiasi componente.
+	  \end{itemize}
+	Il teorema \textbf{CAP} afferma che in un qualsiasi sistema distribuito si possono garantire al massimo due proprietà \cite[Brewer:2000]{Brewer:2000}
+	Esiste dunque un tradeoff fra \textbf{safety} e \textbf{liveness}.
+
+	\section{Terminologia}
+		\paragraph{Safety}
+		Il concetto di consistenza richiama fondamentalmente il concetto di safety secondo il quale:\\ ``\emph{Something bad ($\phi$) always not happends}'' 
+		\begin{equation}
+			\square \lnot \phi
+		\end{equation}
+		\paragraph{Liveness}
+		Il concetto di availability riprende invece quello di liveness secondo cui:\\
+		``\emph{Something good ($\psi$) eventually happends}''
+		\begin{equation}
+			\square \lozenge \psi
+		\end{equation}
+		\paragraph{Partition Tolerance:}
+		Quando un sistema è \textit{partitioned} allora tutti i messaggi scambiati da un nodo in un componente della partizione a un altro nodo della partizione sono persi.
+		\paragraph{Componente}
+		In un sistema distribuito è formato da vari componenti; ogni componente ha queste caratteristiche:
+		\begin{itemize}
+		 	\item{\textbf{Indipendenza:}}
+		 	Ogni componente è una entità autonoma e indipendente e dunque generalmente disaccoppiata.
+		 	\item{\textbf{Eterogeneità:}}
+		 	Non sono date \textit{assunzioni} sulla \textbf{natura} delle singole entità sulla loro \textit{struttura} e \textbf{comportamento}
+		\end{itemize}
+		\paragraph{Coerenza}
+		Un sistema distribuito ha come scopo principe quello di rappresentare e gestire in modo coerente i vari componenti con lo scopo di risultare dall'esterno come un sistema omogeneo \emph{Working as One, Looking as One}.\\
+		La coerenza viene ottenuta anche attraverso l'utilizzo di un \textbf{Middleware} il quale permette a tutti i componenti di interfacciarsi su un \textit{layer condiviso} che espone la \textit{stessa interfaccia} su architetture e linguaggi diversi.
+		\paragraph{Interazione}
+		Secondo una definizione più specifica fornita da \cite[Colouris:2012]{Colouris:2012} un sistema distribuito è un sistema in cui componenti collegati in rete comunicano e si coordinano attraverso \textbf{scambio di messaggi}.\\
+		L'interazione in questo caso diventa fondamentale per garantire la \textbf{coerenza} e l'\textbf{uniformità} del sistema.
+
+	\section{Replicazione e Fault Tolerance}
+	Secondo molti un sistema distribuito porta in generale più complessità e addirittura meno vantaggi rispetto ad un sistema situato. Esistono però alcuni proprietà fondamentali che i sistemi situati, che operano nel concentrato, non riescono a garantire.
+		\subsubsection{Replicazione e Consistenza}
+		La replicazione porta parecchi benefici fra cui:
+		\begin{itemize}
+			\item{\textbf{Reliability}}
+			Il sistema è molto più reliable dato che esistono repliche che possono essere operative anche a fronte di guasti di altre unità.
+			\item{\textbf{Fault Tolerance}}
+			Un componente può fallire mentre il resto del sistema continua a funzionare. Abbiamo dunque la resistenza contro \textit{partial failure} nel sistema.
+			\item{\textbf{Accessibility}}
+			Avendo più repliche a disposizione, si rende più agevole l'accessibilità e il carico può essere bilanciato in modo più semplice.
+			\item{\textbf{Performance}}
+			Non avendo un solo punto di accesso, anche le performance traggono giovamento.
+			\item{\textbf{Scalability}}
+			IL sistema è indipendente dal numero di componenti presenti. Questo permette grande \textit{elasticità} nella gestione dei componenti.
+		\end{itemize}
+		ma anche alcuni problemi che bisognerà arginare:
+		\begin{itemize}
+			\item{\textbf{Costo}}
+			Il costo della replicazione è direttamente correlato al costo delle macchine utilizzate per replicare i dati. Più hardware viene utilizzato più il costo collegato è elevato.
+			\item{\textbf{Consistenza}}
+			Il problema della consistenza è il problema fondamentale per i sistemi distribuiti. Dato che un sistema multi-replica non garantisce nulla su come e quando verranno replicati i dati, bisogna trovare un modo per garantire che lo stato dei singoli componenti sia consistente con quello del sistema. Questo deve essere fatto anche a discapito di altre proprietà come la \textbf{availability} come già visto nel teorema CAP. 
+		\end{itemize}
+
+    \subsubsection{Fault Tolerance}
+    Lo scopo fondamentale della fault tolerance è quello di permette al sistema di \textbf{sopravvivere} a e in alcuni casi \textbf{risolvere} autonomamente le \textbf{failures}.
+    Generalmente questo comportamento viene ottenuto limitando l'impatto della failure sull'intero sistema cercando di sfruttare i componenti integri al fine di risolvere gli stessi fallimenti.
+
+
