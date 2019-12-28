@@ -1,6 +1,13 @@
  % -*- root: ../main.tex -*-
 \chapter{RAFT}
-	
+	Come abbiamo visto nel capitolo precedente la struttura di una macchina a stati replicata è generalmente molto semplice. Questo è dato dal fatto che ogni singola state machine può essere decomposta in singoli \textbf{moduli} dedicati a uno \textbf{specifico scopo}.
+	\begin{itemize}
+		\item{\textit{Log Module}}
+		\item{\textit{State Machine Module}}
+		\item{\textit{Consensus Module}}
+	\end{itemize}
+	I moduli sono \textbf{semi-dipendenti} ossia comunicano tra di loro attraverso chiamate a procedure standard. Per esempio il modulo di log potrebbe esporre funzionalità dedicate all'appending o commiting di una serie di comandi, o ancora la state machine potrebbe mettere a disposizione un metodo per l'esecuzione di un determinato comando.\\
+	In questo capitolo andremo a soffermarci maggiormente sul core-module di ogni SMR ossia il \textbf{modulo di consenso}; capiremo quali sono le sfide che un algoritmo di consenso deve affrontare e vedremo in dettaglio un'implementazione di un famoso algoritmo di consenso, \textbf{RAFT}.
 	\section{L'algoritmo PAXOS}
 	\section{L'algoritmo RAFT}
 		\subsection{Leader Election}
