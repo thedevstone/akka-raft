@@ -18,6 +18,8 @@
   end note
   == Normale funzionamento ==
   loop Indefinite
+    OldLeader --> OldLeader ++ : Start Timer
+    return Timers Trigger
     OldLeader ->> Followers : AppendEntries()
     activate Followers
     Followers --> OldLeader : Ack and state
@@ -45,6 +47,8 @@
   end note
   destroy OldLeader
   loop Indefinite
+    Leader --> Leader ++ : Start Timer
+    return Timers Trigger
     Leader ->> Followers : AppendEntries()
     activate Followers
     Followers --> Leader : Ack and state
