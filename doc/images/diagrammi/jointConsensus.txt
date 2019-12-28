@@ -1,0 +1,4 @@
+Per cambiare la configurazione del sistema, si ricorre a una fase intermedia posta tra la vecchia configurazione e quella nuova, in maniera tale da evitare di incorrere in inconistenze.
+In questa fase intermedia, chiamata "joint consensus", per prendere le decisioni si tengono in considerazione entrambe le maggioranze: sia quella della nuova configur4azione che quella della vecchia.
+
+ Il cambiamento della configurazione viene scatenato da una richiesta. Quando il leader riceve questa richiesta la aggiunge al prorpio log e la propaga,  come farebbe normalmente, ma ea committarla. 
