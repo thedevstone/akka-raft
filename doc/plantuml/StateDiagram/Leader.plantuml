@@ -17,6 +17,6 @@
     ControlStatus --> WaitingMessage : Commit actual entry\n/sendCommitMsg()\n/updateState()\n/sendReslt()
     ControlStatus --> WaitingMessage : Insufficient ack for commit\n
     
-    LeaderElaborate --> Follower : Received one message from another leader\n[msg.getTerm > agetTerm]
+    LeaderElaborate --> Follower : Received one message\n from another leader\n[msg.getTerm > agetTerm]
   }
 @enduml

@@ -8,14 +8,14 @@
     participant "New Leader" as Leader
   activate OldLeader
 
-  note right OldLeader
+  /'note right OldLeader
     In questo schema, è espressa la
     leader election di un Follower
     dopo il crash del vecchio leader,
     questo è uno schema semplificato,
     che non tiene conto dei failure 
     della rete
-  end note
+  end note'/
   == Normale funzionamento ==
   loop Indefinite
     OldLeader --> OldLeader ++ : Start Timer
@@ -26,9 +26,9 @@
     deactivate Followers
   end group
     destroy OldLeader 
-  note over OldLeader :Il vecchio leader si blocca
+  'note over OldLeader :Il vecchio leader si blocca
   == Leader election ==
-  Followers -> Candidate ** : One follower got timeout
+  Followers -->> Candidate ** : One follower got timeout
   activate Candidate
   Candidate ->> Followers : Send N vote request
   Followers --> Candidate : Receive back the votes
@@ -39,12 +39,12 @@
   destroy Candidate
   Leader ->> OldLeader : AppendEntries()
   activate OldLeader
-  note Over OldLeader 
+  /'note Over OldLeader 
     Una volta risvegliato,
     riceve un AppendEntries
     dal nuovo leader,
     e torna Follower
-  end note
+  end note'/
   destroy OldLeader
   loop Indefinite
     Leader --> Leader ++ : Start Timer
