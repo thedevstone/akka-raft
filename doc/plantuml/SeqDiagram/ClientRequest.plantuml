@@ -2,9 +2,8 @@
     
   actor "Client"  
   box "Server Cluster" #99CCFF
-    participant "Follower" as Follower
+    participant "Followers" as Followers
     participant "Leader" as Leader
-    participant "OtherFollower" as OtherFollower
 	end box
   activate Leader
 
@@ -20,24 +19,23 @@
   end note
   == Richiesta esterna ==
   alt Indirect request
-  Client ->> Follower : Send request 
-  activate Follower
-  Follower --> Client : return leader address
+  Client ->> Followers : Send request 
+  activate Followers
+  Followers --> Client : return leader address
   Client ->> Leader : Send request
-  deactivate Follower
+  deactivate Followers
   else Direct request
   Client ->> Leader : Send request
   end group
   == Elaborazione della richiesta nel cluster ==
   loop Indefinite
-    Leader ->> Follower : AppendEntries()
-    activate Follower
-    Leader ->> OtherFollower : AppendEntrie()
-    activate OtherFollower
-    Follower --> Leader : Ack and state
-    OtherFollower --> Leader : Ack and state
-    deactivate Follower
-    deactivate OtherFollower
+    Leader --> Leader ++ : Start Timer
+    return Timers Trigger
+    Leader ->> Followers : AppendEntries()
+
+    activate Followers
+    Followers --> Leader : Ack and state
+    deactivate Followers
       opt if ackNum > sizeCluster/2-1
         Leader --> Client : return result
     end group
