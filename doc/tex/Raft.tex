@@ -8,28 +8,17 @@
 	\end{itemize}
 	I moduli sono \textbf{semi-dipendenti} ossia comunicano tra di loro attraverso chiamate a procedure standard. Per esempio il modulo di log potrebbe esporre funzionalità dedicate all'appending o commiting di una serie di comandi, o ancora la state machine potrebbe mettere a disposizione un metodo per l'esecuzione di un determinato comando.\\
 	In questo capitolo andremo a soffermarci maggiormente sul core-module di ogni SMR ossia il \textbf{modulo di consenso}; capiremo quali sono le sfide che un algoritmo di consenso deve affrontare e vedremo in dettaglio un'implementazione di un famoso algoritmo di consenso, \textbf{RAFT}.
-	
+
 	\section{Approcci al Consenso}
-	Esistono generalmente due approcci al problema del consenso:
-	\begin{itemize}
-		\item{\textbf{Symmetric | Leader-less:}}
-		In questa tipologia i server hanno tutti lo \textbf{stesso ruolo} e tutti lo stesso potere decisionale in qualsiasi momento.\\
-		I \textbf{client} possono quindi \textbf{contattare} e fare richiesto verso \textbf{qualunque server} presente all'interno del cluster. 
-		\item{\textbf{Asymmetric | Leader-base:}}
-		In qualsiasi momento i server non hanno \textbf{mai} lo \textbf{stesso ruolo} e lo stesso potere decisionale. Esiste infatti sempre un server che si trova \textbf{in carica}, questo particolare server viene denominato \textbf{Leader}. Il leader gestisce solitamente tutte le operazioni del cluster, mentre gli altri server sono denominati \textbf{Servant} e portano a compimento le richieste del leader.\\
-		In questo tipo di sistema i \textbf{client} possono \textbf{comunicare solamente con il leader}; nel caso in cui un client conttati un server diverso dal leader viene immediatamente \textbf{rediretto} al leader corrente.
-	\end{itemize}
-	\section{L'algoritmo PAXOS}
+    \input{tex/RAFT/ApprocciAlConsenso.tex}
+  \section{L'algoritmo PAXOS}
+    \input{tex/RAFT/Paxos.tex}
 	\section{RAFT Core}
-		\subsection{Basics}
-		\subsection{Leader Election}
-		\subsection{Normal Operation | Log Replication}
-		\subsection{Safety e Consistency}
-			\subsubsection{Election restriction}
-			\subsubsection{Committing entries from previous terms}
-			\subsubsection{Neutralize Old Leaders}
-			\subsubsection{Follower and Candidate Crash}
+		\input{tex/RAFT/Core/Basics.tex}
+		\input{tex/RAFT/Core/LeaderElection.tex}
+		\input{tex/RAFT/Core/LogReplication.tex}
+		\input{tex/RAFT/Core/Safety.tex}
 	\section{RAFT Extensions}
-		\subsection{Client Protocol}
-		\subsection{Configuration Changes}
-		\subsection{Log Compaction}
+		\input{tex/RAFT/Extensions/ClientProtocol.tex}
+		\input{tex/RAFT/Extensions/ConfigurationChanges.tex}
+		\input{tex/RAFT/Extensions/LogCompaction.tex}
