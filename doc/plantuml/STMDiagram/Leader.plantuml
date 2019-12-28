@@ -1,4 +1,22 @@
 @startuml
-
-
+  state "Candidate" as Candidate
+    Candidate --> Leader : Time expired\n[Time=0 && \nin_idle=true]
+  state "Follower" as Follower 
+    
+  state "Leader" as Leader { 
+    Leader : Entry; do \n serverState=Leader\n Time = heartBeatDelayTime\n SendHeartBeatMsg()
+    Leader : Exit: do  
+    [*] --> WaitingMessage
+    state "Waiting Message" as WaitingMessage
+    state "Elaborate" as LeaderElaborate
+    state "Control status" as ControlStatus
+    WaitingMessage --> WaitingMessage : Heartbeat time expired\n[Time=0 && in_idle=true]\AppendEntries(getActualEntries())
+    WaitingMessage --> LeaderElaborate : Hadle msg\n[msgavaiable() = True]\n/getMsg()
+    LeaderElaborate --> ControlStatus : Ack received from one follower\n/increaseAckForAcrualEntry()
+    LeaderElaborate --> WaitingMessage : Received one client request\n /addRequest(msg)
+    ControlStatus --> WaitingMessage : Commit actual entry\n/sendCommitMsg()\n/updateState()\n/sendReslt()
+    ControlStatus --> WaitingMessage : Insufficient ack for commit\n
+    
+    LeaderElaborate --> Follower : Received one message from another leader\n[msg.getTerm > agetTerm]
+  }
 @enduml

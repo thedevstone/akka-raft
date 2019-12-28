@@ -1,0 +1,70 @@
+@startuml
+    
+  actor "Client"  
+  box "Server Cluster" #99CCFF
+  participant "Follower" as Follower
+  participant "Leader" as Leader
+  participant "OtherFollower" as OtherFollower
+	end box
+  activate Leader
+
+  note Over Client 
+    In questo schema, è espresso 
+    il caso d'uso in cui un client 
+    richiede una determinata modifica
+    al cluster.
+    Inoltre nello schema,
+    non si tengono in considerazione i
+    classici failure della rete
+  end note
+  'note over Follower: Check if OtherFollower exists
+  alt Indirect request
+  Client ->> Follower : Send request 
+  activate Follower
+  Follower --> Client : return leader address
+  Client ->> Leader : Send request
+
+  deactivate Follower
+  else Direct request
+  Client ->> Leader : Send request
+  end group
+
+  loop Indefinite
+    Leader ->> Follower : AppendEntries(X)
+    activate Follower
+    Leader ->> OtherFollower : AppendEntrie(X)
+    activate OtherFollower
+    Follower --> Leader : Ack and state
+    OtherFollower --> Leader : Ack and state
+    deactivate Follower
+    deactivate OtherFollower
+  end group
+
+  Leader --> Client : return result
+
+  /'Follower->Leader: findOtherFollower(OtherFollowerId)
+  Leader->Leader: lookup(OtherFollowerId)
+
+  '  alt OtherFollower found
+  Leader-->Follower: OtherFollower
+  ' else not found
+  Leader-->Follower: null
+  Follower->Leader: createOtherFollower(OtherFollowerId, contentURL)
+  Leader->OtherFollower: new(OtherFollowerId, contentURL)
+  activate OtherFollower
+  Leader-->Follower: OtherFollower
+
+  Follower->Leader: loadMetadata()
+    '   note over Leader
+    '       Download and parse manifest, save in db
+    '   end note
+  Leader-->Follower: onTracksAvailable
+  Leader-->Follower: onDownloadMetadata
+  '    note over Follower: * See //track-selection// flow
+  ' end group
+
+  '  note over Follower: app is ready to start downloading
+  Follower->OtherFollower: startDownload()'/
+
+
+@enduml

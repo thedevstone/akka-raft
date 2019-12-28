@@ -11,64 +11,21 @@ Agent --> [*] :Stop
 state "Server Agent" as Agent {
 [*] -r-> Follower : \Time=0\n\inIdle=false
 
-state "Follower" as Follower {
-  Follower : Entry; do \n Time = Random(minDelay,maxDelay)\n serverState=Follower
-  state "Elaborate" as FollowerElaborate
-    FollowerElaborate : Entry; do \n Time = Random(minWitingDelay,maxWaitingDelay)
-  state "Idle" as Idle
-    Idle : Entry; do \n set inIdle=true
-    Idle : Exit: do  \n set inIdle=false
-  state "Commit" as Commit
-    Commit : Entry; do \n addCommit(Msg.get())
-    Commit : Exit: do \n updateState()
-
-  [*] --> Idle
-  Idle -r-> FollowerElaborate : Hadle msg\n[msgavaiable() = True]\n/getMsg()
-  
-  FollowerElaborate -l-> Idle : Vote\n[msg.type = VoteRequest]\n/sendVote(addr,choice)
-  FollowerElaborate -d-> Idle : Append new entry\n[msg.type = NewEntry]\n/AddNewEntry(msg.get())
-  FollowerElaborate -d-> Commit : Commit entry\n[msg.type = Commit]
-  
-  Commit --> Idle : Return in idle state
-
-  Follower -l-> Candidate : Time expired\n[Time=0 && inIdle=true]
-
-}
+state "Follower" as Follower 
+  Follower --> Candidate : Time expired\n[Time=0 && inIdle=true]
 
 
-state "Candidate" as Candidate {
-  Candidate : Entry; do \n SendVoteRequest()\n serverState=Candidate\n Time = Random(minDelayElection,maxDelayElection)\n Term++\n numVote = 0
-  Candidate : Exit: do 
-  [*] --> WaitingVotation
-  state "Waiting Votation" as WaitingVotation
-  state "Elaborate" as CandidateElaborate
-
-  WaitingVotation -r-> CandidateElaborate : Handle msg\n[msgavaiable() = True]\n/getMsg()
-
-  CandidateElaborate -r-> WaitingVotation : Vote request accepted\n numVote++
-  CandidateElaborate --> WaitingVotation :Vote request rejected
-  CandidateElaborate -u-> Follower : Received one message from leader\n[msg.getTerm > agetTerm]
-
-  Candidate --> Candidate :Time expired\n[Time=0 && \nin_idle=true]
-  Candidate -l-> Leader : numVote > (sizeCluster/2)-1 
-}
 
 
-  state "Leader" as Leader { 
-    Leader : Entry; do \n serverState=Leader\n Time = heartBeatDelayTime\n SendHeartBeatMsg()
-    Leader : Exit: do  
-    [*] --> WaitingMessage
-    state "Waiting Message" as WaitingMessage
-    state "Elaborate" as LeaderElaborate
-    state "Control status" as ControlStatus
-    WaitingMessage --> WaitingMessage : Heartbeat time expired\n[Time=0 && in_idle=true]\AppendEntries(getActualEntries())
-    WaitingMessage --> LeaderElaborate : Hadle msg\n[msgavaiable() = True]\n/getMsg()
-    LeaderElaborate --> ControlStatus : Ack received from one follower\n/increaseAckForAcrualEntry()
-    LeaderElaborate --> WaitingMessage : Received one client request\n /addRequest(msg)
-    LeaderElaborate -d-> Follower : Received one message from another leader\n[msg.getTerm > agetTerm]
-    ControlStatus --> WaitingMessage : Commit actual entry\n/sendCommitMsg()\n/updateState()\n/sendReslt()
-    ControlStatus --> WaitingMessage : Insufficient ack for commit\n
-  }
+state "Candidate" as Candidate 
+  Candidate --> Follower : Received one message from leader\n[msg.getTerm > agetTerm]
+  Candidate --> Candidate : Time expired\n[Time=0 && \nin_idle=true]
+  Candidate --> Leader : numVote > (sizeCluster/2)-1 
+
+
+
+  state "Leader" as Leader 
+    Leader --> Follower : Received one message from another leader\n[msg.getTerm > agetTerm]
   --
   [*] --> AgentTimer
   state "Agent Timer" as AgentTimer{
