@@ -75,7 +75,11 @@
 			\item{\textbf{Costo}}
 			Il costo della replicazione è direttamente correlato al costo delle macchine utilizzate per replicare i dati. Più hardware viene utilizzato più il costo collegato è elevato.
 			\item{\textbf{Consistenza}}
-			Il problema della consistenza è il problema fondamentale per i sistemi distribuiti. Dato che un sistema multi-replica non garantisce nulla su come e quando verranno replicati i dati, bisogna trovare un modo per garantire che lo stato dei singoli componenti sia consistente con quello del sistema. Questo deve essere fatto anche a discapito di altre proprietà come la \textbf{partition tolerance} come già visto nel teorema CAP. 
+			Il problema della consistenza è il problema fondamentale per i sistemi distribuiti. Dato che un sistema multi-replica non garantisce nulla su come e quando verranno replicati i dati, bisogna trovare un modo per garantire che lo stato dei singoli componenti sia consistente con quello del sistema. Questo deve essere fatto anche a discapito di altre proprietà come la \textbf{availability} come già visto nel teorema CAP. 
 		\end{itemize}
+
+    \subsubsection{Fault Tolerance}
+    Lo scopo fondamentale della fault tolerance è quello di permette al sistema di \textbf{sopravvivere} a e in alcuni casi \textbf{risolvere} autonomamente le \textbf{failures}.
+    Generalmente questo comportamento viene ottenuto limitando l'impatto della failure sull'intero sistema cercando di sfruttare i componenti integri al fine di risolvere gli stessi fallimenti.
 
 

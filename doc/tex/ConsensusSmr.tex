@@ -9,7 +9,25 @@ Fra le sfide più importanti che i sistemi distribuiti devono affrontare al gior
 	Gli algoritmi di consenso permettono a una collezione di \textbf{macchine eterogenee} di lavorare in qualche modo come se fossero un \textbf{una sola macchina}.\\
 	Si parte dunque con un insieme di \textbf{macchine} singolarmente \textbf{inaffidabili} e si fa in modo che esse si comportino come un'\textbf{unica macchina super-affidabile} che garantisce di operare in modo reliable anche nel caso in cui alcune macchine falliscano.\\
 	All'interno di un gruppo di consenso (\textbf{consensus group}) i fallimenti sono gestiti in un modo studiato e comprovato, questo permette di avere un \textit{modello di funzionamento} robusto e affidabile.\\
-	Data l'estremam \textbf{availability} e \textbf{raliability} dei consensus group, altri sistemi possono decidere di usare un consensus group come fondamenta per garantire fault tolerance; questo porta gli algoritmi di consenso a giocano un ruolo fondamentale nella costruzione di sistemi reliable di grandi dimensioni. 
+	Data l'estremam \textbf{availability} e \textbf{raliability} dei consensus group, altri sistemi possono decidere di usare un consensus group come fondamenta per garantire fault tolerance; questo porta gli algoritmi di consenso a giocare un ruolo fondamentale nella costruzione di sistemi reliable di grandi dimensioni.
+		\subsection{Proprietà degli algoritmi di consenso}
+    Gli algoritmi di consenso applicati a sistemi come le \textbf{Replicated State Machine} garantiscono queste proprietà al sistema:
+    \begin{itemize}
+       \item{\textbf{Safety:}}
+       Non ritornano mai un risultato incorretto sotto \textbf{condizioni non bizantine}. Un algoritmo di consenso generalmente è safe rispetto a gran parte dei problemi che affliggono le \textbf{reti}:
+        \begin{itemize}
+          \item \textit{network delay}
+          \item \textit{network partition} 
+          \item \textit{packet loss}
+          \item \textit{duplication}
+          \item \textit{reordering}
+        \end{itemize}
+       \item{\textbf{Liveness:}}
+       Gli algoritmi di consenso funzionano bene quando la maggioranza dei server sono operativi e di conseguenza sono in grado di comunicare fra loro o con clients. Empiricamente è stato dimostrato che un cluster di cinque server, mantenuti attraverso consenso, può tollerare il fallimento di 2 server.\\
+       E' importante sottolineare che il stato di \textbf{fail} per un sistema non è definitivo ma, come abbiamo già detto, è possibile che alcuni componenti possano recuperare dallo stato di failure e tornare all'interno del cluster attraverso un processo di \textbf{joining}.
+       \item{\textbf{Indipendenza temporale:}}
+       La \textbf{consistenza} del sistema (dei log nel caso di una macchina a stati replicata) fornita da un algoritmo di consenso è \textbf{indipendente} dal concetto di \textbf{tempo} in senso assoluto. Ciò significa che è possibile che siano presenti ritardi e perdite di pacchetti ma questi problemi causeranno solamente problemi di \textbf{availability} del sistema, in accordo a quello che dice il teorema \textbf{CAP} \cite[Brewer:2000]{Brewer:2000}.
+     \end{itemize} 
 
 	\section{Replicated State Machine}
 	Gli algoritmi di consenso sono generalmente utilizzati nel contesto di quelle che chiamiamo replicated state machines. Prima di parlare di macchine a stati replicate bisogna definire cos'è una macchina a stati.\\
@@ -48,3 +66,7 @@ Fra le sfide più importanti che i sistemi distribuiti devono affrontare al gior
 		\caption{Un modello di state machine semplificato}
 		\label{fig:figure1}
 	\end{figure}
+
+  \subsection{Usi Pratici delle SMR}
+  Le macchine a stati replicate vengono generalmente considerate come blocchi general pourpose su cui basare sistemi più complessi al fine di renderli  fault-tolerant. Esistono vari paradigmi di utilizzo delle state machine: solitamente il pattern più comune consiste nell'utilizzo di una state machine molto \textbf{semplice}, formata da tre o cinque server, sulla quale si appoggiano altri server specifici con lo scopo di \textbf{coordinare} le proprie \textbf{attività}.\\
+  Molti sistemi di storaging utilizzano questo principio, fra i più importanti possiamo trovare: GFS, HDFS, RAMCloud.
