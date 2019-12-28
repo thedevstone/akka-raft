@@ -1,15 +1,24 @@
 \documentclass{report}
 \usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+
 %Disable all warnings issued by latex starting with "You have..."
 \usepackage{silence}
 \WarningFilter{latex}{You have requested package}
 
+%Bib
+\usepackage[style=numeric]{biblatex}
+\addbibresource{references.bib}
+\DeclareNameAlias{default}{last-first}
+\usepackage{csquotes}
+%\usepackage{natbib}
+
+%Import
 \usepackage{marvosym}
 \usepackage{fancyvrb}
 \usepackage[usenames]{color}
 \usepackage[hidelinks]{hyperref}
 \usepackage{url}
-\usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
@@ -40,7 +49,7 @@
 \hypersetup{
     colorlinks = true,
     linkcolor = .,
-    citecolor = .,
+    citecolor = {blue},
     linkbordercolor = {white},
 }
 %TABELLE TBCOLORBOX
@@ -51,6 +60,19 @@
         colframe=red!75!black,
         fonttitle=\bfseries
        }
+
+\newcommand{\executeiffilenewer}[3]{%
+ \ifnum\pdfstrcmp{\pdffilemoddate{#1}}%
+ {\pdffilemoddate{#2}}>0%
+ {\immediate\write18{#3}}\fi%
+}
+\newcommand{\includesvg}[1]{%
+ \executeiffilenewer{#1.svg}{#1.pdf}%
+ {inkscape -z -D --file=#1.svg %
+ --export-pdf=#1.pdf --export-latex}%
+ \input{#1.tex}%
+}
+
 %PATH IMMAGINI
 \graphicspath{{images/} {plantuml/rendered/} }
 \newcommand{\emailaddr}[1]{\href{mailto:#1}{\texttt{#1}}}
@@ -74,12 +96,12 @@
 \tableofcontents
 
 \input{tex/Abstract}
+\include{tex/Intro}
+\include{tex/ConsensusSmr}
 \include{tex/Raft}
 \include{tex/RaftImplementation}
 \include{tex/Conclusion}
 
-\nocite{*} % Includes all references from the `references.bib` file
-\bibliographystyle{plain}
-\bibliography{references}
+\printbibliography
 
 \end{document}
