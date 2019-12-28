@@ -6,7 +6,7 @@ scale 1920 width
 !define TAB5 \t\t\t\t\t
 
 [*] --> Agent :Start
-Agent --> [*] :Stop
+Agent -u-> [*] :Stop
 
 state "Server Agent" as Agent {
 [*] -r-> Follower : \Time=0\n\inIdle=false
@@ -18,14 +18,14 @@ state "Follower" as Follower
 
 
 state "Candidate" as Candidate 
-  Candidate --> Follower : Received one message from leader\n[msg.getTerm > agetTerm]
+  Candidate --> Follower : Received one \nmessage from leader\n[msg.getTerm > agetTerm]
   Candidate --> Candidate : Time expired\n[Time=0 && \nin_idle=true]
   Candidate --> Leader : numVote > (sizeCluster/2)-1 
 
 
 
   state "Leader" as Leader 
-    Leader --> Follower : Received one message from another leader\n[msg.getTerm > agetTerm]
+    Leader --> Follower : Received one \nmessage from another leader\n[msg.getTerm > agetTerm]
   --
   [*] --> AgentTimer
   state "Agent Timer" as AgentTimer{

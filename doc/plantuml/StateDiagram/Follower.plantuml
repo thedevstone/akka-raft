@@ -1,7 +1,7 @@
 @startuml
 !define NL3 \n\n\n\n\n
 !define TAB3 \t\t\t\t\t
-[*] -r-> Follower : \Time=0\n\inIdle=false
+[*] -d-> Follower : \Time=0\n\inIdle=false
 state "Candidate" as Candidate
   Candidate -d-> Follower : Received one message from leader\n[msg.getTerm > agetTerm]
 state "Leader" as Leader 
@@ -26,7 +26,7 @@ state "Follower" as Follower {
   FollowerElaborate -d-> Idle : Append new entry\n[msg.type = NewEntry]\n/AddNewEntry(msg.get())
   FollowerElaborate -d-> Commit : Commit entry\n[msg.type = Commit]
   
-  Commit --> Idle : Return in idle state
+  Commit --> Idle : Return \nin idle state
 
   Follower -u-> Candidate : Time expired\n[Time=0 && inIdle=true]
 

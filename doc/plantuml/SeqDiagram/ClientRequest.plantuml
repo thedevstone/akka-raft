@@ -7,7 +7,7 @@
 	end box
   activate Leader
 
-  note Over Client 
+ /' note Over Client 
     In questo schema, è espresso 
     il caso d'uso in cui un client 
     richiede una determinata modifica
@@ -16,7 +16,7 @@
     Inoltre nello schema,
     non si tengono in considerazione i
     classici failure della rete
-  end note
+  end note'/
   == Richiesta esterna ==
   alt Indirect request
   Client ->> Followers : Send request 
@@ -39,7 +39,7 @@
       opt if ackNum > sizeCluster/2-1
         Leader --> Client : return result
     end group
-    note Over Client 
+    /'note Over Client 
       Le richieste dei client, 
       vengono eseguite solo una volta,
       dopodiche il cluster continuerà,
@@ -47,6 +47,6 @@
       anche se non ci sono 
       effettivamente delle entry
       da diffondere
-    end note
+    end note'/
   end group
 @enduml

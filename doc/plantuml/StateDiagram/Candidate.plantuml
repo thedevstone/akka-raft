@@ -1,6 +1,6 @@
 @startuml
 state "Leader" as Leader
-  Candidate -u-> Leader : numVote > (sizeCluster/2)-1 
+  Candidate --> Leader : numVote > \n(sizeCluster/2)-1 
 state "Follower" as Follower
   Follower -l-> Candidate : Time expired\n[Time=0 && inIdle=true]
 state "Candidate" as Candidate {
@@ -13,8 +13,8 @@ state "Candidate" as Candidate {
   WaitingVotation --> CandidateElaborate : Handle msg\n[msgavaiable() = True]\n/getMsg()
 
   CandidateElaborate --> WaitingVotation : Vote request accepted\n numVote++
-  CandidateElaborate --> WaitingVotation :Vote request rejected
-  CandidateElaborate -u-> Follower : Received one message from leader\n[msg.getTerm > agetTerm]
+  CandidateElaborate --> WaitingVotation :Vote request \nrejected
+  CandidateElaborate -u-> Follower : Received one message\nfrom leader\n[msg.getTerm > agetTerm]
 
   Candidate --> Candidate :Time expired\n[Time=0 && \nin_idle=true]
 }
