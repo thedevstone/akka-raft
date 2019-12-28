@@ -1,0 +1,3 @@
+Un term è un priodo di tempo che parte con l'elezione di un nuovo leader e termina con la fine del suo "regno". 
+Un term attraversa normalmente due fasi: durante la prima, evidenziata in blu, i server eleggono il proprio leader; durante la seconda, evidenziata in verde, si svolgono le normali operazioni coordinate dal leader in carica.
+Non è possibile che due candidati ottengano la maggioranza all'interno dell ostesso term, tuttavia è possibile che l'elezione si concluda in parità, come nel Term 3 in figura. In questo caso il term si conclude e ne inizia uno nuovo in cui si avvia una nuova elezione.

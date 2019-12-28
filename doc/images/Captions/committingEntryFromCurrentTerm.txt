@@ -1,0 +1,1 @@
+è sicuro procedere con il commit dell'entry all'indice 4 poichè la maggiorparte dei server la include nel proprio log e il leader del term successivo sarà sicuramente qualcuno che ha quella entry in posizione 4, perchè S4 e S5 non possono essere eletti in quanto non verranno votati da S1,S2,S3, che hanno il log più aggiornato del loro.
