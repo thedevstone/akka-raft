@@ -12,7 +12,8 @@
     In questo schema, è espresso 
     il caso d'uso in cui un client 
     richiede una determinata modifica
-    al cluster.
+    al cluster, in manieà semplificata
+    per non esagerare con i blocchi alt.
     Inoltre nello schema,
     non si tengono in considerazione i
     classici failure della rete
@@ -30,17 +31,19 @@
   end group
 
   loop Indefinite
-    Leader ->> Follower : AppendEntries(X)
+    Leader ->> Follower : AppendEntries()
     activate Follower
-    Leader ->> OtherFollower : AppendEntrie(X)
+    Leader ->> OtherFollower : AppendEntrie()
     activate OtherFollower
     Follower --> Leader : Ack and state
     OtherFollower --> Leader : Ack and state
     deactivate Follower
     deactivate OtherFollower
+      opt if ackNum > sizeCluster/2-1
+        Leader --> Client : return result
+    end group
   end group
 
-  Leader --> Client : return result
 
   /'Follower->Leader: findOtherFollower(OtherFollowerId)
   Leader->Leader: lookup(OtherFollowerId)
