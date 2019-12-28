@@ -18,7 +18,6 @@
     non si tengono in considerazione i
     classici failure della rete
   end note
-  'note over Follower: Check if OtherFollower exists
   alt Indirect request
   Client ->> Follower : Send request 
   activate Follower
@@ -43,31 +42,4 @@
         Leader --> Client : return result
     end group
   end group
-
-
-  /'Follower->Leader: findOtherFollower(OtherFollowerId)
-  Leader->Leader: lookup(OtherFollowerId)
-
-  '  alt OtherFollower found
-  Leader-->Follower: OtherFollower
-  ' else not found
-  Leader-->Follower: null
-  Follower->Leader: createOtherFollower(OtherFollowerId, contentURL)
-  Leader->OtherFollower: new(OtherFollowerId, contentURL)
-  activate OtherFollower
-  Leader-->Follower: OtherFollower
-
-  Follower->Leader: loadMetadata()
-    '   note over Leader
-    '       Download and parse manifest, save in db
-    '   end note
-  Leader-->Follower: onTracksAvailable
-  Leader-->Follower: onDownloadMetadata
-  '    note over Follower: * See //track-selection// flow
-  ' end group
-
-  '  note over Follower: app is ready to start downloading
-  Follower->OtherFollower: startDownload()'/
-
-
 @enduml
