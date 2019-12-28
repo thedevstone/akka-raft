@@ -1,0 +1,52 @@
+@startuml
+    
+  actor "Client"  
+  box "Server Cluster" #99CCFF
+    participant "Followers" as Followers
+    participant "Leader" as Leader
+	end box
+  activate Leader
+
+ /' note Over Client 
+    In questo schema, è espresso 
+    il caso d'uso in cui un client 
+    richiede una determinata modifica
+    al cluster, in manieà semplificata
+    per non esagerare con i blocchi alt.
+    Inoltre nello schema,
+    non si tengono in considerazione i
+    classici failure della rete
+  end note'/
+  == Richiesta esterna ==
+  alt Indirect request
+  Client ->> Followers : Send request 
+  activate Followers
+  Followers --> Client : return leader address
+  Client ->> Leader : Send request
+  deactivate Followers
+  else Direct request
+  Client ->> Leader : Send request
+  end group
+  == Elaborazione della richiesta nel cluster ==
+  loop Indefinite
+    Leader --> Leader ++ : Start Timer
+    return Timers Trigger
+    Leader ->> Followers : AppendEntries()
+
+    activate Followers
+    Followers --> Leader : Ack and state
+    deactivate Followers
+      opt if ackNum > sizeCluster/2-1
+        Leader --> Client : return result
+    end group
+    /'note Over Client 
+      Le richieste dei client, 
+      vengono eseguite solo una volta,
+      dopodiche il cluster continuerà,
+      questa sequenza di messaggi
+      anche se non ci sono 
+      effettivamente delle entry
+      da diffondere
+    end note'/
+  end group
+@enduml

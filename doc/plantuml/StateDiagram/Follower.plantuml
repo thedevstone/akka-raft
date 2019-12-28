@@ -1,0 +1,34 @@
+@startuml
+!define NL3 \n\n\n\n\n
+!define TAB3 \t\t\t\t\t
+[*] -d-> Follower : \Time=0\n\inIdle=false
+state "Candidate" as Candidate
+  Candidate -d-> Follower : Received one message from leader\n[msg.getTerm > agetTerm]
+state "Leader" as Leader 
+  Leader --> Follower : Received one \nmessage from \nanother leader\n[msg.getTerm > agetTerm]
+
+state "Follower" as Follower {
+
+  Follower : Entry; do \n Time = Random(minDelay,maxDelay)\n serverState=Follower
+  state "Elaborate" as FollowerElaborate
+    FollowerElaborate : Entry; do \n Time = Random(minWitingDelay,maxWaitingDelay)
+  state "Idle" as Idle
+    Idle : Entry; do \n set inIdle=true
+    Idle : Exit: do  \n set inIdle=false
+  state "Commit" as Commit
+    Commit : Entry; do \n addCommit(Msg.get())
+    Commit : Exit: do \n updateState()
+
+  [*] --> Idle
+  Idle -r-> FollowerElaborate : Hadle msg\n[msgavaiable() = True]\n/getMsg()
+  
+  FollowerElaborate -l-> Idle : Vote\n[msg.type = VoteRequest]\n/sendVote(addr,choice)
+  FollowerElaborate -d-> Idle : Append new entry\n[msg.type = NewEntry]\n/AddNewEntry(msg.get())
+  FollowerElaborate -d-> Commit : Commit entry\n[msg.type = Commit]
+  
+  Commit --> Idle : Return \nin idle state
+
+  Follower -u-> Candidate : Time expired\n[Time=0 && inIdle=true]
+
+}
+@enduml
