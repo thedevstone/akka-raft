@@ -14,6 +14,44 @@
   \section{L'algoritmo PAXOS}
     \input{tex/RAFT/Paxos.tex}
 	\section{RAFT Core}
+    Quando si progetta un nuovo algoritmo è importante concentrasi sin da subito sui \textbf{metodi di valutazione} del risultato atteso. Generalmente i criteri utilizzati per la valutazione di algoritmi sono: 
+    \begin{itemize}
+      \item{\textbf{Correttezza:}}
+      Se l'algoritmo fornisce il risultato atteso in tutte le condizioni.
+      \item{\textbf{Efficienza:}}
+      Il numero di cicli di cpu o la quantità di memoria utilizzata dall'algoritmo. Solitamente questi due indicatori sono negativamente correlati, questo significa che cercando di ottimizzare un algoritmo sotto il profilo dei cicli di cpu si tenderà ad utilizzare più memoria.
+      \item{\textbf{Concisione:}}
+      Un algoritmo è conciso quando le sue specifiche sono definite in modo preciso e chiaro.
+    \end{itemize}
+    Nel caso di RAFT, gli ideatori \textbf{Diego Ongaro e John Ousterhout} hanno deciso di usare un approccio inusuale, il loro scopo era prima di tutto quello della \textbf{understandability}\footnote{Un algoritmo pensato per essere comprensibile implicitamente obbliga l'autore a dover pensare in modo semplice e come sappiamo per il rasoio di Occham, la soluzione più veloce e comprensibile è generalmente quella migliore. Nel caso dei sistemi distribuiti questo è ancora più vero dato che in questo caso è importante sapere non solo che un algoritmo funzioni ma sopratutto perché funzioni.}.\\
+    Nella progettazione di RAFT sono state applicate varie tecniche volte a garantire undestandability:
+    \begin{itemize}
+      \item{\textbf{Decomposizione del problema:}}
+      Tecnica che opera in modo simile al divide et impera degli algoritmi. Nella decomposizione il problema viene suddiviso parallelamente in problemi più piccoli e più semplici da risolvere.
+      \item{\textbf{Minimizzazione dello spazio degli stati:}}
+      La minimizzazione dello spazio degli stati può essere vista in modo molto naive come la riduzione del numero di istruzioni condizionali presenti. Questa procedura garantisce come piacevole conseguenza altre proprietà estremamente importanti:
+      \begin{itemize}
+        \item{\textbf{Gestione di problemi multipli con lo stesso meccanismo}}
+        \item{\textbf{Eliminazione degli stati speciali}}
+        \item{\textbf{Massimizzazione della coerenza e la consistenza}}
+        \item{\textbf{Minimizzazione del non-determinismo}}
+      \end{itemize}
+    \end{itemize}
+      \paragraph{RAFT in breve}
+      RAFT implementa il consenso eleggendo prima di tutto un \texttt{leader} e fornendo allo stesso la totale responsabilità della gestione dei log replicati. Il leader una volta eletto accetta delle richieste dai \texttt{client}, le replica su gli altri server e comunica ai server quando è safe eseguire le stesse richieste nelle proprie state machines.\\
+      L'esistenza del leader semplifica di molto l'algoritmo poiché garantisce un minor numero di stati del sistema. Nel caso in cui un leader fallisca o venga disconnesso verrà eletto un nuovo leader garantendo il progresso dell'algoritmo.
+
+      \paragraph{RAFT e decomposizione}
+      RAFT decompone il problema del consenso in tre problemi relativamente indipendenti:
+      \begin{itemize}
+        \item{\textbf{Leader Election:}}
+        Il problema consiste nella \textbf{detection} di una \textbf{failure} da parte di un leader e nella definizione di un \textbf{protocollo di rielezione} che possa essere consistente.
+        \item{\textbf{Log Replication}}
+        Il leader deve essere l'unico server che può accettare comandi da parte di un client. Inoltre il leader deve assicurarsi di poter \textbf{replicare in modo safe} una entry presente nel log. 
+        \item{\textbf{Safety}}
+        La proprietà di safety chiave di RAFT è data dall State \textbf{Machine Safety Property}.
+      \end{itemize}
+
 		\input{tex/RAFT/Core/Basics.tex}
 		\input{tex/RAFT/Core/LeaderElection.tex}
 		\input{tex/RAFT/Core/LogReplication.tex}
