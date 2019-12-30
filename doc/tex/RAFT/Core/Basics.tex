@@ -55,8 +55,21 @@ Un cluster RAFT può contenere vari server, solitamente cinque è il numero tipi
       \end{itemize}
       \item Se un server riceve messaggi con \textbf{term obsoleti} questi vengono immediatamente \textbf{rifiutati}.
     \end{enumerate}
+  \subsubsection{Tipologie di Messaggio | Remote Procedure Calls}
+  Al fine di massimizzare la comprensibilità RAFT definisce solamente due tipologie di messaggio:
+  \begin{itemize}
+    \item{\textbf{Request Vote:}}
+    I messaggi di questo tipo sono spediti dai \textbf{candidates} durante il processo di \textit{leader election}.
+    \item{\textbf{Append Entries:}}
+    Questi messaggi sono usati dai \textbf{leaders} con due scopi fondamentali:
+    \begin{itemize}
+      \item{\emph{Log replication di una o più entries}}
+      \item{\emph{Heartbeat con lo scopo di evitare che i follower possano iniziare una nuova elezione}}
+      \item{\emph{Trasferimento di Snapshot tra i vari server}}
+    \end{itemize}
+  \end{itemize}
+  \subsubsection{Gestione del tempo}
+  L'unica nozione di tempo logico è quella di term, non ci sono \textit{clock condivisi} fra le macchine. Esiste una nozione di tempo implicita che garantisce il progresso: essa risiede nel concetto di \textbf{timeouts}.
 
-  
-
-
-
+  \subsubsection{Scalabilità}
+  Per il fatto che un algoritmo di consenso necessità della maggioranza dei server per effettuare qualsiasi operazione il concetto di \textbf{scalabilità viene meno}. L'unico modo di garantire scalabilità è consiste nel \textbf{partizionare} i server in \textbf{più cluster} e usare un algoritmo di consenso fra cluster: questo è il caso dei sistemi di storaging di elevate dimensioni come Megastore, Spanner e Scatter.
