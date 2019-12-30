@@ -39,7 +39,7 @@ build/
 # *.ps
 # *.eps
 *.pdf
-!doc/images/*.pdf
+!doc/images/**/*.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl
