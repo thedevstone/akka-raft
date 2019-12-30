@@ -1,4 +1,0 @@
-Frequenti cambiamenti di leadership possono portare ad avere dei log inconsistenti sui diversi server. Sappiamo,per le proprietà de4ll'algoritmo, che le entry che sono nello stato "committed" sono uguali in tutti i log. Per quanto riguarda le altre possono verificarsi due tipi di incorrispondenze:
-- Entry mancanti: si hanno nel caso in cui il log del follower è più corto di quello del leader
-- Entry estranee: dato un indice, il term contenuto nell'entry del leader è diverso da quello presente nell'entry del follower. 
-Per adattare gli altri log al suo, il leader deve eliminare le entry estranee e aggiungere le entry mancanti.

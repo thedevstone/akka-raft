@@ -1,8 +1,0 @@
-La configurazione del sistema può cambiare nel tempo, ad esempio quando una macchina va incontra a crash, viene sostituita o viene aggiunta al cluster.
-Le informazioni sulla configurazione del sistema sono cruciali perchè sapere quanti e quali server fanno parte del cluster è necessario per operazioni che necessitano di decidere basandosi sulla maggioranza, come l'elezione del leader o il commit di una entry.
-Il problema cruciale che si incontra in tutti i sistemi distribuiti è che la transizione tra una configurazione e l'altra non avviene nello stesso istante per tutte le macchine. 
-Nella figura, ad esempio, i server 4 e 5 ebtrano a far parte del cluster, ma al tempo t, si ha che S1 e S2 sono ancora alla vecchia configurazione, mentre S3, S4 e S5 sono passati alla nuova.
-S1 e S2 costituiscono una mggioranza, nella configurazione vecchia (sono 2 su 3), ma anche S3, S4 e S5 possono formare una maggioranza nella loro configurazione di riferimento (3 su 5). 
-Sulla base di queste maggioranze possono essere portate a termine delle operazioni, come ad esempio, il committing  di una entry. Questo potrebbe generare delle inconsistenze: ad esempio se la maggioranza data da S1 e S3 decide di fare commit dell'entry e1, mentre la maggioranza data da S3,S4 e S5 decide di fare commit dell'entry e2!=e1, in corrispondenza dello stesso indice, si avranno dei log diversi che èporteranno all'esecuzione di istruzioni diverse.
-
-

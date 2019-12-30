@@ -1,4 +1,0 @@
-In figura si evidenzia la struttura del log mantenuto da ognuno dei server. Ogni elemento del log memorizza l'istruzione da eseguire e il term a cui essa appartiene.
-Il log del leader è quello che fa fede in quel dato term e deve essere replicato anche negli altri.
-I log vengono memorizzati sul disco, affinchè possano sopravvivere ai crash della macchina. 
-Se il leader sa che una entry è stata replicata sulla maggiorparte dei server, allora essa passa allo stato di "committed" e può essere eseguita in maniera sicura dalle macchine a stati.
