@@ -1,0 +1,4 @@
+Il leader replica il proprio log appendendo un elemento per volta al log dei vari follower.
+L'operazione di append ha successo solo nel caso in cui ci sia corrispondenza tra l'elemento precedente del log del leader e l'elemento nella stessa posizione, del log del follower. 
+Se questo non accade, l'operazione fallisce e il leader invia l'entry precedente all'ultima inviata; se anch'essa non corrisponde, invia quella ancora prima e così via, fino a trovare una corrispondenza.
+Questa operazione si basa sul fatto che se due entry di due diversi server corrispondono, ovvero hanno lo stesso indice, lo stesso term e, di conseguenza, lo stesso comando, allora anche tutte le precedenti entry dei due log sono tra di loro equivalenti.
