@@ -12,16 +12,15 @@ Un cluster RAFT può contenere vari server, solitamente cinque è il numero tipi
       \item{\emph{Replicazione del log}}
     \end{itemize}
     \item{\textbf{Follower:}}
-    I follower sono server totalmente \textbf{passivi}, essi intraprendono due azioni fondamentali: 
+    I follower sono server totalmente \textbf{passivi}, essi intraprendono tre azioni fondamentali: 
     \begin{itemize}
       \item{\emph{Risposta alle richieste di leader e candidate}}
       \item{\emph{Redirection al leader delle richieste da parte dei client}}
-      \item{\emph{Se non hanno più notizie dal leader da un po' allora diventano ``ansiosi'' e diventano candidate}}
+      \item{\emph{Se non hanno più notizie dal leader da un po' allora diventano ``ansiosi'' e si convertono allo stato di candidate}}
     \end{itemize}
     \item{\textbf{Candidate:}}
     Lo stato di candidate è usato per \textbf{eleggere un nuovo leader}.
   \end{itemize}
-  L'immagine \ref{fig:figure2} qua sotto mostra come avvengono le transizioni fra i vari stati.
 
   \begin{figure}[H]
     \centering
@@ -31,25 +30,25 @@ Un cluster RAFT può contenere vari server, solitamente cinque è il numero tipi
   \end{figure}
 
   \subsubsection{Terms}
-  IL tempo in RAFT è diviso in periodi di \textbf{lunghezza arbitraria} chiamati \textbf{terms}. I term godono di queste proprietà:
+  Il tempo in RAFT è diviso in periodi di \textbf{lunghezza arbitraria} chiamati \textbf{terms}. I term godono di queste proprietà:
   \begin{itemize}
     \item{\textbf{Identificativo:}}
     A ciascun term è associato un numero in modo \textbf{incrementale} e \textbf{assoluto} nel tempo.
     \item{\textbf{Leader-centric:}}
-    Ogni term parte con l'elezione di \textbf{uno e un solo leader}: se l'elezione ha successo allora il candidate eletto avrà potere per tutta la durata del term. Può capitare che più candidate provino a diventare leader nello stesso instante: in questo caso il risultato della votazione premierà un solo candidate. Raft garantisce che non ci sia più di un leader per term.
-    \item{\textbf{Leader-less}}
-    In alcuni casi può capitare che nessun leader emerga, questo avviene perché nella votazione non è stata ottenuta una maggioranza assoluta. In questo caso si dice che è avvenuto un \textbf{vote-split} e al fine di garantire safety \textit{nessun leader può essere eletto}.\\
+    Ogni term parte con l'elezione di \textbf{uno e un solo leader}: se l'elezione ha successo allora il candidate eletto avrà potere per tutta la durata del term. Può capitare che più candidate provino a diventare leader nello stesso instante: in questo caso il risultato della votazione premierà un solo candidate. RAFT garantisce che non ci sia \textit{più di un leader per term}.
+    \item{\textbf{Leader-less:}}
+    In alcuni casi può capitare che nessun leader emerga, questo avviene perché nella votazione non è stata ottenuta una maggioranza assoluta. In questo caso si dice che è avvenuto un \textbf{split-vote} e al fine di garantire safety \textit{nessun leader può essere eletto}.\\
     In questo caso l'algoritmo considererà l'elezione come \textbf{failed} e verrà aperta immediatamente una \textbf{nuova elezione}.
-    \item{\textbf{Term come logical clock}}
-    I term in RAFT hanno uno scopo molto più generale oltre al contesto dell'elezione: essi agiscono come \textbf{logical clock} \cite{Lamport:1978} garantendo un concetto logico di tempo. e garantendo ai server di accorgesi quando sono in possesso di \textbf{informazioni obsolete}.
+    \item{\textbf{Term come logical clock:}}
+    I term in RAFT hanno uno scopo molto più generale oltre al contesto dell'elezione: essi agiscono come \textbf{logical clock} \cite{Lamport:1978} garantendo un concetto logico di tempo e permettendo ai server di accorgesi quando sono in possesso di \textbf{informazioni obsolete}.
   \end{itemize}
     \paragraph{Identificazione di informazioni obsolete}
     Non esiste in RAFT un concetto di stato/term globale ma ogni \textbf{server vede}, in un \textbf{dato istante}, una \textbf{parte del sistema} e non è detto che sia lo stesso per tutti.\\
     L'identificazione di informazioni obsolete avviene in modo molto semplice:
     \begin{enumerate}
-      \item Ogni server contiene al suo interno le informazioni sul \textbf{term attuale} che ovviamente può incrementare nel tempo in modo monotonico.
+      \item Ogni server contiene al suo interno le informazioni sul \textbf{term attuale} che ovviamente può incrementare nel tempo in modo monotono.
       \item Nel momento in cui avviene una comunicazione ogni server \textbf{include} nel proprio \textbf{messaggio} anche le informazioni sul \textbf{proprio term}.
-      \item Nel caso in cui un server si accorge di avere un term troppo obsoleto \textbf{aggiorna} immediatamente il proprio \textbf{term} con quello più \textbf{recente}.
+      \item Nel caso in cui un server si accorga di avere un term troppo obsoleto \textbf{aggiorna} immediatamente il proprio \textbf{term} con quello più \textbf{recente}.
       \begin{itemize}
         \item Se il server si trova nello stato di leader allora esso \textbf{regredisce} immediatamente \textbf{a follower}
       \end{itemize}
@@ -61,7 +60,7 @@ Un cluster RAFT può contenere vari server, solitamente cinque è il numero tipi
     \item{\textbf{Request Vote:}}
     I messaggi di questo tipo sono spediti dai \textbf{candidates} durante il processo di \textit{leader election}.
     \item{\textbf{Append Entries:}}
-    Questi messaggi sono usati dai \textbf{leaders} con due scopi fondamentali:
+    Questi messaggi sono usati dai \textbf{leaders} con tre scopi fondamentali:
     \begin{itemize}
       \item{\emph{Log replication di una o più entries}}
       \item{\emph{Heartbeat con lo scopo di evitare che i follower possano iniziare una nuova elezione}}
@@ -72,4 +71,4 @@ Un cluster RAFT può contenere vari server, solitamente cinque è il numero tipi
   L'unica nozione di tempo logico è quella di term, non ci sono \textit{clock condivisi} fra le macchine. Esiste una nozione di tempo implicita che garantisce il progresso: essa risiede nel concetto di \textbf{timeouts}.
 
   \subsubsection{Scalabilità}
-  Per il fatto che un algoritmo di consenso necessità della maggioranza dei server per effettuare qualsiasi operazione il concetto di \textbf{scalabilità viene meno}. L'unico modo di garantire scalabilità è consiste nel \textbf{partizionare} i server in \textbf{più cluster} e usare un algoritmo di consenso fra cluster: questo è il caso dei sistemi di storaging di elevate dimensioni come Megastore, Spanner e Scatter.
+  Per il fatto che un algoritmo di consenso necessita della maggioranza dei server per effettuare qualsiasi operazione il concetto di \textbf{scalabilità viene meno}. L'unico modo di garantire scalabilità consiste nel \textbf{partizionare} i server in \textbf{più cluster} e usare un algoritmo di consenso fra cluster: questo è il caso dei sistemi di storaging di elevate dimensioni come Megastore, Spanner e Scatter.

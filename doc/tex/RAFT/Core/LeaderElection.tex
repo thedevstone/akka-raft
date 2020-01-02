@@ -1,10 +1,26 @@
 % -*- root: ../../../main.tex -*-
 \subsection{Leader Election}
 \label{Leader Election}
-In RAFT ogni server inizialmente si trova nello stato di \textbf{Follower} e vi resta fintantochè riceve nuovi messaggi dall'attuale server \textbf{Leader}. I server \textbf{Follower} mantengono internamente un timer randomico che si resetta ogni volta che viene ricevuto un messaggio dal leader. La durata di questo timer viene chiamata \textit{election timeout}. Quando il timer si innesca provoca il cambiamento di stato da \textbf{Follower} a \textbf{Candidate}, dando inizio ad una nuova \textit{Leader Election}.
-\\ 
-Il \textbf{Leader}, per mantenersi tale, deve pertanto comunicare costantemente la propria presenza ai suoi \textbf{Follower}; ciò viene fatto tramite dei messaggi periodici chiamati \textit{heartbeats}(AppendEntries senza contenuto).
-Quando una \textit{Leader Election} ha inizio il \textbf{Follower} incrementa il proprio term di uno e cambia il suo stato in \textbf{Candidate}, dopodiché vota per sé stesso e procede ad inviare delle \textit{Request Vote} a tutti i membri del cluster.
+In un dato term, tutte le \textit{operazioni di replicazione} del log sono affidate ad un server che ricopre il ruolo di \textit{leader}. Al fine di accordarsi in maniera safe su un unico leader è necessario applicare un protocollo di elezione robusto.  
+
+	\subsubsection{Candidatura}
+	Ogni elezione ha inizio nel momento in cui uno o più server si candidano come aspiranti leader.
+
+	\begin{enumerate}
+		\item{\textbf{Stato iniziale:}}	ogni server inizialmente si trova nello stato di follower e vi resta fintantochè riceve nuovi messaggi dall'attuale server leader.
+		\item{\textbf{Heartbeat:}} il leader, periodicamente, invia un messaggio detto di \textit{heartbeat}\footnote{come heartbeat vengono utilizzati i messaggi di tipo AppendEntries che, nel caso in cui non ci sia effettivamente una entry da appendere, vengono lasciati vuoti.} 
+		per comunicare ai suoi follower che è ancora in funzione.
+		\item{\textbf{Timeout:}} i server \textbf{follower} mantengono internamente un \textbf{timer randomico} che si resetta ogni volta che viene ricevuto un messaggio dal leader. La durata di questo timer viene chiamata \textit{election timeout}.		
+		\item{\textbf{Inizio candidatura:}} allo scadere del timer, il follower considera il leader assente e si propone come leader effettuando un \textbf{cambiamento di stato} da follower a candidate e dando inizio a una \textbf{nuova leader election}.
+	\end{enumerate}
+
+
+Quando una \textit{Leader Election} ha inizio il follower esegue i seguenti passaggi:
+
+\begin{enumerate}
+	\item{}
+\end{enumerate}
+ incrementa il proprio term di uno e cambia il suo stato in candidate, dopodiché vota per sé stesso e procede ad inviare delle \textit{Request Vote} a tutti i membri del cluster.
 A questo punto possono verificarsi i seguenti tre scenari:
 \begin{enumerate}
 	\item Il \textbf{Candidate} vince le elezioni e diventa \textbf{Leader}: questo accade quando il numero di voti ricevuti raggiunge la maggioranza, considerando anche il suo voto.
