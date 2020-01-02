@@ -1,5 +1,24 @@
 % -*- root: ../../../main.tex -*-
 \subsection{Safety e Consistency}
+Nelle sezioni precedenti è stato descritto il funzionamento principale, purtroppo questo non è sufficente per garantire consistenza tra i log.
+Attualmente ci sono casi che non sono gestiti, casi che possono causare inconsistenza, di seguito descriviamo le proprietà e i vincoli mancanti per completare \textbf{RAFT}.
+Tutte le proprietà di \textbf{RAFT} sono riportate di seguito:
+\begin{enumerate}
+	\item Election Safety:Per un dato term è possibile al più eleggere un solo \textbf{Leader}.
+	Questa proprietà è garantita dal fatto che per un dato term, ogni \textbf{Follower} può esprimere al più una preferenza, questo garantice che ci sia massimo un solo \textbf{Leader} eletto.
+	\item Leader Append-Only:Il \textbf{Leader} non cancella mai, ne sovrascrive le entry del proprio log(può sovrascrivere le entry dei \textbf{Follower}).
+	\item Log Matching:Se due log contengono un \textit{entry} con lo stesso \textit{index} e stesso \textit{term}, allora le due \textit{entry} sono identiche e contengono la stessa sequenza di comandi, questo vale anche per tutte le \textit{entry} precedenti.
+	Questa proprietà è costituita da due sottoproprietà:
+	\begin{enumerate}
+		\item Se due log hanno un entry con lo stesso index e stesso term, allora quell'entry contiene lo stesso comando(sono identiche).
+		\item Se due \textit{entry} in log diversi hanno lo stesso index e lo stesso term, allora anche tutte le loro precedenti entry sono identiche tra i due log.
+	\end{enumerate}
+	La prima sottoproprietà deriva dal fatto che il \textbf{Leader} per un dato term assegnerà ad un dato indice al più una sola \textit{entry}.
+	Mentre la seconda è garantità da un controllo effettuato dal \textbf{Follower} nel momento in cui verifica le \textit{entry} ricevute dal \textbf{Leader}.
+	Questo meccanismo è spiegato in dettaglio nella sezione \ref{Log Replication} e nelle figure  \ref{fig:figure6} e \ref{fig:figure7}
+	\item Leader Completeness:Se una \textit{entry} è validata(effettua il commit) in un certo term, allora tutti i \textbf{Leader} dei \textit{term} futuri avranno presente questa entry nel loro log.
+	\item State Machine Safety:Se un qualunque \textbf{Server} esegue un \textit{entry} ad un certo index, allora nessun altro \textbf{Server} eseguirà un comando diverso allo stesso \textit{index}.
+\end{enumerate}
   \subsubsection{Election restriction}
   \subsubsection{Committing entries from previous terms}
   \subsubsection{Neutralize Old Leaders}
