@@ -1,0 +1,20 @@
+Per cambiare la configurazione del sistema, si ricorre a una fase intermedia posta tra la vecchia configurazione e quella nuova, in maniera tale da evitare di incorrere in inconsistenze.
+Durante questa fase intermedia, chiamata "joint consensus", per prendere le decisioni si tengono in considerazione entrambe le maggioranze: sia quella della nuova configurazione (C_new) che quella della vecchia (Cold) in maniera tale che nè C_old nè C_new possano prendere de4cisioni unilaterali.
+
+Il cambiamento della configurazione viene scatenato da una richiesta. Quando il leader riceve questa richiesta la aggiunge al proprio log e la propaga,  come farebbe normalmente, ma l'azione ha effetto immediato poichè il leader applica il cambiamento di configurazione il prima possibile, senza attendere il commit.
+ 
+Il leader, dunque passa alla configurazione intermedia (C_old+new) e prende tutte le successive decisioni basandosi su di essa. Ad esemmpio, per capire se una entry può essere committata, verifica che essa abbia la maggioranza sia nella vecchia configurazione che in quella nuova.
+
+Esiste un periodo di tempo in cui la ebtry della nuova configurazione è presente nel log del leader ma non è ancora stata committata. 
+In questo lasso di tempo è possibile che le decisioni possano essere prese sotto entrambe le configurazioni. Ad esempio, se il leader crasha prima di aver replicato l'entry della nuova configurazione negli altri log, è possibile che venga eletto come nuovo leader un server che ha ancora la vecchia confiogurazione. 
+
+Tuttavia, prima o poi arriverà un leader che non crasherà anzitempo e la nuova configurazione verrà committata. 
+Una volta committata diventa impossibile che vengano prese decisioni solo sulla base di C_old, perchè ora il sistema è interamente sotto la configurazione C_old+new, in uno stato di joint consensus.
+Durante il joint consensus, la nuova configurazione può essere messa nel log e propagata.
+
+Esiste un periodo di tempo tra l'aggiunta nel log del leader della nuova configurazione e il commit della stessa, in cui le decisioni possono essere prese sulla base della configurazione C_old+new o sulla base della nuova configurazione. 
+Questo perchè nel caso in cui il leader sia soggetto a crash, prima che abbia proceduto al commit dell'entry relativa alla nuova configurazione, può e4ssere eletto un nuovo leader che ha ancora la configurazione intermedia. Tuttavia, come nel caso precedente, si ha che prima o poi un leader riuscirà a fare commit della nuova configurazione e, da quel momento in poi, le decisioni verranno prese solo sulla base di quest'ultima. 
+
+
+Si conclude che non c'è nessun momento in cui sia C_old che C_new possono prendere decisioni unilaterali, generando conflitti.
+Tuttavia è possibile che anche dopo che C_new è stata committata, venga eletto un leader che non è ancora in tale configurazione e che quindi non può prendere decisioni. In questo caso esso dovrà "dimettersi" dando vita ad una nuova elezione nel momento in cui il timeout di uno degli altri follower scadrà. 

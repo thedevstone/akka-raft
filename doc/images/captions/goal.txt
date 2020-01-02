@@ -1,0 +1,5 @@
+Ogni server ha due componenti principali: un log, contenente le istruzioni da eseguire e una macchina a stati, che esegue le istruzioni. 
+Nel caso in cui si abbia un unico server, queste componenti sono sufficienti, ma nel momento in cui si è in un sistema distribuito, si ha la necessità che tutti i server eseguano le stesse identiche istruzioni, nello stesso identico ordine.
+Per raggiungere questo obiettivo è necessario replicare il log delle istruzioni in tutte le macchine coinvolte. Diventa necessario, dunque, aggiungere una nuova componente: il modulo di consenso.
+Il modulo di consenso racchiude tutto ciò che viene fatto per farsi che tutte le macchine concordino sulle entry del log delle istruzioni da eseguire, in maniera tale da garantire la consistenza del sistema.
+
