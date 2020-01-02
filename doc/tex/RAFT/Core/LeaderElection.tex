@@ -1,5 +1,6 @@
 % -*- root: ../../../main.tex -*-
 \subsection{Leader Election}
+\label{Leader Election}
 In RAFT ogni server inizialmente si trova nello stato di \textbf{Follower} e vi resta fintantochè riceve nuovi messaggi dall'attuale server \textbf{Leader}. I server \textbf{Follower} mantengono internamente un timer randomico che si resetta ogni volta che viene ricevuto un messaggio dal leader. La durata di questo timer viene chiamata \textit{election timeout}. Quando il timer si innesca provoca il cambiamento di stato da \textbf{Follower} a \textbf{Candidate}, dando inizio ad una nuova \textit{Leader Election}.
 \\ 
 Il \textbf{Leader}, per mantenersi tale, deve pertanto comunicare costantemente la propria presenza ai suoi \textbf{Follower}; ciò viene fatto tramite dei messaggi periodici chiamati \textit{heartbeats}(AppendEntries senza contenuto).

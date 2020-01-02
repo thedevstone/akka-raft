@@ -1,5 +1,6 @@
 % -*- root: ../../../main.tex -*-
 \subsection{Normal Operation | Log Replication}
+\label{Log Replication}
 In RAFT il \textbf{Leader} è l'unico server in grado di apportare delle modifiche al \textit{log} . Una volta eletto correttamente, inizia a servire tutte le richieste dei client; allo stesso tempo propaga le modifiche al cluster e si assicura che tutti i server replichino la giusta sequenza di comandi, mantenendo così il \textit{log} consistente nell'intero cluster.
 Internamente il \textbf{Leader} mantiene tutti le informazioni riguradanti i log di tutti i \textbf{Follower}; questo perche il \textbf{Leader} deve inviare solo'lentry successiva all'ultima registrata dal \textbf{Follower} così da procedere in sequenza.
 
