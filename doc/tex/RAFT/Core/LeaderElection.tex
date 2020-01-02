@@ -18,13 +18,19 @@ In un dato term, tutte le \textit{operazioni di replicazione} del log sono affid
 Quando una \textit{Leader Election} ha inizio il follower esegue i seguenti passaggi:
 
 \begin{enumerate}
-	\item{}
+	\item{\emph{Incrementa di uno il proprio term}}
+	\item{\emph{Cambia il proprio stato in candidate}}
+	\item{\emph{Vota per sè stesso}}
+	\item{\emph{Invia in broadcast un messaggio di tipo ``Request Vote'' affinchè gli altri membri del cluster possano votarlo}}
 \end{enumerate}
- incrementa il proprio term di uno e cambia il suo stato in candidate, dopodiché vota per sé stesso e procede ad inviare delle \textit{Request Vote} a tutti i membri del cluster.
+ 
 A questo punto possono verificarsi i seguenti tre scenari:
 \begin{enumerate}
-	\item Il \textbf{Candidate} vince le elezioni e diventa \textbf{Leader}: questo accade quando il numero di voti ricevuti raggiunge la maggioranza, considerando anche il suo voto.
-	\item Un altro \textbf{Candidate} vince l'elezione: questo può accadere se ad esempio i due si candidano a poca distanza l'uno dall'altro. A questo punto il \textbf{Candidate} che ha perso, riceverà un messaggio dal nuovo \textbf{Leader} e tornerà \textbf{Follower}.
+	\item{\textbf{Il candidate vince l'elezione:}} questo accade quando il numero di voti ricevuti dagli altri membri del cluster (compreso il proprio) raggiunge la maggioranza.\\
+	A questo punto \textit{cambia il suo stato in \textbf{leader}} e invia un \textbf{heartbeat}, con lo scopo di controllare il cluster evitando che si inneschino nuove candidature.
+
+	\item{\textbf{Un altro candidate vince l'elezione:}} questo può accadere se ad esempio i due si candidano a poca distanza l'uno dall'altro. A questo punto il \textbf{Candidate} che ha perso, riceverà un messaggio dal nuovo \textbf{Leader} e tornerà \textbf{Follower}.
+	
 	\item Nessuno vince le elezioni: la contemporanea presenza di più \textbf{Candidate} può portare a uno \textit{Split Vote}, ovvero una situazione in cui nessuno dei \textbf{Candidate} ottiene la maggioranza dei voti. In questo caso il term termina senza aver avuto un leader e viene dato inizio al term successivo.
 \end{enumerate}
 Ogni \textbf{Follower} del cluster può avere una sola preferenza di voto per term, questo garantisce che per un dato term ci sia al più un solo \textbf{Leader}. \\
