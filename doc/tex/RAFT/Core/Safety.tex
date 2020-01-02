@@ -4,7 +4,7 @@ Nelle sezioni precedenti è stato descritto il funzionamento principale, purtrop
 Attualmente ci sono casi che non sono gestiti, casi che possono causare inconsistenza, di seguito descriviamo le proprietà e i vincoli mancanti per completare \textbf{RAFT}.
 Tutte le proprietà di \textbf{RAFT} sono riportate di seguito:
 \begin{enumerate}
-	\item Election Safety:Per un dato term è possibile al più eleggere un solo \textbf{Leader}.
+	\item Election Safety: Per un dato term è possibile al più eleggere un solo \textbf{Leader}.
 	Questa proprietà è garantita dal fatto che per un dato term, ogni \textbf{Follower} può esprimere al più una preferenza, questo garantice che ci sia massimo un solo \textbf{Leader} eletto.
 	\item Leader Append-Only:Il \textbf{Leader} non cancella mai, ne sovrascrive le entry del proprio log(può sovrascrivere le entry dei \textbf{Follower}).
 	\item Log Matching:Se due log contengono un \textit{entry} con lo stesso \textit{index} e stesso \textit{term}, allora le due \textit{entry} sono identiche e contengono la stessa sequenza di comandi, questo vale anche per tutte le \textit{entry} precedenti.
