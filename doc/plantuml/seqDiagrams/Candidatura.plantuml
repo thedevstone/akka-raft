@@ -1,0 +1,22 @@
+@startuml
+  box "Server Cluster" #99CCFF 
+    participant "Follower" as Follower
+    participant "Old Leader" as OldLeader
+    participant "Candidate" as Candidate
+  activate OldLeader
+  activate Follower
+
+  loop Indefinite
+    OldLeader -> OldLeader ++ : Start Timer
+    return Timers Triggers
+    OldLeader ->> Follower : AppendEntries()
+    Follower -->> OldLeader: Ack(state)
+  end group
+    destroy OldLeader 
+
+  Follower ->> Follower : timeout
+  Follower ->> Candidate ** : <<become Candidate>>
+  activate Candidate
+  deactivate Follower
+end box
+@enduml

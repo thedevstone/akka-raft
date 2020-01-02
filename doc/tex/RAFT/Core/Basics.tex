@@ -42,6 +42,14 @@ Un cluster RAFT può contenere vari server, solitamente cinque è il numero tipi
     \item{\textbf{Term come logical clock:}}
     I term in RAFT hanno uno scopo molto più generale oltre al contesto dell'elezione: essi agiscono come \textbf{logical clock} \cite{Lamport:1978} garantendo un concetto logico di tempo e permettendo ai server di accorgesi quando sono in possesso di \textbf{informazioni obsolete}.
   \end{itemize}
+  
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.80\columnwidth]{raft/terms}
+    \caption{Un term è un priodo di tempo che parte con l'elezione di un nuovo leader e termina con la fine del suo "regno".}
+    \label{fig:figure3}
+  \end{figure}
+
     \paragraph{Identificazione di informazioni obsolete}
     Non esiste in RAFT un concetto di stato/term globale ma ogni \textbf{server vede}, in un \textbf{dato istante}, una \textbf{parte del sistema} e non è detto che sia lo stesso per tutti.\\
     L'identificazione di informazioni obsolete avviene in modo molto semplice:
