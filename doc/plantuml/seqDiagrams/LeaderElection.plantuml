@@ -13,12 +13,14 @@
   deactivate Followers
   
   Candidate ->> Leader ** : <<become leader>>
+  destroy Candidate
   deactivate Candidate
   activate Leader
   deactivate Candidate
   Leader ->> OldLeader : AppendEntries()
   activate OldLeader
   OldLeader ->> Followers: <<become follower>>
+  destroy OldLeader
   deactivate OldLeader
 
   loop Indefinite
