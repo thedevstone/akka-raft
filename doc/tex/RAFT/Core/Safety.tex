@@ -119,10 +119,32 @@ E' necessario dunque completare l'algoritmo aggiungendo la proprietà chiave di 
   Questo garantisce che il server $S5$ non possa essere eletto leader al \textbf{term 5} per la regola 1 in \ref{eq:1}.
   \begin{figure}[H]
     \centering
-    \includegraphics[width=0.99\columnwidth]{raft/committingEntryFromEarlierTerm}
-    \caption[stateDiagramCaption]{}
+    \includegraphics[width=0.80\columnwidth]{raft/newCommitmentRules}
+    \caption[stateDiagramCaption]{Quando $S4$ diviene leader non committa immediatamente le entry passate ma attende l'arrivo di nuove entry. Questo evita che $S5$ possa diventare leader sovrascrivendo i logs e portando inconsistenze.}
     \label{fig:figure13}
   \end{figure}
-  \subsubsection{Neutralize Old Leaders}
-  \subsubsection{Follower and Candidate Crash}
-  \subsubsection{Timing and Availability}
+  \subsubsection{Neutralizzazione di vecchi leader}
+  Supponiamo che un leader venga momentaneamente disconnesso dalla rete, creando una cosiddetta \textbf{network partition}. RAFT essendo un algoritmo che soddisfa il requisito di \textbf{partition tolerance} garantisce che il cluster sopravviva alla failure di un membro; il cluster semplicemente eleggerà un nuovo leader.\\
+  \emph{Cosa succede però se il vecchio leader torna in campo e decide di continuare a governare?}\\
+  Per evitare inconsistenze RAFT mette in pratica un comportamento molto semplice, chiamato \textbf{Neutralization of stale leader}, esso funziona in modo molto semplice:
+  \begin{itemize}
+    \item{Ogni messaggio scambiato contiene al suo interno il \textbf{term del mittente}}.
+    \item{\textbf{Caso A}}
+      \[
+        senderTerm > receiverTerm
+      \]
+      \begin{itemize}
+        \item{\textbf{Il messaggio viene rifiutato.}}
+        \item{\textbf{Il mittente si converte a follower.}}
+      \end{itemize}
+      \item{\textbf{Caso B}}
+      \[
+        receipTerm > senderTerm
+      \]
+      \begin{itemize}
+        \item{\textbf{Il ricevente si converte a follower.}}
+        \item{\textbf{Il ricevente aggiorna il suo term a l'ultimo ricevuto.}}
+        \item{\textbf{Il ricevente processa il messaggio normalmente.}}
+      \end{itemize}
+  \end{itemize}
+  Seguendo questi semplici casi, una volta che una \textbf{lezione} per un nuovo leader è \textbf{terminata} non è possibile che un leader deposto possa inviare messaggi alla maggioranza del cluster poiché tale maggioranza possiederà un \textbf{term aggiornato dall'ultima elezione}.
