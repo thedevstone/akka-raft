@@ -3,7 +3,7 @@
 \label{Log Replication}
 Prima di proseguire con la descrizione della seconda fase dell'algoritmo (\textit{log replication}) è bene fornire una definizione completa della struttura del log.
   \subsubsection{Struttura del Log}
-  In RAFT ogni server, compreso il leader, mantiene una copia personale del log.\\ Ogni singolo log è strutturato in questo modo:
+  In RAFT ogni server, compreso il leader, mantiene una copia personale del log. Ogni singolo log è strutturato in questo modo:
   \begin{itemize}
     \item{\emph{\textbf{Entry:}}}
     \emph{Ogni log è suddiviso in celle chiamate \textbf{entry} identificate da un \textbf{indice} che ne indica la \textbf{posizione} nel log}
