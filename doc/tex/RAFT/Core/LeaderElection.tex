@@ -34,11 +34,11 @@ A questo punto possono verificarsi i seguenti tre scenari:
 	\item{\textbf{Nessuno vince le elezioni:}} la contemporanea presenza di più \textbf{Candidate} può portare a uno \textbf{Split-Vote}, ovvero una situazione in cui nessuno dei candidate ottiene la maggioranza dei voti. In questo caso il \textit{term termina senza aver avuto un leader} e viene dato inizio al term successivo.
 \end{enumerate}
 
-  \subsubsection{Elezione: Safety e Liveness}
+  \subsubsection{Elezione: Safety e Liveness}\label{electionsaf}
   Il protocollo di elezione, al fine di essere robusto, deve soddisfare requisiti di safety e di liveness.
   
   \begin{itemize}
-    \item{\textbf{No leader multipli }(safety):} non vogliamo che \textbf{più di una macchina} possa essere eletta come leader nel medesimo term.
+    \item{\textbf{No leader multipli }(Election Safety):} non vogliamo che \textbf{più di una macchina} possa essere eletta come leader nel medesimo term.
     \begin{itemize}
       \item{\emph{Proof:}} ogni server rilascia \textbf{un solo voto} per term e lo salva su disco. Se malauguratamente avviene un crash allora, nel caso in cui il server torni operativo, esso verificherà la possibilità di voto recuperando l'informazione dal disco. Quindi possiamo dire che due candidates non possono accumulare due diverse maggioranze sullo stesso term. 
     \end{itemize}
