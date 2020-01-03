@@ -5,17 +5,19 @@
     participant "New Leader" as Leader
     participant "Old Leader" as OldLeader
 
-  activate OldLeader
-  activate Followers
   activate Candidate
   
   Candidate ->> Followers : Send N vote request
+  activate Followers
   Followers -->> Candidate : Receive back the votes
+  deactivate Followers
   
   Candidate ->> Leader ** : <<become leader>>
+  deactivate Candidate
   activate Leader
-  deactivate Candidate 
+  deactivate Candidate
   Leader ->> OldLeader : AppendEntries()
+  activate OldLeader
   OldLeader ->> Followers: <<become follower>>
   deactivate OldLeader
 
@@ -23,7 +25,9 @@
     Leader -> Leader ++ : Start Timer
     return Timers Triggers
     Leader ->> Followers : AppendEntries()
+    activate Followers
     Followers --> Leader : Ack and state
+    deactivate Followers
   end group
 end box
 @enduml
