@@ -39,7 +39,14 @@ Prima di proseguire con la descrizione della seconda fase dell'algoritmo (\texti
 
   \subsubsection{Log Matching Property}
   \label{Log Matching}
-  La proprietà di log matching garantisce che: \emph{\textbf{se una entry è committed allora anche tutte le entry precedenti lo saranno.}}\\
+  La proprietà di log matching garantisce che:
+  \[
+    \begin{multlined}
+    \emph{\textbf{Se una entry è committed}}\\
+    \emph{\textbf{allora anche tutte 
+    le entry precedenti lo saranno.}}
+    \end{multlined}
+  \]
   Questa proprietà deriva da queste sotto-proprietà:
   \begin{itemize}
     \item{\emph{Se due log hanno un entry con lo stesso index e stesso term, allora quell'entry contiene lo stesso comando(sono identiche)}}.
