@@ -4,16 +4,15 @@
     participant "Old Leader" as OldLeader
     participant "Candidate" as Candidate
   activate OldLeader
-  activate Follower
 
   loop Indefinite
     OldLeader -> OldLeader ++ : Start Timer
     return Timers Triggers
     OldLeader ->> Follower : AppendEntries()
+    activate Follower
     Follower -->> OldLeader: Ack(state)
   end group
-    destroy OldLeader 
-
+    destroy OldLeader
   Follower ->> Follower : timeout
   Follower ->> Candidate ** : <<become Candidate>>
   activate Candidate
