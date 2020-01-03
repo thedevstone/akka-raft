@@ -1,44 +1,61 @@
 % -*- root: ../../../main.tex -*-
 \subsection{Configuration Changes}
-La configurazione del sistema può cambiare nel tempo, ad esempio quando una macchina va incontro a crash, viene sostituita o viene aggiunta al cluster.
-Le informazioni sulla configurazione del sistema sono cruciali perchè sapere quanti e quali server fanno parte del cluster è necessario per operazioni che necessitano di decidere basandosi sulla maggioranza, come l'elezione del leader o il commit di una entry.
-Il problema cruciale che si incontra in tutti i sistemi distribuiti è che la transizione tra una configurazione e l'altra non avviene nello stesso istante per tutte le macchine. Esisterà dunque un tempo \textit{t} per cui alcune macchine saranno aggiornate sulla nuova configurazione mentre altre saranno ancora nella vecchia. Ciò porta a una situazione in cui è possibile che ci siano due gruppi di server, che si trovano in due diverse configurazioni e che rappresentano la maggioranza per quella configurazione.
+La configurazione del sistema può cambiare nel tempo, ad esempio quando una macchina va incontro a crash, viene sostituita o viene aggiunta al cluster.\\
 
-Sulla base di queste \textbf{maggioranze} possono essere portate a termine delle operazioni, come ad esempio, il commit  di una entry. Questo potrebbe generare delle \textbf{inconsistenze}: ad esempio se la maggioranza data da S1 e S2 decide di fare commit dell'entry e1, mentre la maggioranza data da S3,S4 e S5 decide di fare commit dell'entry e2!=e1, in corrispondenza dello stesso indice, si avranno dei \textbf{log diversi} che porteranno all'esecuzione di istruzioni diverse, generando inconsistenza.
-Per risolvere questo problema il passaggio tra una congigurazione e l'altra non è immediato, ma viene fatto in \textbf{due fasi}.
+Le informazioni sulla configurazione del sistema sono cruciali perchè sapere \textbf{quanti} e \textbf{quali} server fanno parte del cluster è necessario per operazioni che necessitano di decidere basandosi sulla maggioranza, come l'elezione del leader o il commit di una entry.\\
+
+\subsubsection{Contemporanea presenza di due configurazioni}
+  Il problema che si incontra in tutti i sistemi distribuiti è che \textit{la \textbf{transizione} tra una configurazione e l'altra \textbf{non avviene nello stesso istante} per tutte le macchine}. Esisterà dunque un tempo \textbf{t} per cui \textbf{alcune} macchine saranno aggiornate sulla \textbf{nuova configurazione} mentre \textbf{altre} saranno ancora nella \textbf{vecchia}. Ciò porta a una situazione in cui è possibile che ci siano due gruppi di server, che si trovano in \textbf{due diverse configurazioni} e che rappresentano la \textbf{maggioranza} per quella configurazione.\\
 
   \begin{figure}[H]
     \centering
     \includegraphics[width=0.90\columnwidth]{raft/configChanges.pdf}
-    \caption{Esempio di maggioranze diverse in due diverse configurazioni: i server 4 e 5 entrano a far parte del cluster, ma al tempo t, si ha che S1 e S2 sono ancora alla vecchia configurazione, mentre S3, S4 e S5 sono passati alla nuova.
-S1 e S2 costituiscono una maggioranza, nella configurazione vecchia (sono 2 su 3), ma anche S3, S4 e S5 possono formare una maggioranza nella loro configurazione di riferimento (3 su 5). }
+    \caption{Esempio di \textbf{maggioranze diverse in due diverse configurazioni}: i server \textit{S4} e \textit{S5} entrano a far parte del cluster, ma al tempo \textbf{t}, si ha che \textit{S1} e \textit{S2} sono ancora alla \textbf{vecchia configurazione}, mentre \textit{S3}, \textit{S4} e \textit{S5} sono \textbf{passati alla nuova}.
+    \textit{S1} e \textit{S2} costituiscono una maggioranza, nella configurazione vecchia (sono \textbf{2 su 3}), ma anche \textit{S3}, \textit{S4} e \textit{S5} possono formare una maggioranza nella loro configurazione di riferimento (\textbf{3 su 5}). }
     \label{fig:figure 8}
   \end{figure}
 
+  \subsubsection{Problema}
+    Sulla base di queste \textbf{maggioranze} possono essere portate a termine delle operazioni, come ad esempio, il commit  di una entry. Questo potrebbe generare delle \textbf{inconsistenze}, come nel caso seguente:
+  \begin{enumerate}
+    \item{\emph{I server \textbf{S1} e \textbf{S2} formano una \textbf{maggioranza} nella \textbf{vecchia} configurazione}}
+    \item{\emph{I server \textbf{S3}, \textbf{S4} e \textbf{S5} formano una \textbf{maggioranza} nella \textbf{nuova} configurazione}}
+    \item{\emph{la \textbf{maggioranza} data da S1 e S2 decide di fare \textbf{commit} dell'entry \textbf{e1}}}
+    \item{\emph{la \textbf{maggioranza} data da S3,S4 e S5 decide di fare \textbf{commit} dell'entry \textbf{e2!=e1}}}
+    \item{\emph{in corrispondenza dello \textbf{stesso indice}, si avranno dei \textbf{log diversi} che porteranno all'esecuzione di istruzioni diverse, generando \textbf{inconsistenza}}}
+  \end{enumerate}
+
+  Per risolvere questo problema, il passaggio tra una configurazione e l'altra non è immediato, ma viene fatto in \textbf{due fasi}.
+    
 
 
+  \subsubsection{Soluzione}   
 
-Per cambiare la configurazione del sistema, si ricorre a una fase intermedia posta tra la vecchia configurazione e quella nuova, in maniera tale da evitare di incorrere in inconsistenze.
-Durante questa fase intermedia, chiamata \textbf{joint consensus}, per prendere le decisioni si tengono in considerazione entrambe le maggioranze: sia quella della nuova configurazione (\textit{C\_new}) che quella della vecchia (\textit{C\_old}) in maniera tale che nè \textit{C\_old} nè \textit{C\_new} possano prendere decisioni unilaterali.
+    Per cambiare la configurazione del sistema, si ricorre a una \textbf{fase intermedia} posta tra la vecchia configurazione e quella nuova, in maniera tale da \textbf{evitare} di incorrere in \textbf{inconsistenze}.
+    Durante questa fase intermedia, chiamata \textbf{joint consensus}, per prendere le decisioni si tengono in considerazione entrambe le maggioranze: sia quella della nuova configurazione (\textit{C\_new}) che quella della vecchia (\textit{C\_old}) in maniera tale che nè \textit{C\_old} nè \textit{C\_new} possano prendere \textbf{decisioni unilaterali}.\\
 
-Il cambiamento della configurazione viene scatenato da una richiesta. Quando il leader riceve questa richiesta la aggiunge al proprio log e la propaga, come farebbe normalmente, ma l'azione ha effetto immediato poichè il leader applica il cambiamento di configurazione il prima possibile, senza attendere il commit.
- 
-Il leader, dunque passa alla configurazione intermedia (\textit{C\_old+new}) e prende tutte le successive decisioni basandosi su di essa. Ad esempio, per capire se una entry può essere committata, verifica che essa abbia la maggioranza sia nella vecchia configurazione che in quella nuova.
+    Le caratteristiche di questo approccio sono le seguenti:
+    
+    \begin{enumerate}
+      \item{Il \textbf{cambiamento della configurazione} viene scatenato da una richiesta. Quando il leader riceve questa richiesta la aggiunge al proprio log e la propaga, come farebbe normalmente, ma l'azione ha \textbf{effetto immediato} poichè il leader applica il cambiamento di configurazione il prima possibile, \textbf{senza attendere il commit}.}
 
-Esiste un periodo di tempo in cui la entry della nuova configurazione è presente nel log del leader ma non è ancora stata committata. 
-In questo lasso di tempo è possibile che le decisioni possano essere prese sotto entrambe le configurazioni. Ad esempio, se il leader crasha prima di aver replicato l'entry della nuova configurazione negli altri log, è possibile che venga eletto come nuovo leader un server che ha ancora la vecchia confiogurazione. 
+      \item{Il leader, dunque passa alla configurazione intermedia (\textit{C\_old+new}) e prende tutte le successive decisioni basandosi su di essa. Ad esempio, per capire se una entry può essere committata, verifica che essa abbia la maggioranza sia nella vecchia configurazione che in quella nuova.} 
 
-Tuttavia, prima o poi arriverà un leader che non crasherà anzitempo e la nuova configurazione verrà committata. 
-Una volta committata diventa impossibile che vengano prese decisioni solo sulla base di \textit{C\_old}, perchè ora il sistema è interamente sotto la configurazione \textit{C\_old+new}, in uno stato di joint consensus.
-Durante il joint consensus, la nuova configurazione può essere messa nel log e propagata.
+      \item{\emph{Esiste un periodo di tempo in cui la entry della nuova configurazione è presente nel log del leader ma non è ancora stata committata. 
+      In questo lasso di tempo è possibile che le decisioni possano essere prese sotto entrambe le configurazioni. Ad esempio, se il leader crasha prima di aver replicato l'entry della nuova configurazione negli altri log, è possibile che venga eletto come nuovo leader un server che ha ancora la vecchia configurazione.
+      Tuttavia, prima o poi arriverà un leader che non crasherà anzitempo e la nuova configurazione verrà committata. }} 
 
-Esiste un periodo di tempo tra l'aggiunta nel log del leader della nuova configurazione e il commit della stessa, in cui le decisioni possono essere prese sulla base della configurazione \textit{C\_old+new} o sulla base della nuova configurazione. 
-Questo perchè nel caso in cui il leader sia soggetto a crash, prima che abbia proceduto al commit dell'entry relativa alla nuova configurazione, può essere eletto un nuovo leader che ha ancora la configurazione intermedia. Tuttavia, come nel caso precedente, si ha che prima o poi un leader riuscirà a fare commit della nuova configurazione e, da quel momento in poi, le decisioni verranno prese solo sulla base di quest'ultima. 
+      \item{Una volta committata diventa impossibile che vengano prese decisioni solo sulla base di \textit{C\_old}, perchè ora il sistema è interamente sotto la configurazione \textit{C\_old+new}, in uno stato di joint consensus.
+      Durante il joint consensus, la nuova configurazione può essere messa nel log e propagata.} 
 
 
-Si conclude che non c'è nessun momento in cui sia \textit{C\_old} che \textit{C\_new} possono prendere decisioni unilaterali, generando conflitti.
-Tuttavia è possibile che anche dopo che \textit{C\_new} è stata committata, venga eletto un leader che non è ancora in tale configurazione e che quindi non può prendere decisioni. In questo caso esso dovrà "dimettersi" dando vita ad una nuova elezione nel momento in cui il timeout di uno degli altri follower scadrà.
+      \item{\emph{Esiste un periodo di tempo tra l'aggiunta nel log del leader della nuova configurazione e il commit della stessa, in cui le decisioni possono essere prese sulla base della configurazione \textit{C\_old+new} o sulla base della nuova configurazione. 
+      Questo perchè nel caso in cui il leader sia soggetto a crash, prima che abbia proceduto al commit dell'entry relativa alla nuova configurazione, può essere eletto un nuovo leader che ha ancora la configurazione intermedia. Tuttavia, come nel caso precedente, si ha che prima o poi un leader riuscirà a fare commit della nuova configurazione e, da quel momento in poi, le decisioni verranno prese solo sulla base di quest'ultima.}} 
 
+    \end{enumerate}
+
+    Si conclude che non c'è nessun momento in cui sia \textit{C\_old} che \textit{C\_new} possono prendere decisioni unilaterali, generando conflitti.
+    Tuttavia è possibile che anche dopo che \textit{C\_new} è stata committata, venga eletto un leader che non è ancora in tale configurazione e che quindi non può prendere decisioni. In questo caso esso dovrà "dimettersi" dando vita ad una nuova elezione nel momento in cui il timeout di uno degli altri follower scadrà.
 
 
   \begin{figure}[H]
