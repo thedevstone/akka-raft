@@ -21,7 +21,7 @@ Prima di proseguire con la descrizione della seconda fase dell'algoritmo (\texti
   \end{itemize}
   \begin{figure}[H]
   	\centering
-  	\includegraphics[width=0.80\columnwidth]{raft/logStructure}
+  	\includegraphics[width=0.99\columnwidth]{raft/logStructure}
   	\caption{Nell'immagine possiamo vedere che la entry n.7 è commited poiché è replicata sulla maggioranza dei server. Entry n.8 non può essere commited poiché è replicata solo su 2/5 dei server.}
   	\label{fig:figure6}
   \end{figure}
@@ -81,14 +81,14 @@ Prima di proseguire con la descrizione della seconda fase dell'algoritmo (\texti
    
   \begin{figure}[H]
   	\centering
-  	\includegraphics[width=0.80\columnwidth]{raft/appendEntries}
+  	\includegraphics[width=0.99\columnwidth]{raft/appendEntries}
   	\caption{Il leader replica il proprio log inviando un elemento per volta al log dei vari follower, i quali accettano solo se c'è corrispondenza tra l'entry precedente a quella inviata dal leader e la loro ultima entry.}
   	\label{fig:figure7}
   \end{figure}
 
   \begin{figure}[H]
   	\centering
-  	\includegraphics[width=0.80\columnwidth]{raft/repairingFollowerLogs}
+  	\includegraphics[width=0.99\columnwidth]{raft/repairingFollowerLogs}
     \captionsetup{singlelinecheck=off}
   	\caption[consistencyCheck2]{
     Il leader procede ad inviare entry con \textbf{indice sempre minore} fino a trovare una corrispondenza, per poi risalire fino alla cima del log, se necessario sovrascrive le entry inconsistenti del Follower.\\
@@ -115,7 +115,7 @@ Prima di proseguire con la descrizione della seconda fase dell'algoritmo (\texti
 
   \begin{figure}[H]
     \centering
-    \includegraphics[width=0.80\columnwidth]{raft/loginconsistencies}
+    \includegraphics[width=0.99\columnwidth]{raft/loginconsistencies}
     \caption[inconsistency]{La figura mostra un esempio in cui vengono mostrati tutti i tipi di inconsistenza possibili in RAFT.}
     \label{fig:figure9}
   \end{figure}
