@@ -1,2 +1,34 @@
 % -*- root: ../../../main.tex -*-
 \subsection{Client Protocol}
+
+Il client semplicemente inviano dei comendi al leader e ricevono indietro le risposte.
+se il client non sa chi è il leader va bene. Può parlare con qualsiasi macchina e se quella macchina non è il leader semplicemente dice al client chi è il leader affinchè esso possa contattarlo.
+
+
+il leader non risponderà al client fino al momento in cui il comando è stato messo nel log e COMMITTATO ed eseguito dalla state machine del leader.
+
+
+Che succede se il leader crasha, oppure per qualche altro motivo la richiesta scade?
+- Il cliend ritrasmette il comando ad un'altra macchina. 
+- Se questa macchina non è il nuovo leader, gli dice a chi rivolgersi.
+- Si rivolge al nuovo leader
+
+Questo GARANTISCE che ogni richiesta verrà gestita, PRIMA O POI.
+ Ma ancora non è sufficiente a garantire che venga eseguita una e una siola volta:
+
+può succedere che il crash del leader avvenga DOPO l'esecuzione del comando, ma PRIMA di dare la risposta al Client. 
+In questo caso il client non saprebbe che il comando è stato eseguito e ritrasmetterebbe la richiesta al nuovo leader che lo porterà il quale, nel momento in cui farà commit del comando lo rieseguirà. In questo modo si avrebbe che il comando è stato eseguito due volte, il che non è accettabile.
+ 
+
+Per fare ciò si introduce un identificatore univoco che viene generato dal client per ogni richiesta. 
+Questo identificativo di richiesta è contenuto nella relativa entry del log.
+In questo modo il leader, prima di accettare una nuova richiesta, può controllare se l'ID è già presente in una delle entry del suo log e agire di conseguenza:
+ - se non è presente, lo accoda nel log e procede come di consueto
+ - se è già presente, non lo accoda, ma attende che la propria state machine, se non lo ha già fatto, lo esegua; dopodichè restituisce al client il risultato.
+
+
+In questo modo si garantisce che un comandovenga eseguito una e una sola volta: exactly-once semantics.
+
+ 
+
+
