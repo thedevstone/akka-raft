@@ -6,7 +6,7 @@ Qui di seguito ricordiamo le proprietà nominate nelle sezioni precedenti:
 \begin{itemize}
 	\item{\textbf{Election Safety:}} 
   Per un dato term è possibile al più eleggere \textbf{un solo leader}.
-	La dimostrazione di questa proprietà è già stata discussa precedentemente nella sezione \ref{electionsaf} alla pagina \pageref{electionsaf}.
+	La dimostrazione di questa proprietà è già stata discussa precedentemente nella sezione \ref{electionsaf}.
 	\item{\textbf{Leader Append-Only:}}
   Il leader non cancella \textbf{mai}, ne sovrascrive le entry del proprio log.
   La proprietà è descritta in dettaglio nella sezione \ref{Log Replication}.
@@ -16,7 +16,7 @@ Qui di seguito ricordiamo le proprietà nominate nelle sezioni precedenti:
 		\item{\emph{Se due log hanno un entry con lo stesso index e stesso term, allora quell'entry contiene lo stesso comando(sono identiche)}}.
 		\item{\emph{Se due \textit{entry} in log diversi hanno lo stesso index e lo stesso term, allora anche tutte le loro precedenti entry sono identiche tra i due log}}.
 	\end{itemize}
-	La proprietà è descritta in dettaglio nella sezione \ref{Log Replication} e nelle figure  \ref{fig:figure6} e \ref{fig:figure7}.
+	La proprietà è descritta in dettaglio nella sezione \ref{Log Matching}.
 \end{itemize}
 L'elenco sovrastante non è però completo! Attualmente ci sono casi che non sono gestiti e che possono causare notevole \textbf{inconsistenza} tra i log.
 Ad esempio se il leader \textit{valida} alcune \textit{entry} mentre un dato follower è offline, nel caso in cui il follower venisse eletto esso potrebbe sovrascrivere le entry gia eseguite con quelle presenti nel proprio log.\\
@@ -29,7 +29,7 @@ E' necessario dunque completare l'algoritmo aggiungendo la proprietà chiave di 
 
   \subsubsection{Election restriction}
   Durante le elezioni ci sono casi in cui non è possibile determinare se un \textit{entry} è committed oppure no.
-  Come si può vedere in figura \ref{fig:figure 8} non è possibile determinare se l'ultima \textit{entry} è stata committed: per questo si aggiunge un ulteriore vincolo all'elezione di un candidate.
+  Come si può vedere in figura \ref{fig:figure9} non è possibile determinare se l'ultima \textit{entry} è stata committed: per questo si aggiunge un ulteriore vincolo all'elezione di un candidate.
   Si restringere il range di elezione ai \textbf{Candidate} con il log più completo; questo per eleggere in ogni \textit{term} il migior \textbf{Candidate} quello che ha la visione più completa della situazione. 
   Come già detto un candidate invia ad ogni elezione le informazioni riguardanti il log.
   Più precisamente il \textbf{Candidate} invia solo le informazioni sull'ultima entry, l'\textit{index} e il \textit{term}, dato che queste informazioni definisco interamente il \textit{log}.
@@ -42,7 +42,7 @@ E' necessario dunque completare l'algoritmo aggiungendo la proprietà chiave di 
   	\captionsetup{singlelinecheck=off}
   	\caption[stateDiagramCaption]{
 	In questo caso non è possibile determinare se l'ultima \textit{entry} è validata, inoltre solo il primo server può essere eletto dato che il terzo non è disponibile.}
-  	\label{fig:figure8}
+  	\label{fig:figure10}
   \end{figure}
   \subsubsection{Committing entries from previous terms}
   \subsubsection{Neutralize Old Leaders}
