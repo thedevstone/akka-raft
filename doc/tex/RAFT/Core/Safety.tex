@@ -127,9 +127,9 @@ E' necessario dunque completare l'algoritmo aggiungendo la proprietà chiave di 
     \label{fig:figure13}
   \end{figure}
   \subsubsection{Neutralizzazione di vecchi leader}
-  Supponiamo che un leader venga momentaneamente disconnesso dalla rete, creando una cosiddetta \textbf{network partition}. RAFT essendo un algoritmo che soddisfa il requisito di \textbf{partition tolerance} garantisce che il cluster sopravviva alla failure di un membro; il cluster semplicemente eleggerà un nuovo leader.\\
+  Supponiamo che un leader venga momentaneamente disconnesso dalla rete, creando una cosiddetta \textbf{network partition}. RAFT, essendo un algoritmo che soddisfa il requisito di \textbf{partition tolerance}, garantisce che il cluster sopravviva alla failure di un membro: il cluster semplicemente eleggerà un \textbf{nuovo leader}.\\
   \emph{Cosa succede però se il vecchio leader torna in campo e decide di continuare a governare?}\\
-  Per evitare inconsistenze RAFT mette in pratica un comportamento molto semplice, chiamato \textbf{Neutralization of stale leader}, esso funziona in modo molto semplice:
+  Per evitare inconsistenze RAFT mette in pratica un comportamento molto semplice, chiamato \textbf{neutralization of stale leader}, esso funziona in modo molto semplice:
   \begin{itemize}
     \item{Ogni messaggio scambiato contiene al suo interno il \textbf{term del mittente}}.
     \item{\textbf{Caso A}}
@@ -142,12 +142,12 @@ E' necessario dunque completare l'algoritmo aggiungendo la proprietà chiave di 
       \end{itemize}
       \item{\textbf{Caso B}}
       \[
-        receipTerm > senderTerm
+        receiverTerm > senderTerm
       \]
       \begin{itemize}
         \item{\textbf{Il ricevente si converte a follower.}}
-        \item{\textbf{Il ricevente aggiorna il suo term a l'ultimo ricevuto.}}
+        \item{\textbf{Il ricevente aggiorna il suo term all'ultimo ricevuto.}}
         \item{\textbf{Il ricevente processa il messaggio normalmente.}}
       \end{itemize}
   \end{itemize}
-  Seguendo questi semplici casi, una volta che una \textbf{lezione} per un nuovo leader è \textbf{terminata} non è possibile che un leader deposto possa inviare messaggi alla maggioranza del cluster poiché tale maggioranza possiederà un \textbf{term aggiornato dall'ultima elezione}.
+  Seguendo questi semplici casi, una volta che un' \textbf{elezione} per un nuovo leader è \textbf{terminata} non è possibile che un leader deposto possa inviare messaggi alla maggioranza del cluster poiché tale maggioranza possiederà un \textbf{term aggiornato dall'ultima elezione}.
