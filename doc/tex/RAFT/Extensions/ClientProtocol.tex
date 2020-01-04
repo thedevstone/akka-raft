@@ -32,9 +32,9 @@ RAFT è un algoritmo leader-based, di conseguenza è il leader che svolge i comp
 	Abbiamo detto che nel caso in cui il client non riceva più notizie dal leader, ad esempio a causa di un crash di quest'ultimo, l'interazione si svolge nel seguente modo:
 
 	\begin{enumerate}
-		\item{\emph{Il client ritrasmette il comando ad una qualsiasi delle altre macchine. }}
-		\item{\emph{Se la macchina contattata non è il nuovo leader, fornisce indicazioni su a chi rivolgersi.}}
-		\item{\emph{Il client si rivolge al nuovo leader e, ad esso, risottomette la richiesta}}
+		\item{\emph{Il \textbf{client} ritrasmette il comando ad \textbf{una qualsiasi} delle altre macchine. }}
+		\item{\emph{Se la macchina contattata \textbf{non è il }\textbf{nuovo leader}, fornisce indicazioni su \textbf{a chi rivolgersi}.}}
+		\item{\emph{Il \textbf{client} si rivolge al \textbf{nuovo leader} e, ad esso, \textbf{risottomette} la richiesta}}
 	\end{enumerate}
 
 	Questo iter \textbf{garantisce} che ogni richiesta verrà gestita, \textbf{prima o poi}, ma ancora \textbf{non è sufficiente} a garantire che venga eseguita \textbf{una e una sola volta}. 
