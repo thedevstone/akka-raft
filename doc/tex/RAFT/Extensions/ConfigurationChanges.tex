@@ -36,23 +36,23 @@ Le informazioni sulla configurazione del sistema sono cruciali perchè sapere \t
 
     Le caratteristiche di questo approccio sono le seguenti:
     
-    \begin{enumerate}
-      \item{Il \textbf{cambiamento della configurazione} viene scatenato da una richiesta. Quando il leader riceve questa richiesta la aggiunge al proprio log e la propaga, come farebbe normalmente, ma l'azione ha \textbf{effetto immediato} poichè il leader applica il cambiamento di configurazione il prima possibile, \textbf{senza attendere il commit}.}
+    \begin{itemize}
+      \item{\textbf{Cambiamento della configurazione:} il passaggio a una nuova configurazione viene innescato da una richiesta. Quando il leader riceve questa richiesta la aggiunge al proprio log e la propaga, come farebbe normalmente, ma l'azione ha \textbf{effetto immediato} poichè il leader applica il cambiamento di configurazione il prima possibile, \textbf{senza attendere il commit}.}
 
-      \item{Il leader, dunque passa alla configurazione intermedia (\textit{C\_old+new}) e prende tutte le successive decisioni basandosi su di essa. Ad esempio, per capire se una entry può essere committata, verifica che essa abbia la maggioranza sia nella vecchia configurazione che in quella nuova.} 
+      \item{\textbf{Configurazione intermedia:} successivamente, il leader, passa alla configurazione intermedia (\textit{C\_old+new}) e prende tutte le successive decisioni basandosi su di essa. Ad esempio, per capire se è possibile procedere con il commit di una entry, verifica che essa abbia la \textbf{\textit{maggioranza}} \textbf{sia nella vecchia} configurazione \textbf{che in quella nuova}.} 
 
-      \item{\emph{Esiste un periodo di tempo in cui la entry della nuova configurazione è presente nel log del leader ma non è ancora stata committata. 
-      In questo lasso di tempo è possibile che le decisioni possano essere prese sotto entrambe le configurazioni. Ad esempio, se il leader crasha prima di aver replicato l'entry della nuova configurazione negli altri log, è possibile che venga eletto come nuovo leader un server che ha ancora la vecchia configurazione.
-      Tuttavia, prima o poi arriverà un leader che non crasherà anzitempo e la nuova configurazione verrà committata. }} 
+      \item{\textbf{Mancato commit della nuova configurazione:} esiste un periodo di tempo in cui la \textbf{entry} della nuova configurazione è \textbf{presente} nel log del leader ma non è ancora stata \textbf{committata}. 
+      In questo lasso di tempo è possibile che le \textbf{decisioni} possano essere prese sotto \textbf{entrambe le configurazioni}. Ad esempio, se il \textbf{leader} decade prima di aver \textbf{replicato} l'entry della \textbf{nuova configurazione} negli altri log, è possibile che venga eletto come \textbf{nuovo leader} un server che ha ancora la \textbf{vecchia configurazione}.
+      Tuttavia, prima o poi arriverà un leader che non fallirà anzitempo e la nuova configurazione verrà committata. } 
 
-      \item{Una volta committata diventa impossibile che vengano prese decisioni solo sulla base di \textit{C\_old}, perchè ora il sistema è interamente sotto la configurazione \textit{C\_old+new}, in uno stato di joint consensus.
-      Durante il joint consensus, la nuova configurazione può essere messa nel log e propagata.} 
+      \item{\textbf{Joint consensus:} una volta fatto il \textbf{commit} diventa \textbf{impossibile} che vengano prese decisioni solo sulla base di \textit{C\_old}, perchè ora il sistema è interamente sotto la configurazione \textit{\textbf{C\_old+new}}, in uno stato di \textit{joint consensus}.
+      Durante il joint consensus, la \textbf{nuova configurazione} può essere \textbf{aggiunta} al log e \textbf{propagata}.} 
 
 
-      \item{\emph{Esiste un periodo di tempo tra l'aggiunta nel log del leader della nuova configurazione e il commit della stessa, in cui le decisioni possono essere prese sulla base della configurazione \textit{C\_old+new} o sulla base della nuova configurazione. 
-      Questo perchè nel caso in cui il leader sia soggetto a crash, prima che abbia proceduto al commit dell'entry relativa alla nuova configurazione, può essere eletto un nuovo leader che ha ancora la configurazione intermedia. Tuttavia, come nel caso precedente, si ha che prima o poi un leader riuscirà a fare commit della nuova configurazione e, da quel momento in poi, le decisioni verranno prese solo sulla base di quest'ultima.}} 
+      \item{Esiste un periodo di tempo tra l'aggiunta nel log del leader della nuova configurazione e il commit della stessa, in cui le decisioni possono essere prese sulla base della configurazione \textit{C\_old+new} o sulla base della nuova configurazione. 
+      Questo perchè nel caso in cui il leader sia soggetto a crash, prima che abbia proceduto al commit dell'entry relativa alla nuova configurazione, può essere eletto un nuovo leader che ha ancora la configurazione intermedia. Tuttavia, come nel caso precedente, si ha che prima o poi un leader riuscirà a fare commit della nuova configurazione e, da quel momento in poi, le decisioni verranno prese solo sulla base di quest'ultima.} 
 
-    \end{enumerate}
+    \end{itemize}
 
     Si conclude che non c'è nessun momento in cui sia \textit{C\_old} che \textit{C\_new} possono prendere decisioni unilaterali, generando conflitti.
     Tuttavia è possibile che anche dopo che \textit{C\_new} è stata committata, venga eletto un leader che non è ancora in tale configurazione e che quindi non può prendere decisioni. In questo caso esso dovrà "dimettersi" dando vita ad una nuova elezione nel momento in cui il timeout di uno degli altri follower scadrà.
