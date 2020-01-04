@@ -6,7 +6,7 @@
 	],
 	"settings": {
 		"plantuml.diagramsRoot": "plantuml/",
-		"plantuml.exportFormat": "png",
+		"plantuml.exportFormat": "svg",
 		"plantuml.exportSubFolder": false,
 		"plantuml.exportOutDir": "plantuml/rendered",
 		"plantuml.render": "PlantUMLServer",

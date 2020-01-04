@@ -10,7 +10,7 @@ RAFT è un algoritmo leader-based, di conseguenza è il leader che svolge i comp
 	\begin{enumerate}
 		\item{\textbf{Sottomissione:}} il \textbf{client} sottopone la richiesta al leader.
 
-		\item{\textbf{Presa in carico:}} il \textbf{leader} leader prende in carico la richiesta, accodandola al proprio log e replicandola sugli altri server.
+		\item{\textbf{Presa in carico:}} il \textbf{leader} prende in carico la richiesta, accodandola al proprio log e replicandola sugli altri server.
 
 		\item{\textbf{Commit:}} il \textbf{leader}, prima di poter procedere col soddisfare la richiesta, deve \textbf{assicurarsi} che venga fatto il \textbf{commit} della stessa, per avere la garanzia che sia stata replicata nella maggioranza dei log. 
 
@@ -79,14 +79,14 @@ In questo modo si garantisce che un comando venga eseguito una e una sola volta:
 
 	  \begin{figure}[H]
 	    \centering
-	    \includegraphics[width=0.90\columnwidth]{raft/clientProtocolConID.png}
+	    \includegraphics[width=0.90\columnwidth]{raft/clientProtocolConID}
 	    \caption{\textbf{Interazione} tra client e leader che tiene conto dell'aggiunta di un \textbf{identificativo} per le richieste, al fine di \textbf{evitare} la \textbf{molteplice esecuzione} di una richiesta. Diversamente dal caso precedente, un crash del leader nel punto evidenziato \textbf{non porta alla violazione di alcuna proprietà}.}
 	    \label{fig:figure 13}
 	  \end{figure} 
 
 	  \begin{figure}[H]
 	    \centering
-	    \includegraphics[width=0.90\columnwidth]{../plantuml/rendered/seqDiagrams/ClientRequest.png}
+	    \includegraphics[width=0.90\columnwidth]{../plantuml/rendered/seqDiagrams/ClientRequest}
 	    \caption{Rappresentazione completa dell'interazione tra il client e i server appartenenti al cluster.}
 	    \label{fig:figure 14}
 	  \end{figure} 
