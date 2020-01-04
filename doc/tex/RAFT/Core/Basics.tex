@@ -33,20 +33,20 @@ Un cluster RAFT può contenere vari server, solitamente cinque è il numero tipi
   Il tempo in RAFT è diviso in periodi di \textbf{lunghezza arbitraria} chiamati \textbf{terms}. I term godono di queste proprietà:
   \begin{itemize}
     \item{\textbf{Identificativo:}}
-    A ciascun term è associato un numero in modo \textbf{incrementale} e \textbf{assoluto} nel tempo.
+    a ciascun term è associato un numero in modo \textbf{incrementale} e \textbf{assoluto} nel tempo.
     \item{\textbf{Leader-centric:}}
-    Ogni term parte con l'elezione di \textbf{uno e un solo leader}: se l'elezione ha successo allora il candidate eletto avrà potere per tutta la durata del term. Può capitare che più candidate provino a diventare leader nello stesso instante: in questo caso il risultato della votazione premierà un solo candidate. RAFT garantisce che non ci sia \textit{più di un leader per term}.
+    ogni term parte con l'elezione di \textbf{uno e un solo leader}: se l'elezione ha successo allora il candidate eletto avrà potere per tutta la durata del term. Può capitare che più candidate provino a diventare leader nello stesso instante: in questo caso il risultato della votazione premierà un solo candidate. RAFT garantisce che non ci sia \textit{più di un leader per term}.
     \item{\textbf{Leader-less:}}
-    In alcuni casi può capitare che nessun leader emerga, questo avviene perché nella votazione non è stata ottenuta una maggioranza assoluta. In questo caso si dice che è avvenuto un \textbf{split-vote} e al fine di garantire safety \textit{nessun leader può essere eletto}.\\
+    in alcuni casi può capitare che nessun leader emerga, questo avviene perché nella votazione non è stata ottenuta una maggioranza assoluta. In questo caso si dice che è avvenuto uno \textbf{split-vote} e, al fine di garantire safety, \textit{nessun leader può essere eletto}.\\
     In questo caso l'algoritmo considererà l'elezione come \textbf{failed} e verrà aperta immediatamente una \textbf{nuova elezione}.
     \item{\textbf{Term come logical clock:}}
-    I term in RAFT hanno uno scopo molto più generale oltre al contesto dell'elezione: essi agiscono come \textbf{logical clock} \cite[Lamport:1978]{Lamport:1978} garantendo un concetto logico di tempo e permettendo ai server di accorgesi quando sono in possesso di \textbf{informazioni obsolete}.
+    i term in RAFT hanno uno scopo molto più generale oltre al contesto dell'elezione: essi agiscono come \textbf{logical clock} \cite[Lamport:1978]{Lamport:1978} garantendo un concetto logico di tempo e permettendo ai server di accorgesi quando sono in possesso di \textbf{informazioni obsolete}.
   \end{itemize}
   
   \begin{figure}[H]
     \centering
     \includegraphics[width=0.80\columnwidth]{raft/terms}
-    \caption{Un term è un priodo di tempo che parte con l'elezione di un nuovo leader e termina con la fine del suo "regno".}
+    \caption{Un term è un periodo di tempo che parte con l'elezione di un nuovo leader e termina con la fine del suo "regno".}
     \label{fig:figure3}
   \end{figure}
 
@@ -66,9 +66,9 @@ Un cluster RAFT può contenere vari server, solitamente cinque è il numero tipi
   Al fine di massimizzare la comprensibilità RAFT definisce solamente due tipologie di messaggio:
   \begin{itemize}
     \item{\textbf{Request Vote:}}
-    I messaggi di questo tipo sono spediti dai \textbf{candidates} durante il processo di \textit{leader election}.
+    i messaggi di questo tipo sono spediti dai \textbf{candidates} durante il processo di \textit{leader election}.
     \item{\textbf{Append Entries:}}
-    Questi messaggi sono usati dai \textbf{leaders} con tre scopi fondamentali:
+    questi messaggi sono usati dai \textbf{leader} con tre scopi fondamentali:
     \begin{itemize}
       \item{\emph{Log replication di una o più entries}}
       \item{\emph{Heartbeat con lo scopo di evitare che i follower possano iniziare una nuova elezione}}
@@ -79,4 +79,4 @@ Un cluster RAFT può contenere vari server, solitamente cinque è il numero tipi
   L'unica nozione di tempo logico è quella di term, non ci sono \textit{clock condivisi} fra le macchine. Esiste una nozione di tempo implicita che garantisce il progresso: essa risiede nel concetto di \textbf{timeouts}.
 
   \subsubsection{Scalabilità}
-  Per il fatto che un algoritmo di consenso necessita della maggioranza dei server per effettuare qualsiasi operazione il concetto di \textbf{scalabilità viene meno}. L'unico modo di garantire scalabilità consiste nel \textbf{partizionare} i server in \textbf{più cluster} e usare un algoritmo di consenso fra cluster: questo è il caso dei sistemi di storaging di elevate dimensioni come Megastore, Spanner e Scatter.
+  Per il fatto che un algoritmo di consenso necessita della maggioranza dei server per effettuare qualsiasi operazione, il concetto di \textbf{scalabilità viene meno}. L'unico modo di garantire scalabilità consiste nel \textbf{partizionare} i server in \textbf{più cluster} e usare un algoritmo di consenso fra cluster: questo è il caso dei sistemi di storaging di elevate dimensioni come Megastore, Spanner e Scatter.
