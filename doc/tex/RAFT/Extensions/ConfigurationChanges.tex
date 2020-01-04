@@ -1,11 +1,16 @@
 % -*- root: ../../../main.tex -*-
 \subsection{Configuration Changes}
-La configurazione del sistema può cambiare nel tempo, ad esempio quando una macchina va incontro a crash, viene sostituita o viene aggiunta al cluster.\\
+La configurazione del sistema può cambiare nel tempo, ad esempio quando:
+  \begin{itemize}
+    \item{\emph{una macchina viene eliminata}}
+    \item{\emph{una macchina viene sostituita}}
+    \item{\emph{una nuova macchina viene aggiunta al cluster}}
+  \end{itemize}
 
-Le informazioni sulla configurazione del sistema sono cruciali perchè sapere \textbf{quanti} e \textbf{quali} server fanno parte del cluster è necessario per operazioni che necessitano di decidere basandosi sulla maggioranza, come l'elezione del leader o il commit di una entry.\\
+Le informazioni sulla configurazione del sistema sono fondamentali perchè sapere \textbf{quanti} e \textbf{quali} server fanno parte del cluster è necessario per operazioni che necessitano di decidere \textbf{basandosi sulla maggioranza}, come l'elezione del leader o il commit di una entry.
 
 \subsubsection{Contemporanea presenza di due configurazioni}
-  Il problema che si incontra in tutti i sistemi distribuiti è che \textit{la \textbf{transizione} tra una configurazione e l'altra \textbf{non avviene nello stesso istante} per tutte le macchine}. Esisterà dunque un tempo \textbf{t} per cui \textbf{alcune} macchine saranno aggiornate sulla \textbf{nuova configurazione} mentre \textbf{altre} saranno ancora nella \textbf{vecchia}. Ciò porta a una situazione in cui è possibile che ci siano due gruppi di server, che si trovano in \textbf{due diverse configurazioni} e che rappresentano la \textbf{maggioranza} per quella configurazione.\\
+  Il problema che si incontra in tutti i sistemi distribuiti è che \textit{la \textbf{transizione} tra una configurazione e l'altra \textbf{non avviene nello stesso istante} per tutte le macchine}. Esisterà dunque un tempo \textbf{t} per cui \textbf{alcune} macchine saranno aggiornate sulla \textbf{nuova configurazione} mentre \textbf{altre} saranno ancora nella \textbf{vecchia}. Ciò porta a una situazione in cui è possibile che ci siano due gruppi di server, che si trovano in \textbf{due diverse configurazioni} e che rappresentano la \textbf{maggioranza} per quella configurazione.
 
   \begin{figure}[H]
     \centering
@@ -32,8 +37,9 @@ Le informazioni sulla configurazione del sistema sono cruciali perchè sapere \t
   \subsubsection{Soluzione}   
 
     Per cambiare la configurazione del sistema, si ricorre a una \textbf{fase intermedia} posta tra la vecchia configurazione e quella nuova, in maniera tale da \textbf{evitare} di incorrere in \textbf{inconsistenze}.
-    Durante questa fase intermedia, chiamata \textbf{joint consensus}, per prendere le decisioni si tengono in considerazione entrambe le maggioranze: sia quella della nuova configurazione (\textit{C\_new}) che quella della vecchia (\textit{C\_old}) in maniera tale che nè \textit{C\_old} nè \textit{C\_new} possano prendere \textbf{decisioni unilaterali}.\\
+    Durante questa fase intermedia, chiamata \textbf{joint consensus}, per prendere le decisioni si tengono in considerazione entrambe le maggioranze: sia quella della nuova configurazione (\textit{C\_new}) che quella della vecchia (\textit{C\_old}) in maniera tale che nè \textit{C\_old} nè \textit{C\_new} possano prendere \textbf{decisioni unilaterali}.
 
+    \subsubsection{Approccio bifase: joint consensus}
     Le caratteristiche di questo approccio sono le seguenti:
     
     \begin{itemize}
@@ -42,10 +48,8 @@ Le informazioni sulla configurazione del sistema sono cruciali perchè sapere \t
       \item{\textbf{Configurazione intermedia:} successivamente, il leader, passa alla configurazione intermedia (\textit{C\_old+new}) e prende tutte le successive decisioni basandosi su di essa.\\
       Ad esempio, per capire se è possibile procedere con il commit di una entry, verifica che essa abbia la \textbf{\textit{maggioranza}} \textbf{sia nella vecchia} configurazione \textbf{che in quella nuova}.} 
 
-      \item{\textbf{Decisioni sulla base di \textit{C\_old} o \textit{C\_old+new}:} esiste un periodo di tempo in cui la \textbf{entry} della nuova configurazione è \textbf{presente} nel log del leader ma \textbf{non} è ancora stata \textbf{committata}. In questo lasso di tempo è possibile che le \textbf{decisioni} possano essere prese sotto \textbf{entrambe le configurazioni}.\\ 
-
+      \item{\textbf{Decisioni sulla base di \textit{C\_old} o \textit{C\_old+new}:} esiste un periodo di tempo in cui la \textbf{entry} della nuova configurazione è \textbf{presente} nel log del leader ma \textbf{non} è ancora stata \textbf{committata}. In questo lasso di tempo è possibile che le \textbf{decisioni} possano essere prese sotto \textbf{entrambe le configurazioni}.\\
       Ad esempio, se il \textbf{leader} decade prima di aver \textbf{replicato} l'entry della \textbf{nuova configurazione} negli altri log, è possibile che venga eletto come \textbf{nuovo leader} un server che ha ancora la \textbf{vecchia configurazione}.\\
-
       Tuttavia, prima o poi arriverà un leader che non fallirà anzitempo e la nuova configurazione verrà committata. } 
 
       \item{\textbf{Joint consensus:} una volta fatto il \textbf{commit} diventa \textbf{impossibile} che vengano prese decisioni solo sulla base di \textit{C\_old}, perchè ora il sistema è interamente sotto la configurazione \textit{\textbf{C\_old+new}}, in uno stato di \textit{joint consensus}.
