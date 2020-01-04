@@ -40,7 +40,7 @@ Un cluster RAFT può contenere vari server, solitamente cinque è il numero tipi
     In alcuni casi può capitare che nessun leader emerga, questo avviene perché nella votazione non è stata ottenuta una maggioranza assoluta. In questo caso si dice che è avvenuto un \textbf{split-vote} e al fine di garantire safety \textit{nessun leader può essere eletto}.\\
     In questo caso l'algoritmo considererà l'elezione come \textbf{failed} e verrà aperta immediatamente una \textbf{nuova elezione}.
     \item{\textbf{Term come logical clock:}}
-    I term in RAFT hanno uno scopo molto più generale oltre al contesto dell'elezione: essi agiscono come \textbf{logical clock} \cite{Lamport:1978} garantendo un concetto logico di tempo e permettendo ai server di accorgesi quando sono in possesso di \textbf{informazioni obsolete}.
+    I term in RAFT hanno uno scopo molto più generale oltre al contesto dell'elezione: essi agiscono come \textbf{logical clock} \cite[Lamport:1978]{Lamport:1978} garantendo un concetto logico di tempo e permettendo ai server di accorgesi quando sono in possesso di \textbf{informazioni obsolete}.
   \end{itemize}
   
   \begin{figure}[H]
