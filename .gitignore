@@ -40,6 +40,7 @@ build/
 # *.eps
 *.pdf
 !doc/images/**/*.pdf
+!doc/plantuml/**/*.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl
