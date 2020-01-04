@@ -8,7 +8,7 @@ Qui di seguito ricordiamo le proprietà nominate nelle sezioni precedenti:
   Per un dato term è possibile al più eleggere \textbf{un solo leader}.
 	La dimostrazione di questa proprietà è già stata discussa precedentemente nella sezione \ref{electionsaf}.
 	\item{\textbf{Leader Append-Only:}}
-  Il leader non cancella \textbf{mai}, ne sovrascrive le entry del proprio log.
+  Il leader non cancella \textbf{mai}, né sovrascrive le entry del proprio log.
   La proprietà è descritta in dettaglio nella sezione \ref{Log Replication}.
 	\item{\textbf{Log Matching:}}
   La proprietà di log matching garantisce che:
@@ -18,12 +18,12 @@ Qui di seguito ricordiamo le proprietà nominate nelle sezioni precedenti:
 	\end{itemize}
 	La proprietà è descritta in dettaglio nella sezione \ref{Log Matching}.
 \end{itemize}
-L'elenco sovrastante non è però completo! Attualmente ci sono casi che non sono gestiti e che possono causare notevole \textbf{inconsistenza} tra i log.\\
-Ad esempio se il leader \textit{valida} alcune \textit{entry} mentre un dato follower è offline, nel caso in cui il follower venisse eletto esso potrebbe sovrascrivere le entry gia eseguite con quelle presenti nel proprio log.\\
-E' necessario dunque completare l'algoritmo aggiungendo la proprietà chiave di tutte le state machine, la \textbf{State Machine Safety} property. 
+L'elenco sovrastante non è però completo: attualmente ci sono casi che non sono gestiti e che possono causare notevole \textbf{inconsistenza} tra i log.\\
+Ad esempio se il leader \textit{valida} alcune \textit{entry} mentre un dato follower è offline, nel caso in cui il follower venisse eletto esso potrebbe sovrascrivere le entry già eseguite con quelle presenti nel proprio log.\\
+E' necessario dunque completare l'algoritmo aggiungendo la proprietà chiave di tutte le state machine: la \textbf{State Machine Safety} property. 
 
   \paragraph{State Machine Safety}
-  \emph{Non appena una entry è stata committata ed eseguita in una state machine, allora nessun altra state machine può committare una valore differente per la stessa entry}.\\
+  \emph{Se una entry è stata committata ed eseguita in una state machine, allora nessun altra state machine può committare una valore differente per la stessa entry}.\\
   la state machine safety porta all'introduzione di due \textbf{restrizioni} molto importanti all'algoritmo:
   \begin{itemize}
     \item{\textbf{Restrizione durante la leader election}}
@@ -37,7 +37,7 @@ E' necessario dunque completare l'algoritmo aggiungendo la proprietà chiave di 
     \emph{\textbf{Scegli il candidato con il log più completo.}}
   \]
 
-  Più precisamente il candidate invia solo le informazioni sull'\textbf{ultima entry} dato che queste informazioni definisco interamente il log.
+  Più precisamente il candidate invia solo le informazioni sull'\textbf{ultima entry} dato che queste informazioni definiscono interamente il log.
  \[
       AppendEntries(term, index)
   \]
@@ -71,9 +71,12 @@ E' necessario dunque completare l'algoritmo aggiungendo la proprietà chiave di 
   \end{figure}
 
   \paragraph{Commiting di Entries del term corrente}
-  Vediamo ora un esempio di quello che è stato detto fino ad ora. Nella figura \ref{fig:figure11} possiamo vedere che all'indice 4 il leader $S1$ al term 2 è riuscito a \textbf{replicare con successo} la propria entry sulla maggioranza dei server; la entry è dunque \textbf{committed}. A questo punto nel caso in cui il leader $S1$ crashasse, per l'\textbf{election restriction} introdotta sopra, i server $S4$ e $S5$ non potrebbero essere eletti leader!\\
-  $S5$ non può essere eletto perché non possiede un term più piccolo di tutti gli altri $\rightarrow$ \textbf{condizione n:1}\\
-  $S4$ non può essere eletto poiché anche se possiede un term aggiornato non ha un log completo (più corto) $\rightarrow$ \textbf{condizione n:2} 
+  Vediamo ora un esempio di quello che è stato detto fino ad ora. Nella figura \ref{fig:figure11} possiamo vedere che all'indice 4 il leader $S1$ al term 2 è riuscito a \textbf{replicare con successo} la propria entry sulla maggioranza dei server; la entry è dunque \textbf{committed}. A questo punto nel caso in cui il leader $S1$ crashasse, per l'\textbf{election restriction} introdotta sopra, i server $S4$ e $S5$ non potrebbero essere eletti leader.\\
+  \begin{itemize}
+    \item {$S5$ non può essere eletto perché non possiede un term più piccolo di tutti gli altri $\rightarrow$ \textbf{condizione n:1}}
+    \item{$S4$ non può essere eletto poiché anche se possiede un term aggiornato non ha un log completo (più corto) $\rightarrow$ \textbf{condizione n:2} }
+  \end{itemize}
+
 
   \begin{figure}[H]
     \centering
@@ -83,13 +86,13 @@ E' necessario dunque completare l'algoritmo aggiungendo la proprietà chiave di 
   \end{figure}
 
   \subsubsection{Committing di Entries di term precedenti}
-  Questo caso, rappresentato perfettamente nell'immagine \ref{fig:figure12} rappresenta la situazione peggiore e più inusuale per RAFT; essa si può riassumere come segue:
+  Questo caso, descritto perfettamente nell'immagine \ref{fig:figure12} rappresenta la situazione peggiore e più inusuale per RAFT; essa si può riassumere come segue:
   \begin{enumerate}
-    \item{Il server $S1$, leader al \textbf{term 2}, \textbf{replica la entry} solamente su due server e poi crasha}
-    \item{Un altro server, $S5$ viene eletto leader per il \textbf{term 3} da $S3$ $S4$ $S5$, esso appende una serie di entry e poi crasha prima di poter comunicare.}
-    \item{Il server $S1$ si risveglia e viene eletto leader da $S1$ $S2$ $S3$ $S4$, e prima di tutto cerca di \textbf{riparare} il log del sever $S3$ inviando la entry mancante.}
-    \item{Il server $S5$ quando riceve gli \textbf{ack} da parte dei followers però \textbf{NON COMMITTA!}}
-    \item{Se infatti \textbf{$S1$ crashasse dopo aver committato la entry 3} allora $S5$ può essere eletto, soddisfa entrambi i casi di \ref{eq:1}}
+    \item{Il server $S1$, leader al \textbf{term 2}, \textbf{replica la entry} solamente su due server e poi crasha.}
+    \item{Un altro server, $S5$ viene eletto leader per il \textbf{term 3} da $S3$, $S4$ e $S5$, esso appende una serie di entry e poi crasha prima di poter comunicare.}
+    \item{Il server $S1$ si risveglia e viene eletto leader da $S1$, $S2$, $S3$, $S4$ e prima di tutto cerca di \textbf{riparare} il log del sever $S3$ inviando la entry mancante.}
+    \item{Il server $S5$ quando riceve gli \textbf{ack} da parte dei followers, però, \textbf{NON COMMITTA}}
+    \item{Infatti, se \textbf{$S1$ crashasse dopo aver committato la entry 3} allora $S5$ potrebbe essere eletto poichè soddisfa entrambi i casi di \ref{eq:1}}
     \begin{itemize}
       \item{\textbf{Caso A}}
       \[
@@ -100,8 +103,8 @@ E' necessario dunque completare l'algoritmo aggiungendo la proprietà chiave di 
         lastIndex_{S5} > lastIndex_{Si} \qquad \forall i \in [2,3,4]
       \]
     \end{itemize}
-    \item{Se $S5$ venisse eletto al \textbf{term 5} cercherebbe di propagare il proprio log e questo \textbf{obbligherebbe $S1$ $S2$ $S3$ $S4$ a dover riscrivere i propri log}.\\
-    \textbf{NB:} Qua abbiamo una totale mancanza di safety, infatti \emph{$S1$ non saprebbe cosa fare dato che una volta commitati i log non possono essere cancellati}}.
+    \item{Se $S5$ venisse eletto al \textbf{term 5} cercherebbe di propagare il proprio log e questo \textbf{obbligherebbe $S1$, $S2$, $S3$, e $S4$ a dover riscrivere i propri log}.\\
+    \textbf{NB:} Qua abbiamo una totale mancanza di \textbf{safety}, infatti \emph{$S1$ non saprebbe cosa fare dato che le entry, una volta commitate, non possono essere cancellate dal log}}.
   \end{enumerate}
   \begin{figure}[H]
     \centering
@@ -110,12 +113,12 @@ E' necessario dunque completare l'algoritmo aggiungendo la proprietà chiave di 
     \label{fig:figure12}
   \end{figure}
   \paragraph{Soluzione:}
-  Le regole di committing vengono estese al fine di garantire safety. Ogni leader decidere se una entry è da committare in base a queste regole:
+  Le regole di committing vengono estese al fine di garantire safety. Ogni leader decide se una entry è da committare in base a queste regole:
   \begin{itemize}
     \item{\emph{\textbf{La entry deve essere presente nella maggioranza dei server}}}
     \item{\emph{\textbf{Almeno una nuova entry proveniente dal leader dell'attuale term deve essere presente nella maggioranza dei server}}}
   \end{itemize}
-  Come vediamo in figura \ref{fig:figure13}, nel momento in cui $S1$ viene eletto leader per il \textbf{term 4} e riesce a replicare la entry sulla maggioranza dei servers allora può finalmente \textbf{propagare le informazioni di committment} riferite a term passati.\\
+  Come vediamo in figura \ref{fig:figure13}, nel momento in cui $S1$ viene eletto leader per il \textbf{term 4} e riesce a replicare la entry sulla maggioranza dei server, esso può finalmente \textbf{propagare le informazioni di committment} riferite a term passati.\\
   Questo garantisce che il server $S5$ non possa essere eletto leader al \textbf{term 5} per la regola 1 in \ref{eq:1}.
   \begin{figure}[H]
     \centering
