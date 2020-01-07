@@ -5,7 +5,12 @@ import it.unibo.sd1920.akka_raft.server.ServerActor
 import it.unibo.sd1920.akka_raft.utils.NetworkConstants
 
 object Launcher extends App {
-  ClientActor.main(Seq(NetworkConstants.firstSeedPort.toString).toArray)
-  ServerActor.main(Seq(NetworkConstants.secondSeedPort.toString).toArray)
-  print("Finito")
+  //SEEDS
+  ClientActor.main(Seq("C0", NetworkConstants.firstSeedPort.toString).toArray)
+  ServerActor.main(Seq("S0", NetworkConstants.secondSeedPort.toString).toArray)
+  //SERVERS
+  ServerActor.main(Seq("S1").toArray)
+  ServerActor.main(Seq("S2").toArray)
+  ServerActor.main(Seq("S3").toArray)
+  ServerActor.main(Seq("S4").toArray)
 }
