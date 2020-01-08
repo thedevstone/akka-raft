@@ -27,8 +27,8 @@ class ClientActor extends Actor with ActorLogging {
     case MemberDowned(member) =>
     case IdentifyClient(NodeRole.CLIENT) => sender() ! ClientActor.ClientIdentity(self.path.name)
     case IdentifyClient(NodeRole.SERVER) => sender() ! ServerActor.ClientIdentity(self.path.name)
-    case ClientIdentity(name: String) => this.clients = this.clients + (name -> sender()); log.info(this.servers.size.toString)
-    case ServerIdentity(name: String) => this.servers = this.servers + (name -> sender()); log.info(this.servers.size.toString)
+    case ClientIdentity(name: String) => this.clients = this.clients + (name -> sender())
+    case ServerIdentity(name: String) => this.servers = this.servers + (name -> sender())
   }
 
   private def manageNewMember(member: Member): Unit = member match {
