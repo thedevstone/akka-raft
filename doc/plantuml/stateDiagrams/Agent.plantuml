@@ -1,0 +1,42 @@
+@startuml
+
+scale 1080 height
+scale 1920 width
+!define NL5 \n\n\n\n\n
+!define TAB5 \t\t\t\t\t
+
+[*] --> Agent :Start
+Agent -u-> [*] :Stop
+
+state "Server Agent" as Agent {
+[*] -r-> Follower : \Time=0\n\inIdle=false
+
+state "Follower" as Follower 
+  Follower --> Candidate : Time expired\n[Time=0 && inIdle=true]
+
+
+
+
+state "Candidate" as Candidate 
+  Candidate --> Follower : Received one \nmessage from leader\n[msg.getTerm > agetTerm]
+  Candidate --> Candidate : Time expired\n[Time=0 && \nin_idle=true]
+  Candidate --> Leader : numVote > (sizeCluster/2)-1 
+
+
+
+  state "Leader" as Leader 
+    Leader --> Follower : Received one \nmessage from another leader\n[msg.getTerm > agetTerm]
+  --
+  [*] --> AgentTimer
+  state "Agent Timer" as AgentTimer{
+    AgentTimer --> AgentTimer:After 1ms\n[Time>0]\n/Set Time=Time-1
+  }
+  --
+  [*] --> AgentMessageHandler
+  state "Agent Message Handler" as AgentMessageHandler{
+    AgentMessageHandler : Entry do:\n Time = Random(min,max)
+    AgentMessageHandler --> AgentMessageHandler: New message Arrived\n/addMsg(newMsg) 
+  }
+
+}
+@enduml

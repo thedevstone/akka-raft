@@ -1,0 +1,8 @@
+Per rendere i log dei follower consistenti con il proprio, il leader ha il compito di eliminare le entry che non corrispondono alle proprie e inserire le proprie. 
+Per fare ciò, il leader mantiene l'indice della prossima entry da inviare ad ogni follower (nextIndex), inizializzato a 1+ ultimo indice del leader.
+Se tra le entry non vi è consistenza e, di conseguenza, l'operazione di AppendEntries fallisce, allora il leader decrementa il nextIndex per quel follower e riprova.
+Il leader continua a decrementare e ritentare fino a quando AppendEntries avrà successo. 
+
+In figura, il leader deve inviare la entry in posizione 10, con term 6.
+Nel caso a) l'indice 10 è vuoto, di conseguenza il leader procede a ritroso finchè non trova corrpondenza all'indice 4.
+nel caso b) all'indice 10 c'è una entry diversa da quella del leader, di conseguenza esso procede a ritroso fino all'indice 3, dal quale inizierà a ricostruire il log sovrascrivendo le entry inconsistenti.

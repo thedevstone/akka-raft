@@ -1,18 +1,32 @@
-\documentclass{scrartcl}
+\documentclass{report}
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+
 %Disable all warnings issued by latex starting with "You have..."
 \usepackage{silence}
 \WarningFilter{latex}{You have requested package}
+\pdfsuppresswarningpagegroup=1
+%Bib
+\usepackage[
+backend=biber,
+style=numeric,
+citestyle=numeric,
+]{biblatex}
+\addbibresource{references.bib}
 
+\usepackage{csquotes}
+%\usepackage{natbib}
+
+%Import
 \usepackage{marvosym}
 \usepackage{fancyvrb}
 \usepackage[usenames]{color}
 \usepackage[hidelinks]{hyperref}
 \usepackage{url}
-\usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{xcolor}
-\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{amsmath,amsfonts,amssymb,amsthm,mathtools}
 \usepackage{caption}
 \usepackage{enumerate}
 \usepackage{multicol}
@@ -38,10 +52,11 @@
 }
 %LINK CLICCABILI
 \hypersetup{
-    colorlinks,
-    linkcolor={red!50!black},
-    citecolor={blue!50!black},
-    urlcolor={blue!80!black}
+    colorlinks = true,
+    linkcolor = .,
+    citecolor = {blue},
+    linkbordercolor = {white},
+    urlcolor = {blue},
 }
 %TABELLE TBCOLORBOX
 \tcbset{
@@ -51,18 +66,21 @@
         colframe=red!75!black,
         fonttitle=\bfseries
        }
+
+
+
 %PATH IMMAGINI
 \graphicspath{{images/} {plantuml/rendered/} }
 \newcommand{\emailaddr}[1]{\href{mailto:#1}{\texttt{#1}}}
 
 \title{\LARGE
-    RAFT - Report Finale
+    AKKA RAFT
 }
 
 \author{
     Author 1 \\ \emailaddr{sara.kiade@studio.unibo.it}
     \and 
-    Author 2 \\ \emailaddr{gyiordan.caminati@studio.unibo.it} 
+    Author 2 \\ \emailaddr{gyordan.caminati@studio.unibo.it} 
     \and 
     Author 3 \\ \emailaddr{luca.giulianini2@studio.unibo.it}
 }
@@ -71,20 +89,15 @@
 
 \begin{document}
 \maketitle
-%\tableofcontents
+\tableofcontents
 
-\input{tex/Abstract}
-\input{tex/Requirements}
-\input{tex/Analysis}
-\input{tex/Design}
-\input{tex/Implementation}
-\input{tex/Validation}
-\input{tex/Deployment}
-\input{tex/Usage}
-\input{tex/Conclusion}
-\input{tex/Notes}
-\nocite{*} % Includes all references from the `references.bib` file
-\bibliographystyle{plain}
-\bibliography{references}
+\include{tex/Abstract}
+\include{tex/Intro}
+\include{tex/ConsensusSmr}
+\include{tex/Raft}
+\include{tex/RaftImplementation}
+\include{tex/Conclusion}
+
+\printbibliography
 
 \end{document}

@@ -1,0 +1,36 @@
+@startuml
+    
+  actor "Client"  
+  box "Server Cluster" #99CCFF
+    participant "Followers" as Followers
+    participant "Leader" as Leader
+	end box
+  == Richiesta esterna ==
+  alt Indirect request
+  Client ->> Followers : Send request 
+  activate Client
+  activate Followers
+  Followers -->> Client : return leader address
+  deactivate Followers
+  Client ->> Leader : Send request
+  activate Leader
+  else Direct request
+  Client ->> Leader : Send request
+  deactivate Client
+  end group
+  == Elaborazione della richiesta nel cluster ==
+  loop Indefinite
+    Leader -> Leader ++: Start Timer
+    return Timers Trigger
+    Leader ->> Followers : AppendEntries()
+    activate Followers
+    Followers -->> Leader : Ack and state
+    deactivate Followers
+      opt if ackNum > sizeCluster/2-1
+        Leader -->> Client : return result
+        deactivate Leader
+        activate Client
+        deactivate Client
+    end group
+  end group
+@enduml
