@@ -4,9 +4,8 @@ import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import akka.cluster.{Cluster, Member}
 import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
 import com.typesafe.config.ConfigFactory
-import it.unibo.sd1920.akka_raft.client.ClientActor.IdentifyClient
+import it.unibo.sd1920.akka_raft.client.ClientActor.{ClientIdentity, IdentifyClient, ServerIdentity}
 import it.unibo.sd1920.akka_raft.server.ServerActor
-import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientIdentity, ServerIdentity}
 import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, NodeRole}
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
 
@@ -28,15 +27,15 @@ class ClientActor extends Actor with ActorLogging {
     case MemberDowned(member) =>
     case IdentifyClient(NodeRole.CLIENT) => sender() ! ClientActor.ClientIdentity(self.path.name)
     case IdentifyClient(NodeRole.SERVER) => sender() ! ServerActor.ClientIdentity(self.path.name)
-    case ClientIdentity(name: String) => this.clients = this.clients + (name -> sender())
-    case ServerIdentity(name: String) => this.servers = this.servers + (name -> sender())
+    case ClientIdentity(name: String) => this.clients = this.clients + (name -> sender()); log.info(this.servers.size.toString)
+    case ServerIdentity(name: String) => this.servers = this.servers + (name -> sender()); log.info(this.servers.size.toString)
   }
 
   private def manageNewMember(member: Member): Unit = member match {
     case m if member.roles.contains("server") =>
-      context.system.actorSelection(s"${m.address}/user/**") ! ServerActor.IdentifyServer(NodeRole.CLIENT)
+      context.system.actorSelection(s"${m.address}/user/**") ! ServerActor.IdentifyServer(NodeRole.CLIENT);
     case m if member.roles.contains("client") =>
-      context.system.actorSelection(s"${m.address}/user/**") ! ClientActor.IdentifyClient(NodeRole.CLIENT)
+      context.system.actorSelection(s"${m.address}/user/**") ! ClientActor.IdentifyClient(NodeRole.CLIENT);
     case _ =>
   }
 }
