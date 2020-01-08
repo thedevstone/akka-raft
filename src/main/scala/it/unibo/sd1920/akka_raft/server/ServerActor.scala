@@ -1,19 +1,15 @@
 package it.unibo.sd1920.akka_raft.server
 
-import akka.actor.FSM.Timer
-import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, FSM, Props, Timers}
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props, Timers}
 import akka.cluster.{Cluster, Member}
 import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
-import akka.dispatch.ControlMessage
-
-import scala.concurrent.duration._
-import scala.util.Random
 import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.client.ClientActor
 import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientIdentity, IdentifyServer, ServerIdentity}
-import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, NodeRole}
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
-import it.unibo.sd1920.akka_raft.utils.RandomTime
+import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, NodeRole, RandomTime}
+
+import scala.concurrent.duration._
 
 class ServerActor extends Actor with ActorLogging with Timers {
   private val cluster = Cluster(context.system)
@@ -34,9 +30,9 @@ class ServerActor extends Actor with ActorLogging with Timers {
     case MemberUp(member) => this.manageNewMember(member)
     case MemberDowned(member) =>
     case IdentifyServer(NodeRole.SERVER) => sender() ! ServerActor.ServerIdentity(self.path.name)
-    case IdentifyServer(NodeRole.CLIENT) => sender() ! ClientActor.ServerIdentity(self.path.name);
-    case ServerIdentity(name: String) => this.servers = this.servers + (name -> sender()); log.info(this.servers.size.toString)
-    case ClientIdentity(name: String) => this.clients = this.clients + (name -> sender()); log.info(this.clients.size.toString)
+    case IdentifyServer(NodeRole.CLIENT) => sender() ! ClientActor.ServerIdentity(self.path.name)
+    case ServerIdentity(name: String) => this.servers = this.servers + (name -> sender())
+    case ClientIdentity(name: String) => this.clients = this.clients + (name -> sender())
   }
 
   private def manageNewMember(member: Member): Unit = member match {
