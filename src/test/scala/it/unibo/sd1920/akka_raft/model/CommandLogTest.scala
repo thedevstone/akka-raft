@@ -1,10 +1,11 @@
 package it.unibo.sd1920.akka_raft.model
 
-import org.scalatest.{BeforeAndAfterEach, FunSpec}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.funspec.AnyFunSpec
 
 import scala.collection.mutable.ArrayBuffer
 
-class CommandLogTest extends FunSpec with BeforeAndAfterEach {
+class CommandLogTest extends AnyFunSpec with BeforeAndAfterEach {
   var commandLog: CommandLog[String] = _
 
   override def beforeEach() {

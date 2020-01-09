@@ -32,3 +32,12 @@ dependencies {
     implementation group: "com.typesafe.akka", name: "akka-cluster_2.12", version: "${project.akka_cluster}"
     implementation group: "com.typesafe.akka", name: "akka-cluster-tools_2.12", version: "${project.akka_cluster_tool}"
 }
+
+task spec(dependsOn: ['testClasses'], type: JavaExec) {
+    main = 'org.scalatest.tools.Runner'
+    args = ['-R', 'build/classes/scala/test', '-o']
+    classpath = sourceSets.test.runtimeClasspath
+}
+
+test.dependsOn spec
+check.dependsOn spec
