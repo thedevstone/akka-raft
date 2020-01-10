@@ -2,8 +2,8 @@ package it.unibo.sd1920.akka_raft.model
 
 import scala.collection.mutable.ArrayBuffer
 
-class CommandLog(
-  private var entries: ArrayBuffer[Entry]
+class CommandLog[Command](
+  private var entries: ArrayBuffer[Entry[Command]]
 ){
   //Log indexes
   private var commitIndex = -1
@@ -12,7 +12,7 @@ class CommandLog(
   //term  -> |  X  |  0  |  1  |  1  |  2  |     |
   def length: Int = this.entries.size
 
-  def commands: Seq[(String,Int)] = this.entries.map(entry => entry.command)
+  def commands: Seq[Command] = this.entries.map(entry => entry.command)
   def terms: Seq[Int] = this.entries.map(entry => entry.term)
 
   def previousIndex: Int = lastIndex match {
@@ -21,7 +21,7 @@ class CommandLog(
   }
   def nextIndex: Int = length + 1
 
-  def previousEntry(entry: Entry): Entry = {
+  def previousEntry(entry: Entry[Command]): Entry[Command] = {
     if (this.entries.contains(entry))this.entries(entry.index-1)
 
     this.entries(entry.index-1)
@@ -30,16 +30,16 @@ class CommandLog(
   def lastTerm: Int = this.entries.lastOption.map(t => t.term).getOrElse(0)
   def lastIndex: Int = this.entries.lastOption.map(t => t.index).getOrElse(1)
 
-  def getEntryAtIndex(index: Int): Option[Entry] = index match {
+  def getEntryAtIndex(index: Int): Option[Entry[Command]] = index match {
     case 0 => None              //zero value
     case n => Some(entries(n))  //positive values
     case _ => None              //negative values
   }
 
-  def committedEntries: Seq[Entry] = entries.slice(0, commitIndex)
+  def committedEntries: Seq[Entry[Command]] = entries.slice(0, commitIndex)
 
   //Conssitency check
-  def consistencyCheck(previousEntry: Entry, entryToAppend: Entry): Boolean = previousEntry match  {
+  def consistencyCheck(previousEntry: Entry[Command], entryToAppend: Entry[Command]): Boolean = previousEntry match  {
     case Entry(_, _, _, _) if !this.entries.contains(previousEntry) => false
     case Entry(_, prevTerm , prevIndex, _) if entries(prevIndex-1).term != prevTerm =>
       entries = entries.takeWhile(entry => entry.index < prevIndex)
@@ -54,21 +54,20 @@ class CommandLog(
   //Log Operation
   def commit(index: Int): Unit = this.commitIndex = index
   def getCommitIndex: Int = this.commitIndex
-  def append(entry: Entry): Unit = entries += entry
+  def append(entry: Entry[Command]): Unit = entries += entry
 }
 
 object CommandLog {
-  def emptyLog[T](): CommandLog = new CommandLog(ArrayBuffer.empty)
-  def populatedLog[T](initialLog: ArrayBuffer[Entry]): CommandLog = new CommandLog(initialLog)
+  def emptyLog[T](): CommandLog[T] = new CommandLog(ArrayBuffer.empty)
+  def populatedLog[T](initialLog: ArrayBuffer[Entry[T]]): CommandLog[T] = new CommandLog(initialLog)
 }
 
-case class Entry(
-  command: (String,Int),
+case class Entry[Command](
+  command: Command,
   term: Int,
   index: Int,
   requestId: Long
 ) {
   assert(index >= 0 /* || index = -1*/ ) //Come in java
   assert(term >= 0)
-
 }

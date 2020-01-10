@@ -28,8 +28,7 @@ class CommandLogTest extends AnyFunSpec with BeforeAndAfterEach {
       assert(commandLog.length == 0)
     }
     it("should have new size == 2") {
-      assert(commandLog.consistencyCheck(new Entry[String]("push", 3, 4, 104),new Entry[String]("push", 3, 5, 105)) == true)
-      assert(commandLog.previousTerm == 2)
+      assert(commandLog.consistencyCheck(new Entry[String]("push", 3, 4, 104), new Entry[String]("push", 3, 5, 105)))
       assert(commandLog.previousIndex == 2)
     }
   }
@@ -37,9 +36,6 @@ class CommandLogTest extends AnyFunSpec with BeforeAndAfterEach {
 
     it("should have index == 1") {
       assert(commandLog.previousIndex == 1)
-    }
-    it("should have term == 0") {
-      assert(commandLog.previousTerm == 0)
     }
     it("should have new size == 1") {
       commandLog.append(new Entry[String]("push", 0, 1, 101))
