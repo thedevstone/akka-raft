@@ -1,6 +1,7 @@
 plugins {
     id "scala"
     id "java-library"
+    id "org.scoverage" version "4.0.1"
 }
 
 group project.project_group
@@ -31,6 +32,7 @@ dependencies {
     implementation group: "com.typesafe.akka", name: "akka-actor_2.12", version: "${project.akka_actor}"
     implementation group: "com.typesafe.akka", name: "akka-cluster_2.12", version: "${project.akka_cluster}"
     implementation group: "com.typesafe.akka", name: "akka-cluster-tools_2.12", version: "${project.akka_cluster_tool}"
+    testImplementation group: "com.typesafe.akka", name: "akka-testkit_2.12", version: "${project.akka_test}"
 }
 
 task spec(dependsOn: ['testClasses'], type: JavaExec) {
