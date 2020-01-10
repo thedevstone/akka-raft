@@ -1,12 +1,11 @@
 package it.unibo.sd1920.akka_raft.model
 
+import it.unibo.sd1920.akka_raft.model.BankStateMachine.{BankCommand, Deposit}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funspec.AnyFunSpec
 
-import scala.collection.mutable.ArrayBuffer
-
 class CommandLogTest extends AnyFunSpec with BeforeAndAfterEach {
-  var commandLog: CommandLog[String] = _
+  var commandLog: CommandLog[BankCommand] = _
 
   override def beforeEach() {
     commandLog = CommandLog.emptyLog()
@@ -17,32 +16,64 @@ class CommandLogTest extends AnyFunSpec with BeforeAndAfterEach {
   }
 
   def initWith3Entry(): Unit = {
-    var initLog = ArrayBuffer[Entry[String]](new Entry[String]("push", 0, 1, 100),
-      new Entry[String]("push", 0, 2, 101),
-      new Entry[String]("pop", 1, 3, 102))
+    val initLog = List[Entry[BankCommand]](new Entry[BankCommand](Deposit("A", 50), 0, 0, 100),
+      new Entry[BankCommand](Deposit("A", 50), 1, 1, 101),
+      new Entry[BankCommand](Deposit("A", 100), 1, 2, 102))
     commandLog = CommandLog.populatedLog(initLog)
   }
 
   describe("A empty log") {
     it("should have size == 0") {
-      assert(commandLog.length == 0)
+      assert(commandLog.size == 0)
     }
-    it("should have new size == 2") {
-      assert(commandLog.consistencyCheck(new Entry[String]("push", 3, 4, 104), new Entry[String]("push", 3, 5, 105)))
-      assert(commandLog.previousIndex == 2)
+  }
+  describe("A log with 3 entries (testing previous)") {
+    it("should have previous index == 2") {
+      initWith3Entry()
+      assert(commandLog.previousIndex == 1)
+    }
+    it("should have previous of previous term == 0") {
+      initWith3Entry()
+      assert(commandLog.getEntryAtIndex(commandLog.previousIndex -1).get.term == 0)
     }
   }
 
-
-    it("should have index == 1") {
-      assert(commandLog.previousIndex == 1)
+  describe("A log with 3 entries (testing last and next)") {
+    it("should have lastIndex == 2") {
+      initWith3Entry()
+      assert(commandLog.lastIndex == 2)
     }
-    it("should have new size == 1") {
-      commandLog.append(new Entry[String]("push", 0, 1, 101))
-      commandLog.append(new Entry[String]("push", 0, 2, 102))
-      assert(commandLog.length == 2)
+    it("should have lastTerm == 1") {
+      initWith3Entry()
+      assert(commandLog.lastTerm == 1)
     }
+    it("should have nextIndex == 3") {
+      initWith3Entry()
+      assert(commandLog.nextIndex == 3)
+    }
+  }
 
+  describe("A log with 3 entries (testing entry at index)") {
+    it("should have entry at index 1 == ") {
+      initWith3Entry()
+      assert(commandLog.getEntryAtIndex(1).get == Entry(Deposit("A", 50), 1, 1, 101))
+    }
+  }
 
-
+  describe("A log with 3 entries (committing)") {
+    it("should have commit index == -1 ") {
+      initWith3Entry()
+      assert(commandLog.getCommitIndex == -1)
+    }
+    it("committing 2 entries should have commit index == 2 ") {
+      initWith3Entry()
+      commandLog.commit(2)
+      assert(commandLog.getCommitIndex == 2)
+    }
+    it("committing 2 entries should return 2 entries ") {
+      initWith3Entry()
+      commandLog.commit(2)
+      assert(commandLog.committedEntries == List(Entry(Deposit("A", 50), 0, 0, 100), Entry(Deposit("A", 50), 1, 1, 101)))
+    }
+  }
 }
