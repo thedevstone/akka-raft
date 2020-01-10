@@ -34,7 +34,7 @@ class CommandLogTest extends AnyFunSpec with BeforeAndAfterEach {
     }
     it("should have previous of previous term == 0") {
       initWith3Entry()
-      assert(commandLog.getEntryAtIndex(commandLog.previousIndex -1).get.term == 0)
+      assert(commandLog.getEntryAtIndex(commandLog.previousIndex - 1).get.term == 0)
     }
   }
 
@@ -72,8 +72,20 @@ class CommandLogTest extends AnyFunSpec with BeforeAndAfterEach {
     }
     it("committing 2 entries should return 2 entries ") {
       initWith3Entry()
-      commandLog.commit(2)
+      commandLog.commit(1)
       assert(commandLog.committedEntries == List(Entry(Deposit("A", 50), 0, 0, 100), Entry(Deposit("A", 50), 1, 1, 101)))
+    }
+  }
+  describe("A log with 3 entries (deleting)") {
+    it("after deleting 2 item should have size == 1 ") {
+      initWith3Entry()
+      commandLog.remove(1)
+      assert(commandLog.size == 1)
+    }
+    it("after deleting 2 item last index should be == 0 ") {
+      initWith3Entry()
+      commandLog.remove(1)
+      assert(commandLog.lastIndex == 0)
     }
   }
 }
