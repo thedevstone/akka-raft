@@ -18,8 +18,8 @@ object ServerActor {
   //MESSAGES TO SERVER
   sealed trait ServerInput
   case class IdentifyServer(senderRole: NodeRole) extends ServerInput
-  case class ServerIdentity(name: String)
-  case class ClientIdentity(name: String)
+  case class ServerIdentity(name: String) extends ServerInput
+  case class ClientIdentity(name: String) extends ServerInput
 
   //STARTING CLIENT
   def props: Props = Props(new ServerActor())

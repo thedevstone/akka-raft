@@ -1,5 +1,6 @@
 package it.unibo.sd1920.akka_raft.client
 
+import akka.actor.TypedActor.Receiver
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
@@ -18,7 +19,12 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
     cluster.registerOnMemberUp({})
   }
 
-  override def receive: Receive = clusterBehaviour
+  override def receive: Receive = clusterBehaviour orElse onMessage
+
+  private def onMessage: Receive = {
+    case _ =>
+  }
+
 
 }
 
@@ -26,8 +32,8 @@ object ClientActor {
   //MESSAGES TO CLIENT
   sealed trait ClientInput
   case class IdentifyClient(senderRole: NodeRole) extends ClientInput
-  case class ServerIdentity(name: String)
-  case class ClientIdentity(name: String)
+  case class ServerIdentity(name: String) extends ClientInput
+  case class ClientIdentity(name: String) extends ClientInput
 
   //STARTING CLIENT
   def props: Props = Props(new ClientActor())
