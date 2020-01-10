@@ -1,6 +1,7 @@
 plugins {
     id "scala"
     id "java-library"
+    id "org.scoverage" version "4.0.1"
 }
 
 group project.project_group
