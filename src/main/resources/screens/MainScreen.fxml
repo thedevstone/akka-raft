@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXComboBox?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tab?>
@@ -33,8 +34,24 @@
    <center>
       <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
-          <Tab text="Servers State" />
-          <Tab text="Commands" />
+          <Tab text="Servers State">
+               <content>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <top>
+                        <JFXComboBox fx:id="serverStateCombo" promptText="Select Server" BorderPane.alignment="CENTER" />
+                     </top>
+                  </BorderPane>
+               </content>
+            </Tab>
+          <Tab text="Commands">
+               <content>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <top>
+                        <JFXComboBox fx:id="serverCommandCombo" promptText="Select Server" BorderPane.alignment="CENTER" />
+                     </top>
+                  </BorderPane>
+               </content>
+            </Tab>
         </tabs>
       </TabPane>
    </center>

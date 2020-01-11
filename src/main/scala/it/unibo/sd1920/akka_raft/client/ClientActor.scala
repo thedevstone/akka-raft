@@ -5,7 +5,7 @@ import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
 import akka.dispatch.ControlMessage
 import com.typesafe.config.ConfigFactory
-import it.unibo.sd1920.akka_raft.client.ClientActor.{GuiCommand, ResultArrived}
+import it.unibo.sd1920.akka_raft.client.ClientActor.{GuiCommand, Log, ResultArrived}
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
 import it.unibo.sd1920.akka_raft.server.ServerActor
 import it.unibo.sd1920.akka_raft.utils.NetworkConstants
@@ -13,14 +13,14 @@ import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
 import it.unibo.sd1920.akka_raft.view.screens.{ClientObserver, MainScreenView}
 
 private class ClientActor extends Actor with ClientActorDiscovery with ActorLogging {
-  protected[this] val cluster: Cluster = Cluster(context.system)
   protected[this] val view: ClientObserver = MainScreenView()
-  view.setViewActorRef(self)
-
+  protected[this] val cluster: Cluster = Cluster(context.system)
   protected[this] var servers: Map[String, ActorRef] = Map()
   protected[this] var clients: Map[String, ActorRef] = Map()
-  private var requestHistory: Map[Int, Result] = Map()
-  private var requestID: Int = 0
+  protected[this] var requestHistory: Map[Int, Result] = Map()
+  protected[this] var requestID: Int = 0
+
+  view.setViewActorRef(self)
 
 
   override def preStart(): Unit = {
@@ -32,8 +32,17 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
   override def receive: Receive = clusterBehaviour orElse onMessage
 
   def onMessage: Receive = {
-    case GuiCommand(targetServer, command) => elaborateGuiRequest(targetServer, command)
     case ResultArrived(id, result) => handleResult(id, result)
+    case Log(message) => log info message
+    case GuiCommand(targetServer, command) => elaborateGuiRequest(targetServer, command)
+  }
+
+  def sendRequest(targetServer: String, command: BankCommand): Unit = {
+    this.servers(targetServer) ! ServerActor.ClientRequest(requestID, command)
+  }
+
+  private def handleResult(reqID: Int, result: Option[Int]): Unit = {
+    this.requestHistory = Map(reqID -> Result(executed = true, this.requestHistory(reqID).command, result))
   }
 
   private def elaborateGuiRequest(targetServer: String, command: BankCommand): Unit = {
@@ -41,15 +50,6 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
     this.requestHistory = Map(this.requestID -> Result(executed = false, command, None))
     this.requestID += 1
   }
-
-  private def handleResult(reqID: Int, result: Option[Int]): Unit = {
-    this.requestHistory = Map(reqID -> Result(executed = true, this.requestHistory(reqID).command, result))
-  }
-
-  private def sendRequest(targetServer: String, command: BankCommand): Unit = {
-    this.servers(targetServer) ! ServerActor.ClientRequest(requestID, command)
-  }
-
 }
 
 object ClientActor {
