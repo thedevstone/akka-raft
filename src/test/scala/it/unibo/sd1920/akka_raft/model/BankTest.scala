@@ -22,25 +22,25 @@ class BankTest extends AnyFunSpec with BeforeAndAfterEach {
 
   describe("Getting balance from a null account") {
     it("should return balance == None") {
-      var balance = bank.getBalance("B")
-      assert(balance == None)
+      val balance = bank.getBalance("B")
+      assert(balance.isEmpty)
     }
   }
 
   describe("Withdrawing 5 to a bank iban A") {
     it("should return balance == None") {
-      var balance = bank.withdraw("A", 5)
+      val balance = bank.withdraw("A", 5)
       assert(balance.isEmpty)
     }
     it("should return 0 after depositing 5 to A") {
       bank.deposit("A", 5)
-      var balance = bank.withdraw("A", 5)
+      val balance = bank.withdraw("A", 5)
       assert(balance.contains(0))
     }
     it("should return -5 after withdrawing 5 to A") {
       bank.deposit("A", 5)
       bank.withdraw("A", 5)
-      var balance = bank.withdraw("A", 5)
+      val balance = bank.withdraw("A", 5)
       assert(balance.contains(-5))
     }
   }
