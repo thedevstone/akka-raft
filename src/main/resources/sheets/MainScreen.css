@@ -1,0 +1,95 @@
+#drawerMainBorder {
+    -fx-background-color: white;
+}
+
+#buttonCreateParticles, #buttonPopup, #buttonStartStop {
+    -jfx-disable-visual-focus: true;
+}
+
+#mainBorderPopup {
+    -fx-background-radius: 30;
+    -fx-background-color: transparent;
+}
+
+#vboxPopup {
+    -fx-background-radius: 30;
+    -fx-background-color: transparent;
+    -fx-opacity: 0.8;
+}
+
+.jfx-popup-container {
+    -fx-background-radius: 5 5 10 5;
+    -fx-background-color: rgba(255, 255, 255, 0.80);
+}
+
+#hboxGenerateParticles {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-opacity: 0.80;
+}
+
+#hboxExecutionTime {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-opacity: 0.80;
+}
+
+#toolbar {
+    -fx-background-color: white;
+}
+
+
+/*COMBO BOX */
+
+#comboBox {
+    -fx-prompt-text-fill: black;
+    -fx-background-color: transparent;
+}
+
+#comboBox .text-input {
+    -fx-background-color: transparent;
+}
+
+#comboBox .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+    -fx-font-weight: 100;
+}
+
+#comboBox .combo-box-popup .list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-background-radius: 10 10 10 10;
+
+}
+
+#comboBox .combo-box-popup .list-view .list-cell:selected {
+    -fx-background-color: transparent;
+}
+
+#comboBox .combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.9);
+}
+
+#comboBox .combo-box-popup .list-view {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 0 0 10 10;
+    -fx-opacity: 1;
+    -fx-max-height: 150;
+    /*-fx-pref-height: 150;*/
+    -fx-min-width: 100;
+}
+
+
+/*Patch*/
+#patch-led {
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+}
+
+#guardian-led {
+    -fx-min-width: 20;
+    -fx-min-height: 20;
+}
+
+#canvasPane {
+}

@@ -17,7 +17,7 @@ object BankStateMachine {
   case class GetBalance(iban: Iban) extends BankCommand
 
   sealed trait StateMachineMsg
-  case class ApplyCommand(entry :Entry[BankCommand]) extends StateMachineMsg
+  case class ApplyCommand(entry: Entry[BankCommand]) extends StateMachineMsg
   case class CommandResult(result: (Int, Option[Int])) extends StateMachineMsg
   case object SchedulerTick extends StateMachineMsg
 
@@ -27,7 +27,7 @@ object BankStateMachine {
   def props(schedulerTickPeriod: FiniteDuration): Props = Props(new BankStateMachine(schedulerTickPeriod))
 }
 
-private class BankStateMachine(schedulerTickPeriod: FiniteDuration) extends Actor with ActorLogging with Timers {
+class BankStateMachine(schedulerTickPeriod: FiniteDuration) extends Actor with ActorLogging with Timers {
   private val bank: Bank = Bank()
   private var commandQueue: Queue[Entry[BankCommand]] = Queue()
   private var transactionsHistory: Map[TransactionID, Option[Int]] = Map()
@@ -67,6 +67,7 @@ private class BankStateMachine(schedulerTickPeriod: FiniteDuration) extends Acto
 }
 
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{Balance, Iban}
+
 class Bank {
   private var bankAccounts: Map[Iban, Balance] = Map()
 
