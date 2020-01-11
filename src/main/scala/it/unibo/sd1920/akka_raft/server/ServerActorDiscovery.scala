@@ -9,7 +9,7 @@ import it.unibo.sd1920.akka_raft.utils.NodeRole
 private trait ServerActorDiscovery {
   this: ServerActor =>
 
-  protected def clusterBehaviour: Receive =  clusterBehaviour orElse {
+  protected def clusterBehaviour: Receive = {
     case MemberUp(member) => this.manageNewMember(member)
     case MemberDowned(member) =>
     case IdentifyServer(NodeRole.SERVER) => sender() ! ServerActor.ServerIdentity(self.path.name)

@@ -1,6 +1,7 @@
 package it.unibo.sd1920.akka_raft.utils
 
 object NetworkConstants {
+  val numberOfServer = 5
   val firstSeedPort = 5000
   val secondSeedPort = 5001
 

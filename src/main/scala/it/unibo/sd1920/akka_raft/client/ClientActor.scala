@@ -1,23 +1,26 @@
 package it.unibo.sd1920.akka_raft.client
 
-import akka.actor.TypedActor.Receiver
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
 import akka.dispatch.ControlMessage
 import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.client.ClientActor.{GuiCommand, ResultArrived}
-import it.unibo.sd1920.akka_raft.model.BankStateMachine.{BankCommand, Withdraw}
+import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
 import it.unibo.sd1920.akka_raft.server.ServerActor
 import it.unibo.sd1920.akka_raft.utils.NetworkConstants
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
+import it.unibo.sd1920.akka_raft.view.screens.{ClientObserver, MainScreenView}
 
 private class ClientActor extends Actor with ClientActorDiscovery with ActorLogging {
   protected[this] val cluster: Cluster = Cluster(context.system)
+  protected[this] val view: ClientObserver = MainScreenView()
+  view.setViewActorRef(self)
+
   protected[this] var servers: Map[String, ActorRef] = Map()
   protected[this] var clients: Map[String, ActorRef] = Map()
   private var requestHistory: Map[Int, Result] = Map()
-  private var requestID:Int = 0
+  private var requestID: Int = 0
 
 
   override def preStart(): Unit = {
@@ -28,13 +31,14 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
 
   override def receive: Receive = clusterBehaviour orElse onMessage
 
-  private def onMessage: Receive = {
+  def onMessage: Receive = {
     case GuiCommand(targetServer, command) => elaborateGuiRequest(targetServer, command)
-    case ResultArrived(id, result) => handleResult(id,result)
+    case ResultArrived(id, result) => handleResult(id, result)
   }
+
   private def elaborateGuiRequest(targetServer: String, command: BankCommand): Unit = {
     sendRequest(targetServer, command)
-    this.requestHistory =  Map(this.requestID -> Result(false,command,None))
+    this.requestHistory = Map(this.requestID -> Result(false, command, None))
     this.requestID += 1
   }
 
@@ -57,8 +61,8 @@ object ClientActor {
   case class ResultArrived(id: Int, result: Option[Int]) extends ClientInput
 
   sealed trait GuiClientMessage extends ClientInput
-  case class GuiCommand(targetServer:String,command:BankCommand) extends GuiClientMessage with ControlMessage
-
+  case class GuiCommand(targetServer: String, command: BankCommand) extends GuiClientMessage with ControlMessage
+  case class Log(message: String) extends GuiClientMessage with ControlMessage
 
   //STARTING CLIENT
   def props: Props = Props(new ClientActor())
@@ -76,7 +80,7 @@ object ClientActor {
 
 
 case class Result(
-                 executed: Boolean,
-                 command: BankCommand,
-                 result: Option[Int]
-               )
+                   executed: Boolean,
+                   command: BankCommand,
+                   result: Option[Int]
+                 )

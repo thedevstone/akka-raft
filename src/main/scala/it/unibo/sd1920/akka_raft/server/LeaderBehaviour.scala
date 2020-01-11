@@ -12,7 +12,7 @@ private trait LeaderBehaviour {
   private var followersStatusMap: Map[Int,FollowerStatus] = Map()
 
 
-  protected def leaderBehaviour: Receive = {
+  protected def leaderBehaviour: Receive = clusterBehaviour orElse {
     case _ =>
 
   }

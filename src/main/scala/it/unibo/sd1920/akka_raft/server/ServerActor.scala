@@ -25,6 +25,8 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   private var votedFor: Option[String] = None
   private val serverLog: CommandLog[BankCommand] = CommandLog.emptyLog()
 
+
+
   override def preStart(): Unit = {
     cluster.subscribe(self, classOf[MemberUp], classOf[MemberDowned])
     cluster.registerOnMemberUp({
@@ -33,7 +35,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
 
   override def receive: Receive = clusterBehaviour
 
-  private def onMessage: Receive = {
+  private def onMessage: Receive = clusterBehaviour orElse {
     case ClientRequest(requestID,bankCommand) =>
     case GuiCommand(2) => this.context.become(leaderBehaviour,true)
     case GuiCommand(3) =>
@@ -43,6 +45,8 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   protected def startTimer(){
     timers startTimerWithFixedDelay(SchedulerTickKey,SchedulerTick,RandomUtil.randomBetween(150,300) millis)
   }
+
+
 }
 
 object ServerActor {
