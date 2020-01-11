@@ -38,16 +38,16 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
 
   private def elaborateGuiRequest(targetServer: String, command: BankCommand): Unit = {
     sendRequest(targetServer, command)
-    this.requestHistory = Map(this.requestID -> Result(false, command, None))
+    this.requestHistory = Map(this.requestID -> Result(executed = false, command, None))
     this.requestID += 1
   }
 
   private def handleResult(reqID: Int, result: Option[Int]): Unit = {
-    this.requestHistory = Map(reqID -> Result(true, this.requestHistory(reqID).command, result))
+    this.requestHistory = Map(reqID -> Result(executed = true, this.requestHistory(reqID).command, result))
   }
 
   private def sendRequest(targetServer: String, command: BankCommand): Unit = {
-    this.servers(targetServer) ! ServerActor.ClientRequest(requestID, command);
+    this.servers(targetServer) ! ServerActor.ClientRequest(requestID, command)
   }
 
 }
