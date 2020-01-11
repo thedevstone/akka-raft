@@ -9,7 +9,7 @@ import it.unibo.sd1920.akka_raft.utils.NodeRole
 private trait CandidateBehaviour {
   this: ServerActor =>
 
-  protected def candidateBehaviour: Receive = {
+  protected def candidateBehaviour: Receive = clusterBehaviour orElse {
     case _ =>
   }
 }
