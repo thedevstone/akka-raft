@@ -6,7 +6,8 @@ import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
 import akka.dispatch.ControlMessage
 import com.typesafe.config.ConfigFactory
-import it.unibo.sd1920.akka_raft.client.ClientActor.{GuiCommand, Result}
+import it.unibo.sd1920.akka_raft.client.ClientActor.{GuiCommand, ResultArrived}
+import it.unibo.sd1920.akka_raft.model.BankStateMachine.{BankCommand, Withdraw}
 import it.unibo.sd1920.akka_raft.server.ServerActor
 import it.unibo.sd1920.akka_raft.utils.NetworkConstants
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
@@ -15,6 +16,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
   protected[this] val cluster: Cluster = Cluster(context.system)
   protected[this] var servers: Map[String, ActorRef] = Map()
   protected[this] var clients: Map[String, ActorRef] = Map()
+  private var requestHistory: Map[Int, Result] = Map()
   private var requestID:Int = 0
 
 
@@ -27,12 +29,22 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
   override def receive: Receive = clusterBehaviour orElse onMessage
 
   private def onMessage: Receive = {
-    case GuiCommand(1) => this.servers.get(???).get ! ServerActor.ClientRequest(requestID,"")
-    case Result => this.requestID += 1
-    case GuiCommand(3) =>
-    case GuiCommand(4) =>
+    case GuiCommand(targetServer, command) => elaborateGuiRequest(targetServer, command)
+    case ResultArrived(id, result) => handleResult(id,result)
+  }
+  private def elaborateGuiRequest(targetServer: String, command: BankCommand): Unit = {
+    sendRequest(targetServer, command)
+    this.requestHistory =  Map(this.requestID -> Result(false,command,None))
+    this.requestID += 1
   }
 
+  private def handleResult(reqID: Int, result: Option[Int]): Unit = {
+    this.requestHistory = Map(reqID -> Result(true, this.requestHistory(reqID).command, result))
+  }
+
+  private def sendRequest(targetServer: String, command: BankCommand): Unit = {
+    this.servers(targetServer) ! ServerActor.ClientRequest(requestID, command);
+  }
 
 }
 
@@ -42,10 +54,10 @@ object ClientActor {
   case class IdentifyClient(senderRole: NodeRole) extends ClientInput with ControlMessage
   case class ServerIdentity(name: String) extends ClientInput with ControlMessage
   case class ClientIdentity(name: String) extends ClientInput with ControlMessage
-  case class Result(name: String) extends ClientInput with ControlMessage
+  case class ResultArrived(id: Int, result: Option[Int]) extends ClientInput
 
   sealed trait GuiClientMessage extends ClientInput
-  case class GuiCommand(commandType:Int) extends GuiClientMessage with ControlMessage
+  case class GuiCommand(targetServer:String,command:BankCommand) extends GuiClientMessage with ControlMessage
 
 
   //STARTING CLIENT
@@ -61,3 +73,10 @@ object ClientActor {
     system actorOf(ClientActor.props, name)
   }
 }
+
+
+case class Result(
+                 executed: Boolean,
+                 command: BankCommand,
+                 result: Option[Int]
+               )
