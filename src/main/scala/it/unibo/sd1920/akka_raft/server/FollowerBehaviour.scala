@@ -1,17 +1,13 @@
 package it.unibo.sd1920.akka_raft.server
 
-import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
-import akka.cluster.Member
-import it.unibo.sd1920.akka_raft.client.ClientActor
-import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientIdentity, ClientRequest, IdentifyServer, SchedulerTick, ServerIdentity}
-import it.unibo.sd1920.akka_raft.utils.NodeRole
+import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientRequest, SchedulerTick}
 
 private trait FollowerBehaviour {
   this: ServerActor =>
 
-  protected def followerBehaviour: Receive = {
+  protected def followerBehaviour: Receive = clusterBehaviour orElse {
     case SchedulerTick => context.become(clusterBehaviour orElse candidateBehaviour); startTimer()
-    case ClientRequest(_,_) => ??? //redirect
+    case ClientRequest(_, _) => ??? //redirect
   }
 
 }

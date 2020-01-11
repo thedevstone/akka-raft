@@ -1,15 +1,12 @@
 package it.unibo.sd1920.akka_raft.view.screens
 
 import com.jfoenix.controls.JFXComboBox
-import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
-import it.unibo.sd1920.akka_raft.model.CommandLog
 import it.unibo.sd1920.akka_raft.view.utilities.{JavafxEnums, ViewUtilities}
 import javafx.fxml.FXML
 import javafx.scene.layout.{BorderPane, VBox}
 
 trait View {
   def log(message: String): Unit
-  def updateLogs(serverID: String, commandLog: CommandLog[BankCommand])
 }
 
 abstract class AbstractMainScreenView extends View {
@@ -47,6 +44,5 @@ abstract class AbstractMainScreenView extends View {
   }
 
   override def log(message: String): Unit
-  override def updateLogs(serverID: String, commandLog: CommandLog[BankCommand]): Unit
 
 }
