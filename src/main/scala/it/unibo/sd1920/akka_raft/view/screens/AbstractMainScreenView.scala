@@ -3,22 +3,28 @@ package it.unibo.sd1920.akka_raft.view.screens
 import com.jfoenix.controls.JFXComboBox
 import it.unibo.sd1920.akka_raft.view.utilities.{JavafxEnums, ViewUtilities}
 import javafx.fxml.FXML
-import javafx.scene.layout.{BorderPane, VBox}
+import javafx.scene.control.Label
+import javafx.scene.layout.{BorderPane, HBox, VBox}
+import org.kordamp.ikonli.ionicons.Ionicons
 
 trait View {
   def log(message: String): Unit
 }
 
 abstract class AbstractMainScreenView extends View {
-
   @FXML protected var mainBorder: BorderPane = _
   @FXML protected var vBoxServerNames: VBox = _
   @FXML protected var vBoxServerLogs: VBox = _
   @FXML protected var serverStateCombo: JFXComboBox[String] = _
   @FXML protected var serverCommandCombo: JFXComboBox[String] = _
 
+  type HBoxServerID = HBox
+  type HBoxServerLog = HBox
+  protected var serverToHBox: Map[String, (HBoxServerID, HBoxServerLog)] = Map()
+
   @FXML def initialize(): Unit = {
     this.assertNodeInjected()
+    this.initCombos()
   }
 
   private def assertNodeInjected(): Unit = {
@@ -34,15 +40,28 @@ abstract class AbstractMainScreenView extends View {
       JavafxEnums.LONG_DURATION, JavafxEnums.INFO_NOTIFICATION, null)
   }
 
-  protected def initServerCombos(serverIDs: List[String]): Unit = {
-    serverIDs.foreach(this.serverStateCombo.getItems.add(_))
-    serverIDs.foreach(this.serverCommandCombo.getItems.add(_))
+  private def initCombos(): Unit = {
     this.serverStateCombo.getSelectionModel.selectedItemProperty()
       .addListener((_, _, newValue) => log(newValue))
     this.serverCommandCombo.getSelectionModel.selectedItemProperty()
       .addListener((_, _, newValue) => log(newValue))
-
   }
 
-  protected def createServerLogs(serverIDs: List[String]): Unit = {} //TODO
+  def addServersToMap(serverID: String): Unit = {
+    //ID NODE
+    var serverIDNode = new HBox()
+    var labelIDNode = new Label(serverID)
+    labelIDNode.setGraphic(ViewUtilities.iconSetter(Ionicons.ION_CUBE, JavafxEnums.BIGGER_ICON))
+    serverIDNode.getChildren.add(labelIDNode)
+    //LOG NODE
+    var serverLogNode = new HBox()
+    this.vBoxServerNames.getChildren.add(serverIDNode)
+    this.vBoxServerLogs.getChildren.add(serverLogNode)
+    this.serverToHBox = this.serverToHBox + (serverID -> (serverIDNode, serverLogNode))
+  }
+
+  protected def addServerToCombos(serverID: String): Unit = {
+    this.serverStateCombo.getItems.add(serverID)
+    this.serverCommandCombo.getItems.add(serverID)
+  }
 }

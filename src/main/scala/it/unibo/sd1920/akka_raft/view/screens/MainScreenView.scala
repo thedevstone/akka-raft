@@ -15,7 +15,8 @@ import javafx.stage.Stage
 
 trait ClientObserver {
   def setViewActorRef(actorRef: ActorRef): Unit
-  def initServers(serverIDs: List[String])
+  def addServer(serverID: String)
+  def removeServer(serverID: String)
   def updateLogs(serverID: String, commandLog: CommandLog[BankCommand])
 }
 
@@ -41,10 +42,13 @@ class MainScreenView extends AbstractMainScreenView() with ClientObserver {
     Platform.runLater(() => {}) //TODO
   }
   override def setViewActorRef(actorRef: ActorRef): Unit = this.clientActorRef = actorRef
-  override def initServers(serverIDs: List[String]): Unit = Platform.runLater(() => {
-    initServerCombos(serverIDs)
-    createServerLogs(serverIDs)
+
+  override def addServer(serverID: String): Unit = Platform.runLater(() => {
+    addServersToMap(serverID)
+    addServerToCombos(serverID)
   })
+
+  override def removeServer(serverID: String): Unit = {} //TODO
 }
 
 object MainScreenView {

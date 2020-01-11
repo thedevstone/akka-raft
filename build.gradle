@@ -19,6 +19,8 @@ dependencies {
     implementation "org.kordamp.ikonli:ikonli-core:${project.ikonli_coreVersion}"
     implementation "org.kordamp.ikonli:ikonli-javafx:${project.ikonli_javafxVersion}"
     implementation "org.kordamp.ikonli:ikonli-material-pack:${project.ikonli_material_packVersion}"
+    implementation "org.kordamp.ikonli:ikonli-devicons-pack:${project.ikonli_material_packVersion}"
+    implementation "org.kordamp.ikonli:ikonli-ionicons-pack:${project.ikonli_material_packVersion}"
     implementation "eu.hansolo.enzo:Enzo:${project.enzoVersion}"
     //SCALA
     implementation "org.scala-lang:scala-library:${project.scala_library}"
