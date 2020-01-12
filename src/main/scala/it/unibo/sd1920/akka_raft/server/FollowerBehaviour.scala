@@ -14,7 +14,7 @@ import it.unibo.sd1920.akka_raft.raft.{AckAppendEntries, AppendEntries, AppendEn
 private trait FollowerBehaviour {
   this: ServerActor =>
   private var leaderRef: ActorRef = _
-  protected def followerBehaviour: Receive =  clusterBehaviour orElse  {
+  protected def followerBehaviour: Receive =  clusterBehaviour orElse {
     case SchedulerTick => context.become(candidateBehaviour); startTimer()
     case ClientRequest(_,_) => sender() ! Redirect(Some(leaderRef))
 
@@ -23,11 +23,11 @@ private trait FollowerBehaviour {
 
     case AppendEntries(_, previousEntry, entry, _) if previousEntry.isEmpty => startTimer(); serverLog.putElementAtIndex(entry.get)
     case AppendEntries(_, previousEntry, _, _) if  !serverLog.contains(previousEntry.get) => startTimer(); sender() ! AppendEntriesResult(false)
-/*
-    case AppendEntries(leaderTerm, previousEntry, entry, leaderLastCommit) if serverLog.contains(previousEntry.get)
+    /*
+        case AppendEntries(leaderTerm, previousEntry, entry, leaderLastCommit) if serverLog.contains(previousEntry.get)
 
 
-    case appEntry: AppendEntries => handleNewAppend(appEntry, sender())*/
+        case appEntry: AppendEntries => handleNewAppend(appEntry, sender())*/
   }
 
   private def handleNewAppend(appEntry: AppendEntries, leaderAddress: ActorRef): Unit ={
@@ -52,7 +52,7 @@ private trait FollowerBehaviour {
   }
 
   private def appendResult(result: Boolean): Unit ={
-    leaderRef ! AppendEntriesResult(result,currentTerm)
+    leaderRef ! AppendEntriesResult(result)
   }
 
 }

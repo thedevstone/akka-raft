@@ -6,11 +6,13 @@ import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
 import akka.dispatch.ControlMessage
 import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
-import it.unibo.sd1920.akka_raft.model.CommandLog
+import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog}
 import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientRequest, GuiCommand, SchedulerTick, SchedulerTickKey}
 import it.unibo.sd1920.akka_raft.utils.NetworkConstants
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
 import it.unibo.sd1920.akka_raft.utils.RandomUtil
+import it.unibo.sd1920.akka_raft.utils
+import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration._
 
 
@@ -31,9 +33,10 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
     cluster.subscribe(self, classOf[MemberUp], classOf[MemberDowned])
     cluster.registerOnMemberUp({
     })
+    context.actorOf(BankStateMachine.props(RandomUtil.randomBetween(500,2000).millis),"StateMachine")
   }
 
-  override def receive: Receive = clusterBehaviour
+  override def receive: Receive = followerBehaviour
 
   private def onMessage: Receive = clusterBehaviour orElse {
     case ClientRequest(requestID,bankCommand) =>
