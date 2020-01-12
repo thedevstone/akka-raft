@@ -35,6 +35,7 @@ class BankStateMachine(schedulerTickPeriod: FiniteDuration) extends Actor with A
   override def preStart(): Unit = {
     super.preStart()
     timers startTimerWithFixedDelay(SchedulerTickKey, SchedulerTick, schedulerTickPeriod)
+    log info "StateMachine Started"
   }
 
   override def receive(): Receive = onMessage
