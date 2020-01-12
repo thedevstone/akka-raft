@@ -18,6 +18,10 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
   def lastTerm: Int = this.entries.lastOption.map(t => t.term).getOrElse(0)
   def lastIndex: Int = this.entries.lastOption.map(t => t.index).getOrElse(-1)
 
+  def getPreviousEntry(entry: Entry[Command]): Option[Entry[Command]] = entry.index match {
+    case 0 => None
+    case n => Some(entries(n-1))
+  }
   def getEntryAtIndex(index: Int): Option[Entry[Command]] = index match {
     case n if size > 0 && n < size => Some(entries(n)) //positive values
     case _ => None //negative values
