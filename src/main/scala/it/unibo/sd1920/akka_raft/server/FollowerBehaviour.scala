@@ -21,38 +21,18 @@ private trait FollowerBehaviour {
     case AppendEntries(_,_,entry,_) if entry.isEmpty => startTimer(); sender() ! AckAppendEntries
     case AppendEntries(leaderTerm, _, _, _) if leaderTerm < currentTerm => startTimer(); sender() ! AppendEntriesResult(false);
 
-    case AppendEntries(_, previousEntry, entry, _) if previousEntry.isEmpty => startTimer(); serverLog.putElementAtIndex(entry.get)
-    case AppendEntries(_, previousEntry, _, _) if  !serverLog.contains(previousEntry.get) => startTimer(); sender() ! AppendEntriesResult(false)
-    /*
-        case AppendEntries(leaderTerm, previousEntry, entry, leaderLastCommit) if serverLog.contains(previousEntry.get)
+    case AppendEntries(_, previousEntry, entry, leaderLastCommit) if (previousEntry.isEmpty) => startTimer()
+      callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
+      sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get))
+    case AppendEntries(_, previousEntry, _, _) if  !serverLog.contains(previousEntry.get) => startTimer()
+      sender() ! AppendEntriesResult(false)
+    case AppendEntries(_, _, entry, leaderLastCommit) =>  callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
+      sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get))
 
-
-        case appEntry: AppendEntries => handleNewAppend(appEntry, sender())*/
+  }
+  def callCommit(index: Int) {
+    serverLog.commit(index)
   }
 
-  private def handleNewAppend(appEntry: AppendEntries, leaderAddress: ActorRef): Unit ={
-    startTimer()
-    leaderRef = leaderAddress
-    if(currentTerm < appEntry.leaderTerm){
-      if(checkHeartBeat(appEntry) ){
-        if((appEntry.previousEntry.get.term == serverLog.lastTerm && appEntry.previousEntry.get.index == serverLog.lastIndex)){
-          appendResult(result = true)
-        } else {
-          appendResult(result = false)
-        }
-      }
-
-    } else {
-      appendResult(result = false)
-    }
-  }
-
-  private def checkHeartBeat(appEntry: AppendEntries): Boolean ={
-    appEntry.previousEntry.nonEmpty && appEntry.entry.isEmpty
-  }
-
-  private def appendResult(result: Boolean): Unit ={
-    leaderRef ! AppendEntriesResult(result)
-  }
 
 }
