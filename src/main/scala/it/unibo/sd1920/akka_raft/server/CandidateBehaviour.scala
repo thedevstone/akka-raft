@@ -1,13 +1,10 @@
 package it.unibo.sd1920.akka_raft.server
 
-import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
-import akka.cluster.Member
-import it.unibo.sd1920.akka_raft.client.ClientActor
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
 import it.unibo.sd1920.akka_raft.model.Entry
 import it.unibo.sd1920.akka_raft.raft.{AppendEntries, RequestVoteResult}
-import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientIdentity, IdentifyServer, SchedulerTick, ServerIdentity}
-import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, NodeRole}
+import it.unibo.sd1920.akka_raft.server.ServerActor.SchedulerTick
+import it.unibo.sd1920.akka_raft.utils.NetworkConstants
 
 private trait CandidateBehaviour {
   this: ServerActor =>
@@ -32,7 +29,7 @@ private trait CandidateBehaviour {
   }
 
   private def becomingLeader(): Unit ={
-    var lastEntry: Option[Entry[BankCommand]] = serverLog.getLastEntry()
+    val lastEntry: Option[Entry[BankCommand]] = serverLog.getLastEntry()
 
     servers.foreach(server => server._2 ! AppendEntries(currentTerm,if (lastEntry.isEmpty) None else serverLog.getPreviousEntry(lastEntry.get),lastEntry,lastCommittedIndex))
     context.become(leaderBehaviour)

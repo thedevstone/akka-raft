@@ -16,7 +16,7 @@ private trait FollowerBehaviour {
       handleRequestVote(requestVote)
     case appendEntry: AppendEntries => leaderRef = Some(sender())
       handleAppendEntries(appendEntry)
-    case ClientRequest(_,_) => sender() ! Redirect(leaderRef)
+    case ClientRequest(_, _) => sender() ! Redirect(leaderRef)
     case _ =>
   }
 
@@ -31,10 +31,10 @@ private trait FollowerBehaviour {
     updateTerm(requestVote.candidateTerm)
 
     requestVote match{
-      case RequestVote(candidateTerm,_,_,_) if candidateTerm < currentTerm => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
-      case RequestVote(_,candidateId,lastLogTerm,lastLogIndex) if (votedFor.isEmpty && checkLogBehind(lastLogTerm,lastLogIndex)) => votedFor = Some(sender().path.name)
+      case RequestVote(candidateTerm,_ ,_ ,_) if candidateTerm < currentTerm => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
+      case RequestVote(_, _,lastLogTerm,lastLogIndex) if votedFor.isEmpty && checkLogBehind(lastLogTerm,lastLogIndex) => votedFor = Some(sender().path.name)
         sender() ! RequestVoteResult(voteGranted = true, currentTerm)
-      case RequestVote(candidateTerm, candidateId, lastLogTerm, lastLogIndex) => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
+      case RequestVote(_, _, _, _) => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
       case _ =>
     }
   }
@@ -43,7 +43,7 @@ private trait FollowerBehaviour {
     updateTerm(appendEntry.leaderTerm)//?? TODO è corretto?
 
     appendEntry match{
-      case AppendEntries(_,_,entry,_) if entry.isEmpty => startTimer(); sender() ! AckAppendEntries
+      case AppendEntries(_, _, entry, _) if entry.isEmpty => startTimer(); sender() ! AckAppendEntries
       case AppendEntries(leaderTerm, _, _, _) if leaderTerm < currentTerm => startTimer()
         sender() ! AppendEntriesResult(false)
       case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty => startTimer()
