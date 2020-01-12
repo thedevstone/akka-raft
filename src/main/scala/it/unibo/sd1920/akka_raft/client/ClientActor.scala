@@ -63,6 +63,7 @@ object ClientActor {
   sealed trait GuiClientMessage extends ClientInput
   case class GuiCommand(targetServer: String, command: BankCommand) extends GuiClientMessage with ControlMessage
   case class Log(message: String) extends GuiClientMessage with ControlMessage
+  //case class ServerInfo(commandoLog: CommandLog[BankCommand], )
 
   //STARTING CLIENT
   def props: Props = Props(new ClientActor())

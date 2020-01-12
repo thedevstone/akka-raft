@@ -3,7 +3,8 @@ package it.unibo.sd1920.akka_raft.view.screens
 import com.jfoenix.controls.JFXComboBox
 import it.unibo.sd1920.akka_raft.view.utilities.{JavafxEnums, ViewUtilities}
 import javafx.fxml.FXML
-import javafx.scene.control.Label
+import javafx.scene.control.{Label, ScrollPane}
+import javafx.scene.control.ScrollPane.ScrollBarPolicy
 import javafx.scene.layout.{BorderPane, HBox, VBox}
 import org.kordamp.ikonli.ionicons.Ionicons
 
@@ -55,8 +56,17 @@ abstract class AbstractMainScreenView extends View {
     serverIDNode.getChildren.add(labelIDNode)
     //LOG NODE
     var serverLogNode = new HBox()
+    serverLogNode.setMinHeight(50)
+    //ADDING
+    var scrollPaneLogNode = new ScrollPane()
+    scrollPaneLogNode.setMinHeight(JavafxEnums.BIGGER_ICON.dim)
+    scrollPaneLogNode.setVbarPolicy(ScrollBarPolicy.NEVER)
+    scrollPaneLogNode.setHbarPolicy(ScrollBarPolicy.NEVER)
+    scrollPaneLogNode.setPannable(true)
+    scrollPaneLogNode.setFitToHeight(true)
+    scrollPaneLogNode.setContent(serverLogNode)
     this.vBoxServerNames.getChildren.add(serverIDNode)
-    this.vBoxServerLogs.getChildren.add(serverLogNode)
+    this.vBoxServerLogs.getChildren.add(scrollPaneLogNode)
     this.serverToHBox = this.serverToHBox + (serverID -> (serverIDNode, serverLogNode))
   }
 
@@ -64,4 +74,6 @@ abstract class AbstractMainScreenView extends View {
     this.serverStateCombo.getItems.add(serverID)
     this.serverCommandCombo.getItems.add(serverID)
   }
+
+  //protected def addEntryToLog(serverID: String, commando)
 }

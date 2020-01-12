@@ -38,9 +38,6 @@ class MainScreenView extends AbstractMainScreenView() with ClientObserver {
   override def log(message: String): Unit = clientActorRef ! ClientActor.Log(message)
 
   // ##################### FROM CLIENT ACTOR
-  override def updateLogs(serverID: String, commandLog: CommandLog[BankStateMachine.BankCommand]): Unit = {
-    Platform.runLater(() => {}) //TODO
-  }
   override def setViewActorRef(actorRef: ActorRef): Unit = this.clientActorRef = actorRef
 
   override def addServer(serverID: String): Unit = Platform.runLater(() => {
@@ -49,6 +46,10 @@ class MainScreenView extends AbstractMainScreenView() with ClientObserver {
   })
 
   override def removeServer(serverID: String): Unit = {} //TODO
+
+  override def updateLogs(serverID: String, commandLog: CommandLog[BankStateMachine.BankCommand]): Unit = {
+    Platform.runLater(() => {})
+  }
 }
 
 object MainScreenView {
