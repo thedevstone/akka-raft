@@ -1,7 +1,10 @@
 plugins {
+    id "java"
     id "scala"
     id "java-library"
+    id "application"
     id "org.scoverage" version "4.0.1"
+    id "com.github.johnrengelman.shadow" version "5.2.0"
 }
 
 group project.project_group
@@ -35,6 +38,32 @@ dependencies {
     implementation group: "com.typesafe.akka", name: "akka-cluster_2.12", version: "${project.akka_cluster}"
     implementation group: "com.typesafe.akka", name: "akka-cluster-tools_2.12", version: "${project.akka_cluster_tool}"
     testImplementation group: "com.typesafe.akka", name: "akka-testkit_2.12", version: "${project.akka_test}"
+}
+
+configurations {
+    scalaCompilerPlugin
+}
+
+mainClassName = 'it.unibo.sd1920.akka_raft.JarLauncher'
+
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
+
+
+import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransformer
+
+shadowJar {
+    transform(AppendingTransformer) {
+        resource = 'reference.conf'
+    }
+    mergeServiceFiles()
+    with jar
 }
 
 task spec(dependsOn: ['testClasses'], type: JavaExec) {
