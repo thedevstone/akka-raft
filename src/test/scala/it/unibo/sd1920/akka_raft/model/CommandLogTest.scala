@@ -30,11 +30,11 @@ class CommandLogTest extends AnyFunSpec with BeforeAndAfterEach {
   describe("A log with 3 entries (testing previous)") {
     it("should have previous index == 2") {
       initWith3Entry()
-      assert(commandLog.previousIndex == 1)
+      assert(commandLog.previousIndex.get == 1)
     }
     it("should have previous of previous term == 0") {
       initWith3Entry()
-      assert(commandLog.getEntryAtIndex(commandLog.previousIndex - 1).get.term == 0)
+      assert(commandLog.getEntryAtIndex(commandLog.previousIndex.get - 1).get.term == 0)
     }
   }
 
