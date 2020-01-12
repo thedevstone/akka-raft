@@ -8,7 +8,9 @@ import it.unibo.sd1920.akka_raft.utils.NetworkConstants
 
 private trait CandidateBehaviour {
   this: ServerActor =>
+
   private var voteCounter: Int = 0
+
   protected def candidateBehaviour: Receive = clusterBehaviour orElse {
     case SchedulerTick => restart()
     case req: RequestVoteResult => handleVote(req)
@@ -16,9 +18,9 @@ private trait CandidateBehaviour {
   }
 
   private def handleVote(result: RequestVoteResult): Unit  = result match {
-    case RequestVoteResult(_,followerTerm) if followerTerm > currentTerm => becomingFollower(followerTerm)
-    case RequestVoteResult(result,followerTerm) if result && followerTerm == currentTerm => voteCounter += 1
-      if (voteCounter > NetworkConstants.numberOfServer) becomingLeader()
+    case RequestVoteResult(_, followerTerm) if followerTerm > currentTerm => becomingFollower(followerTerm)
+    case RequestVoteResult(result, followerTerm) if result && followerTerm == currentTerm => voteCounter += 1
+      if (voteCounter > (NetworkConstants.numberOfServer/2)+1) becomingLeader()
     case _ =>
   }
 
@@ -30,8 +32,7 @@ private trait CandidateBehaviour {
 
   private def becomingLeader(): Unit ={
     val lastEntry: Option[Entry[BankCommand]] = serverLog.getLastEntry()
-
-    servers.foreach(server => server._2 ! AppendEntries(currentTerm,if (lastEntry.isEmpty) None else serverLog.getPreviousEntry(lastEntry.get),lastEntry,lastCommittedIndex))
+    servers.foreach(server => server._2 ! AppendEntries(currentTerm, if (lastEntry.isEmpty) None else serverLog.getPreviousEntry(lastEntry.get) ,lastEntry, lastCommittedIndex))
     context.become(leaderBehaviour)
     startTimer()
   }

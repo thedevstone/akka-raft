@@ -8,12 +8,12 @@ import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientRequest, SchedulerTic
 
 private trait FollowerBehaviour {
   this: ServerActor =>
+
   private var leaderRef : Option[ActorRef] = None
 
   protected def followerBehaviour: Receive =  clusterBehaviour orElse {
     case SchedulerTick => becomingCandidate()
-    case requestVote: RequestVote => updateTerm(requestVote.candidateTerm)
-      handleRequestVote(requestVote)
+    case requestVote: RequestVote => handleRequestVote(requestVote)
     case appendEntry: AppendEntries => leaderRef = Some(sender())
       handleAppendEntries(appendEntry)
     case ClientRequest(_, _) => sender() ! Redirect(leaderRef)
@@ -22,7 +22,7 @@ private trait FollowerBehaviour {
 
   def becomingCandidate(): Unit = {
     leaderRef = None
-    currentTerm += 1 //?? TODO è corretto?
+    currentTerm += 1
     context.become(candidateBehaviour)
     startTimer()
   }
@@ -37,24 +37,23 @@ private trait FollowerBehaviour {
       case RequestVote(_, _, _, _) => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
       case _ =>
     }
+    startTimer()
   }
 
   def handleAppendEntries(appendEntry: AppendEntries): Unit = {
-    updateTerm(appendEntry.leaderTerm)//?? TODO è corretto?
+    updateTerm(appendEntry.leaderTerm)
 
     appendEntry match{
-      case AppendEntries(_, _, entry, _) if entry.isEmpty => startTimer(); sender() ! AckAppendEntries
-      case AppendEntries(leaderTerm, _, _, _) if leaderTerm < currentTerm => startTimer()
-        sender() ! AppendEntriesResult(false)
-      case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty => startTimer()
-        callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
+      case AppendEntries(_, _, entry, _) if entry.isEmpty => sender() ! AckAppendEntries
+      case AppendEntries(leaderTerm, _, _, _) if leaderTerm < currentTerm => sender() ! AppendEntriesResult(false)
+      case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
         sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get))
-      case AppendEntries(_, previousEntry, _, _) if !serverLog.contains(previousEntry.get) => startTimer()
-        sender() ! AppendEntriesResult(false)
+      case AppendEntries(_, previousEntry, _, _) if !serverLog.contains(previousEntry.get) => sender() ! AppendEntriesResult(false)
       case AppendEntries(_, _, entry, leaderLastCommit) => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
         sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get))
       case _ =>
     }
+    startTimer()
   }
 
   def updateTerm(term: Int): Unit = {
