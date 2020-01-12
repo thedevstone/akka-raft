@@ -19,11 +19,11 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   protected[this] var servers: Map[String, ActorRef] = Map()
   protected[this] var clients: Map[String, ActorRef] = Map()
 
-  private var currentTerm: Int = 0
-  private var lastApplied: Int = 0
-  private var lastCommittedIndex: Int = 0
-  private var votedFor: Option[String] = None
-  private val serverLog: CommandLog[BankCommand] = CommandLog.emptyLog()
+  protected[this] var currentTerm: Int = 0
+  protected[this] var lastApplied: Int = 0
+  protected[this] var lastCommittedIndex: Int = 0
+  protected[this] var votedFor: Option[String] = None
+  protected[this] val serverLog: CommandLog[BankCommand] = CommandLog.emptyLog()
 
 
 

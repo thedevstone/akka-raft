@@ -41,7 +41,6 @@ case class RequestVoteResult(
     assert(followerTerm >= 0)
   }
 
-
   case  class Redirect(
                                    leaderRef: Option[ActorRef]
                                  )extends RaftMessage{
