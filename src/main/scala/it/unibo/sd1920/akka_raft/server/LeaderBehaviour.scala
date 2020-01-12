@@ -14,7 +14,6 @@ private trait LeaderBehaviour {
 
   protected def leaderBehaviour: Receive = clusterBehaviour orElse {
     case _ =>
-
   }
 }
 

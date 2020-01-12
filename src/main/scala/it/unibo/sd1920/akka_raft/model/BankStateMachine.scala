@@ -37,7 +37,9 @@ class BankStateMachine(schedulerTickPeriod: FiniteDuration) extends Actor with A
     timers startTimerWithFixedDelay(SchedulerTickKey, SchedulerTick, schedulerTickPeriod)
   }
 
-  override def receive(): Receive = {
+  override def receive(): Receive = onMessage
+
+  private def onMessage: Receive = {
     case ApplyCommand(entry: Entry[BankCommand]) => commandQueue = commandQueue enqueue entry
     case SchedulerTick => if (commandQueue.nonEmpty) context.parent ! CommandResult(applyNextEntry())
   }

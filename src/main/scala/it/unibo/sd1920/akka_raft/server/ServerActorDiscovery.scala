@@ -17,6 +17,8 @@ private trait ServerActorDiscovery {
     case ServerIdentity(name: String) => addClient(name)
     case ClientIdentity(name: String) => addServer(name)
   }
+
+
   private def manageNewMember(member: Member): Unit = member match {
     case m if member.roles.contains("server") =>
       context.system.actorSelection(s"${m.address}/user/**") ! ServerActor.IdentifyServer(NodeRole.SERVER)
