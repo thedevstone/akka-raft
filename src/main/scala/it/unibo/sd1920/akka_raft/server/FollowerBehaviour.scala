@@ -21,8 +21,9 @@ private trait FollowerBehaviour {
     case AppendEntries(_,_,entry,_) if entry.isEmpty => startTimer(); sender() ! AckAppendEntries
     case AppendEntries(leaderTerm, _, _, _) if leaderTerm < currentTerm => startTimer(); sender() ! AppendEntriesResult(false);
 
-    case AppendEntries(_, previousEntry, entry, _) if previousEntry.isEmpty => startTimer(); serverLog.putElementAtIndex(entry.get)
+    case AppendEntries(_, previousEntry, entry, _) if (previousEntry.isEmpty) => startTimer(); sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get))
     case AppendEntries(_, previousEntry, _, _) if  !serverLog.contains(previousEntry.get) => startTimer(); sender() ! AppendEntriesResult(false)
+        
     /*
         case AppendEntries(leaderTerm, previousEntry, entry, leaderLastCommit) if serverLog.contains(previousEntry.get)
 
