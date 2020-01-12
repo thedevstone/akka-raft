@@ -8,7 +8,7 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
   //index -> |  0  |  1  |  2  |  3  |  4  |     |
   //term  -> |  0  |  0  |  1  |  1  |  2  |     |
   def size: Int = this.entries.size
-
+  def getEntries: List[Entry[Command]] = this.entries
   def previousIndex: Option[Int] = lastIndex match {
     case 0 => None
     case n => Some(n - 1)
@@ -22,10 +22,10 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
 
   def getPreviousEntry(entry: Entry[Command]): Option[Entry[Command]] = entry.index match {
     case 0 => None
-    case n => Some(entries(n-1))
+    case n => Some(entries(n - 1))
   }
 
-  def getLastEntry(): Option[Entry[Command]] = {
+  def getLastEntry: Option[Entry[Command]] = {
     if (entries.isEmpty) return None
     Some(entries(lastIndex))
   }
@@ -42,10 +42,10 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
   def append(entry: Entry[Command]): Unit = entries = entries :+ entry
   def remove(index: Int): Unit = entries = entries.slice(0, index)
 
-  def putElementAtIndex(entry: Entry[Command]): Boolean ={
-    if(entry.index > size && entry.index < 0) return false
+  def putElementAtIndex(entry: Entry[Command]): Boolean = {
+    if (entry.index > size && entry.index < 0) return false
 
-    if(entries.nonEmpty && entry.index < size ) this.remove(entry.index)
+    if (entries.nonEmpty && entry.index < size) this.remove(entry.index)
 
     this.append(entry)
     true

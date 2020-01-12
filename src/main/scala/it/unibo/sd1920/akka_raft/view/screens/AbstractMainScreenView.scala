@@ -1,6 +1,8 @@
 package it.unibo.sd1920.akka_raft.view.screens
 
 import com.jfoenix.controls.JFXComboBox
+import eu.hansolo.enzo.led.Led
+import it.unibo.sd1920.akka_raft.model.ServerVolatileState
 import it.unibo.sd1920.akka_raft.view.utilities.{JavafxEnums, ViewUtilities}
 import javafx.fxml.FXML
 import javafx.scene.control.{Label, ScrollPane}
@@ -22,6 +24,7 @@ abstract class AbstractMainScreenView extends View {
   type HBoxServerID = HBox
   type HBoxServerLog = HBox
   protected var serverToHBox: Map[String, (HBoxServerID, HBoxServerLog)] = Map()
+  protected var serverToState: Map[String, ServerVolatileState] = Map()
 
   @FXML def initialize(): Unit = {
     this.assertNodeInjected()
@@ -43,7 +46,12 @@ abstract class AbstractMainScreenView extends View {
 
   private def initCombos(): Unit = {
     this.serverStateCombo.getSelectionModel.selectedItemProperty()
-      .addListener((_, _, newValue) => log(newValue))
+      .addListener((_, _, newState) => {
+        serverToState.get(newState) match {
+          case None => ViewUtilities.showNotificationPopup("Server Errorr", "No server update present", JavafxEnums.MEDIUM_DURATION, JavafxEnums.ERROR_NOTIFICATION, null)
+          case Some(state) => //TODO
+        }
+      })
     this.serverCommandCombo.getSelectionModel.selectedItemProperty()
       .addListener((_, _, newValue) => log(newValue))
   }
@@ -75,5 +83,23 @@ abstract class AbstractMainScreenView extends View {
     this.serverCommandCombo.getItems.add(serverID)
   }
 
-  //protected def addEntryToLog(serverID: String, commando)
+  protected def updateServerState(serverID: String, serverVolatileState: ServerVolatileState): Unit = {
+    serverToHBox.get(serverID) match {
+      case None => new IllegalStateException("You sent a serverID that does not exist in map")
+      case Some(entry) =>
+        //UPDATING INFO
+        this.serverToState = this.serverToState + (serverID -> serverVolatileState)
+        //UPDATING LOG
+        serverVolatileState.commandLog.getEntries.map(_.command).foreach(c => {
+          val entryToAdd = new EntryBox(s"${serverVolatileState.currentTerm}:$c")
+          entry._2.getChildren.add(entryToAdd)
+        })
+    }
+  }
+}
+
+class EntryBox(info: String) extends VBox {
+  val entryLed = new Led()
+  val entryInfo = new Label(info)
+  this.getChildren.addAll(entryLed, entryInfo)
 }
