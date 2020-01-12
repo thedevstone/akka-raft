@@ -24,6 +24,10 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
     case 0 => None
     case n => Some(entries(n-1))
   }
+
+  def getLastEntry(): Entry[Command] = {
+    entries(lastIndex)
+  }
   def getEntryAtIndex(index: Int): Option[Entry[Command]] = index match {
     case n if size > 0 && n < size => Some(entries(n)) //positive values
     case _ => None //negative values
