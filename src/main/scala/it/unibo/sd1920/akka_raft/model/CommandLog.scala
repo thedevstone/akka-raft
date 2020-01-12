@@ -25,8 +25,9 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
     case n => Some(entries(n-1))
   }
 
-  def getLastEntry(): Entry[Command] = {
-    entries(lastIndex)
+  def getLastEntry(): Option[Entry[Command]] = {
+    if (entries.isEmpty) return None
+    Some(entries(lastIndex))
   }
   def getEntryAtIndex(index: Int): Option[Entry[Command]] = index match {
     case n if size > 0 && n < size => Some(entries(n)) //positive values
