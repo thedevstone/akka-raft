@@ -19,7 +19,13 @@ abstract class AbstractMainScreenView extends View {
   @FXML protected var vBoxServerNames: VBox = _
   @FXML protected var vBoxServerLogs: VBox = _
   @FXML protected var serverStateCombo: JFXComboBox[String] = _
-  @FXML protected var serverCommandCombo: JFXComboBox[String] = _
+  //STATE LABELS
+  @FXML protected var stateLabelRole: Label = _
+  @FXML protected var stateLabelLastApplied: Label = _
+  @FXML protected var stateLabelVotedFor: Label = _
+  @FXML protected var stateLabelCurrentTerm: Label = _
+  @FXML protected var stateLabelNextIndex: Label = _
+  @FXML protected var stateLabelLastMatched: Label = _
 
   type HBoxServerID = HBox
   type HBoxServerLog = HBox
@@ -36,7 +42,6 @@ abstract class AbstractMainScreenView extends View {
     assert(vBoxServerNames != null, "fx:id=\"vBoxServerNames\" was not injected: check your FXML file 'MainScreen.fxml'.")
     assert(vBoxServerLogs != null, "fx:id=\"vBoxServerLogs\" was not injected: check your FXML file 'MainScreen.fxml'.")
     assert(serverStateCombo != null, "fx:id=\"serverStateCombo\" was not injected: check your FXML file 'MainScreen.fxml'.")
-    assert(serverCommandCombo != null, "fx:id=\"serverCommandCombo\" was not injected: check your FXML file 'MainScreen.fxml'.")
   }
 
   protected def showPopupInfo(): Unit = {
@@ -52,8 +57,6 @@ abstract class AbstractMainScreenView extends View {
           case Some(state) => //TODO
         }
       })
-    this.serverCommandCombo.getSelectionModel.selectedItemProperty()
-      .addListener((_, _, newValue) => log(newValue))
   }
 
   def addServersToMap(serverID: String): Unit = {
@@ -74,13 +77,12 @@ abstract class AbstractMainScreenView extends View {
     scrollPaneLogNode.setFitToHeight(true)
     scrollPaneLogNode.setContent(serverLogNode)
     this.vBoxServerNames.getChildren.add(serverIDNode)
-    this.vBoxServerLogs.getChildren.add(scrollPaneLogNode)
+    this.vBoxServerLogs.getChildren.add(serverLogNode)
     this.serverToHBox = this.serverToHBox + (serverID -> (serverIDNode, serverLogNode))
   }
 
   protected def addServerToCombos(serverID: String): Unit = {
     this.serverStateCombo.getItems.add(serverID)
-    this.serverCommandCombo.getItems.add(serverID)
   }
 
   protected def updateServerState(serverID: String, serverVolatileState: ServerVolatileState): Unit = {
