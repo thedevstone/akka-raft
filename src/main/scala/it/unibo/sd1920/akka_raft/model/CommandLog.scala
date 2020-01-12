@@ -9,14 +9,14 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
   //term  -> |  0  |  0  |  1  |  1  |  2  |     |
   def size: Int = this.entries.size
 
-  def previousIndex: Int = lastIndex match {
-    case -1 => -1
-    case n => n - 1
+  def previousIndex: Option[Int] = lastIndex match {
+    case 0 => None
+    case n => Some(n - 1)
   }
   def nextIndex: Int = size
 
   def lastTerm: Int = this.entries.lastOption.map(t => t.term).getOrElse(0)
-  def lastIndex: Int = this.entries.lastOption.map(t => t.index).getOrElse(-1)
+  def lastIndex: Int = this.entries.lastOption.map(t => t.index).getOrElse(0)
 
   def getPreviousEntry(entry: Entry[Command]): Option[Entry[Command]] = entry.index match {
     case 0 => None
@@ -46,6 +46,6 @@ case class Entry[Command](command: Command,
                           index: Int,
                           requestId: Long
                          ) {
-  assert(index >= 0 /* || index = -1*/) //Come in java
+  assert(index >= 0) //Come in java
   assert(term >= 0)
 }

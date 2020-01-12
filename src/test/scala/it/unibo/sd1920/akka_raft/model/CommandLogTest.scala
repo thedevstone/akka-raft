@@ -22,7 +22,7 @@ class CommandLogTest extends AnyFunSpec with BeforeAndAfterEach {
     commandLog = CommandLog.populatedLog(initLog)
   }
 
-  describe("A empty log") {
+  describe("An empty log") {
     it("should have size == 0") {
       assert(commandLog.size == 0)
     }
