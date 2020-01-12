@@ -3,8 +3,7 @@ package it.unibo.sd1920.akka_raft.view.screens
 import akka.actor.ActorRef
 import com.sun.javafx.application.PlatformImpl
 import it.unibo.sd1920.akka_raft.client.ClientActor
-import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog}
-import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
+import it.unibo.sd1920.akka_raft.model.ServerVolatileState
 import it.unibo.sd1920.akka_raft.view.utilities.ViewUtilities
 import it.unibo.sd1920.akka_raft.view.FXMLScreens
 import javafx.application.Platform
@@ -17,7 +16,7 @@ trait ClientObserver {
   def setViewActorRef(actorRef: ActorRef): Unit
   def addServer(serverID: String)
   def removeServer(serverID: String)
-  def updateLogs(serverID: String, commandLog: CommandLog[BankCommand])
+  def updateServerState(serverID: String, serverVolatileState: ServerVolatileState)
 }
 
 class MainScreenView extends AbstractMainScreenView() with ClientObserver {
@@ -47,8 +46,10 @@ class MainScreenView extends AbstractMainScreenView() with ClientObserver {
 
   override def removeServer(serverID: String): Unit = {} //TODO
 
-  override def updateLogs(serverID: String, commandLog: CommandLog[BankStateMachine.BankCommand]): Unit = {
-    Platform.runLater(() => {})
+  override def updateServerState(serverID: String, serverVolatileState: ServerVolatileState): Unit = {
+    Platform.runLater(() => {
+      updateServerState(serverID, serverVolatileState)
+    })
   }
 }
 
