@@ -8,10 +8,11 @@ import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
 import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog}
 import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientRequest, GuiCommand, SchedulerTick, SchedulerTickKey}
-import it.unibo.sd1920.akka_raft.utils.NetworkConstants
+import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, RandomUtil, ServerRole}
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
-import it.unibo.sd1920.akka_raft.utils.RandomUtil
 import it.unibo.sd1920.akka_raft.utils
+import it.unibo.sd1920.akka_raft.utils.ServerRole.ServerRole
+
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration._
 
@@ -20,7 +21,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   protected[this] val cluster: Cluster = Cluster(context.system)
   protected[this] var servers: Map[String, ActorRef] = Map()
   protected[this] var clients: Map[String, ActorRef] = Map()
-
+  protected[this] var currentRole : ServerRole = ServerRole.FOLLOWER
   protected[this] var currentTerm: Int = 0
   protected[this] var lastApplied: Int = 0
   protected[this] var lastCommittedIndex: Int = 0

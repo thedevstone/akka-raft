@@ -23,7 +23,7 @@ private trait FollowerBehaviour {
 
     case AppendEntries(_, previousEntry, entry, _) if (previousEntry.isEmpty) => startTimer(); sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get))
     case AppendEntries(_, previousEntry, _, _) if  !serverLog.contains(previousEntry.get) => startTimer(); sender() ! AppendEntriesResult(false)
-        
+
     /*
         case AppendEntries(leaderTerm, previousEntry, entry, leaderLastCommit) if serverLog.contains(previousEntry.get)
 
