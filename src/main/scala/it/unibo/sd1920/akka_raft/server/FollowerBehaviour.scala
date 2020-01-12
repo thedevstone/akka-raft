@@ -20,14 +20,14 @@ private trait FollowerBehaviour {
     case _ =>
   }
 
-  def becomingCandidate(): Unit = {
+  private def becomingCandidate(): Unit = {
     leaderRef = None
     currentTerm += 1
     context.become(candidateBehaviour)
     startTimer()
   }
 
-  def handleRequestVote(requestVote: RequestVote): Unit =  {
+  private def handleRequestVote(requestVote: RequestVote): Unit =  {
     updateTerm(requestVote.candidateTerm)
 
     requestVote match{
@@ -40,7 +40,7 @@ private trait FollowerBehaviour {
     startTimer()
   }
 
-  def handleAppendEntries(appendEntry: AppendEntries): Unit = {
+  private def handleAppendEntries(appendEntry: AppendEntries): Unit = {
     updateTerm(appendEntry.leaderTerm)
 
     appendEntry match{
@@ -56,18 +56,18 @@ private trait FollowerBehaviour {
     startTimer()
   }
 
-  def updateTerm(term: Int): Unit = {
+  private def updateTerm(term: Int): Unit = {
     if (term > currentTerm){
       currentTerm = term
       votedFor = None
     }
   }
 
-  def callCommit(index: Int) {
+  private def callCommit(index: Int) {
     serverLog.commit(index)
   }
 
-  def checkLogBehind(lastLogTerm: Int, lastLogIndex: Int): Boolean = {
+  private def checkLogBehind(lastLogTerm: Int, lastLogIndex: Int): Boolean = {
     lastLogTerm >= currentTerm && lastLogIndex >= serverLog.lastIndex
   }
 
