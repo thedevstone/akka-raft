@@ -36,11 +36,11 @@ case class RequestVoteResult(
 
   case  class AppendEntriesResult(
                                   success: Boolean,
+                                  matchId: Int
                                   )extends RaftMessage{
 
   }
 
-  case class AckAppendEntries ()
   case  class Redirect(
                                    leaderRef: Option[ActorRef]
                                  )extends RaftMessage{
