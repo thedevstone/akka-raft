@@ -41,7 +41,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
 
   private def onMessage: Receive = clusterBehaviour orElse {
     case ClientRequest(requestID,bankCommand) =>
-    case GuiCommand(2) => this.context.become(leaderBehaviour,true)
+    case GuiCommand(2) => this.context.become(leaderBehaviour,discardOld = true)
     case GuiCommand(3) =>
     case GuiCommand(4) =>
   }
