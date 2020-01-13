@@ -28,7 +28,6 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
 
   def isReqIdPresent(reqID : Int): Boolean = entries.map(e => e.requestId).contains(reqID)
 
-
   def getLastEntry: Option[Entry[Command]] = {
     if (entries.isEmpty) return None
     Some(entries(lastIndex))
@@ -58,7 +57,6 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
   def putElementAtIndex(entry: Entry[Command]): Boolean = {
 
     if(entry.index > size || entry.index < 0) return false
-
 
     if (entries.nonEmpty && entry.index < size) this.remove(entry.index)
 

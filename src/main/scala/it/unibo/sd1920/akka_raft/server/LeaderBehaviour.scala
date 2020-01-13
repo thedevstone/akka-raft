@@ -1,6 +1,7 @@
 package it.unibo.sd1920.akka_raft.server
 
 
+
 import akka.actor.ActorRef
 import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
 import akka.cluster.Member
@@ -12,6 +13,7 @@ import it.unibo.sd1920.akka_raft.raft.{AppendEntries, AppendEntriesResult, Reque
 import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientIdentity, ClientRequest, IdentifyServer, SchedulerTick, ServerIdentity}
 import it.unibo.sd1920.akka_raft.utils.NodeRole
 import it.unibo.sd1920.akka_raft.server.LeaderBehaviour
+
 
 
 private trait LeaderBehaviour {

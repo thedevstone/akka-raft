@@ -9,7 +9,7 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import scala.concurrent.duration._
 
 class BankStateMachineTest()
-  extends TestKit(ActorSystem("MySpec"))
+  extends TestKit(ActorSystem("BankStateMachineTest"))
     with ImplicitSender
     with AnyWordSpecLike
     with Matchers
@@ -22,7 +22,7 @@ class BankStateMachineTest()
 
   override def beforeAll(): Unit = {
     parent = TestProbe()
-    stateMachineActor = parent childActorOf  (BankStateMachine.props(500.milliseconds), "ActorStateMachine")
+    stateMachineActor = parent childActorOf(BankStateMachine.props(500.milliseconds), "ActorStateMachine")
   }
 
   "A State Machine actor with Deposit('A', 100) command" must {

@@ -3,8 +3,8 @@ package it.unibo.sd1920.akka_raft.view.screens
 import akka.actor.ActorRef
 import com.sun.javafx.application.PlatformImpl
 import it.unibo.sd1920.akka_raft.client.ClientActor
-import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog}
-import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
+import it.unibo.sd1920.akka_raft.model.ServerVolatileState
+import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
 import it.unibo.sd1920.akka_raft.view.utilities.ViewUtilities
 import it.unibo.sd1920.akka_raft.view.FXMLScreens
 import javafx.application.Platform
@@ -17,7 +17,7 @@ trait ClientObserver {
   def setViewActorRef(actorRef: ActorRef): Unit
   def addServer(serverID: String)
   def removeServer(serverID: String)
-  def updateLogs(serverID: String, commandLog: CommandLog[BankCommand])
+  def updateServerState(serverID: String, serverVolatileState: ServerVolatileState)
 }
 
 class MainScreenView extends AbstractMainScreenView() with ClientObserver {
@@ -47,9 +47,16 @@ class MainScreenView extends AbstractMainScreenView() with ClientObserver {
 
   override def removeServer(serverID: String): Unit = {} //TODO
 
-  override def updateLogs(serverID: String, commandLog: CommandLog[BankStateMachine.BankCommand]): Unit = {
-    Platform.runLater(() => {})
+  override def updateServerState(serverID: String, serverVolatileState: ServerVolatileState): Unit = {
+    Platform.runLater(() => {
+      manageServerState(serverID, serverVolatileState)
+    })
   }
+  override def stopServer(serverID: String): Unit = clientActorRef ! ClientActor.GuiStopServer(serverID)
+  override def timeoutServer(serverID: String): Unit = clientActorRef ! ClientActor.GuiTimeoutServer(serverID)
+  override def sendMessage(serverID: String, commandType: CommandType, iban: String, amount: String): Unit =
+    clientActorRef ! ClientActor.GuiSendMessage(serverID, commandType, iban, amount)
+  override def messageLoss(serverID: String, value: Double): Unit = clientActorRef ! ClientActor.GuiMsgLossServer(serverID, value)
 }
 
 object MainScreenView {
