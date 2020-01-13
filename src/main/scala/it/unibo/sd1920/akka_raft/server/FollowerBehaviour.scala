@@ -20,14 +20,14 @@ private trait FollowerBehaviour {
     case _ =>
   }
 
-  def becomingCandidate(): Unit = {
+  private def becomingCandidate(): Unit = {
     leaderRef = None
     currentTerm += 1
     context.become(candidateBehaviour)
     startTimer()
   }
 
-  def handleRequestVote(requestVote: RequestVote): Unit =  {
+  private def handleRequestVote(requestVote: RequestVote): Unit =  {
     updateTerm(requestVote.candidateTerm)
 
     requestVote match{
@@ -40,52 +40,50 @@ private trait FollowerBehaviour {
     startTimer()
   }
 
-  def handleAppendEntries(appendEntry: AppendEntries): Unit = {
+  private def handleAppendEntries(appendEntry: AppendEntries): Unit = {
     updateTerm(appendEntry.leaderTerm)
 
     appendEntry match{
-      //caso heartbeat (da rimuovere)
-      case AppendEntries(_, _, entry, _) if entry.isEmpty => sender() !
 
       //caso rifiuto append da leader più indietro di me
-      case AppendEntries(leaderTerm, _, _, _) if leaderTerm < currentTerm => sender() ! AppendEntriesResult(false)
+      case AppendEntries(leaderTerm, _, _, _) if leaderTerm < currentTerm => sender() ! AppendEntriesResult(success = false, -1)
 
       //caso leader manda prima entry del log.
       case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty && entry.nonEmpty => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
-        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get))
+        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), -1)
 
       //caso leader ha log vuoto e manda append con sia prev che entry vuote. Devo ritornare SEMPRE true
-      case AppendEntries(_, previousEntry, entry, _)  if previousEntry.isEmpty && entry.isEmpty => sender() ! AppendEntriesResult(true)
+      case AppendEntries(_, previousEntry, entry, _)  if previousEntry.isEmpty && entry.isEmpty => sender() ! AppendEntriesResult(success = true, -1)
 
 
       //caso non ho prev entry nel log. Rispondi false indipendentemente da se entry è empty o meno
-      case AppendEntries(_, previousEntry, _, _) if !serverLog.contains(previousEntry.get) => sender() ! AppendEntriesResult(false)
+      case AppendEntries(_, previousEntry, _, _) if !serverLog.contains(previousEntry.get) => sender() ! AppendEntriesResult(success = false, -1)
 
       //caso prev entry presente nel log. Se ho entry da appendere lo faccio,
-      case AppendEntries(_, _, entry, leaderLastCommit) if entry.nonEmpty => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
-        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get))
+      case AppendEntries(_, previousEntry, entry, leaderLastCommit) if entry.nonEmpty => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
+        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), previousEntry.get.index)
 
       // altrimenti ritorno solo true
-      case AppendEntries(_, _, _, leaderLastCommit) => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
-        sender() ! AppendEntriesResult(true)
+      case AppendEntries(_, previousEntry, _, leaderLastCommit) => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
+        sender() ! AppendEntriesResult(success = true, previousEntry.get.index)
 
       case _ =>
     }
     startTimer()
   }
 
-  def updateTerm(term: Int): Unit = {
+  private def updateTerm(term: Int): Unit = {
     if (term > currentTerm){
       currentTerm = term
       votedFor = None
     }
   }
 
-  def callCommit(index: Int) {
+  private def callCommit(index: Int) {
     serverLog.commit(index)
   }
 
-  def checkLogBehind(lastLogTerm: Int, lastLogIndex: Int): Boolean = {
+  private def checkLogBehind(lastLogTerm: Int, lastLogIndex: Int): Boolean = {
     lastLogTerm >= currentTerm && lastLogIndex >= serverLog.lastIndex
   }
 

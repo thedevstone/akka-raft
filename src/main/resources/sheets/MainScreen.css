@@ -93,3 +93,8 @@
 
 #canvasPane {
 }
+
+/*Scroll*/
+#scrollPane {
+    -fx-background-color: transparent;
+}

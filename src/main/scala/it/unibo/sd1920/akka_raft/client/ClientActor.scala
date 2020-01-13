@@ -5,8 +5,9 @@ import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
 import akka.dispatch.ControlMessage
 import com.typesafe.config.ConfigFactory
-import it.unibo.sd1920.akka_raft.client.ClientActor.{GuiCommand, Log, ResultArrived}
+import it.unibo.sd1920.akka_raft.client.ClientActor.{GuiClientCommand, GuiServerState, Log, ResultArrived}
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
+import it.unibo.sd1920.akka_raft.model.ServerVolatileState
 import it.unibo.sd1920.akka_raft.server.ServerActor
 import it.unibo.sd1920.akka_raft.utils.NetworkConstants
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
@@ -22,7 +23,6 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
 
   view.setViewActorRef(self)
 
-
   override def preStart(): Unit = {
     super.preStart()
     cluster.subscribe(self, classOf[MemberUp], classOf[MemberDowned])
@@ -34,7 +34,8 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
   def onMessage: Receive = {
     case ResultArrived(id, result) => handleResult(id, result)
     case Log(message) => log info message
-    case GuiCommand(targetServer, command) => elaborateGuiRequest(targetServer, command)
+    case GuiClientCommand(serverID, command) => elaborateGuiRequest(serverID, command)
+    case GuiServerState(serverState) => guiUpdateServerInfo(serverState)
   }
 
   def sendRequest(targetServer: String, command: BankCommand): Unit = {
@@ -50,6 +51,13 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
     this.requestHistory = Map(this.requestID -> Result(executed = false, command, None))
     this.requestID += 1
   }
+
+  private def guiUpdateServerInfo(serverVolatileState: ServerVolatileState): Unit = {
+    val nodeId = resolveNodeID(sender())
+    view.updateServerState(nodeId, serverVolatileState)
+  }
+
+  private def resolveNodeID(actorRef: ActorRef): String = servers.filter(e => e._2 == sender()).last._1
 }
 
 object ClientActor {
@@ -60,10 +68,10 @@ object ClientActor {
   case class ClientIdentity(name: String) extends ClientInput with ControlMessage
   case class ResultArrived(id: Int, result: Option[Int]) extends ClientInput
 
-  sealed trait GuiClientMessage extends ClientInput
-  case class GuiCommand(targetServer: String, command: BankCommand) extends GuiClientMessage with ControlMessage
+  sealed trait GuiClientMessage
+  case class GuiClientCommand(targetServer: String, command: BankCommand) extends GuiClientMessage with ControlMessage
   case class Log(message: String) extends GuiClientMessage with ControlMessage
-  //case class ServerInfo(commandoLog: CommandLog[BankCommand], )
+  case class GuiServerState(serverState: ServerVolatileState) extends GuiClientMessage with ControlMessage
 
   //STARTING CLIENT
   def props: Props = Props(new ClientActor())
@@ -78,7 +86,6 @@ object ClientActor {
     system actorOf(ClientActor.props, name)
   }
 }
-
 
 case class Result(
                    executed: Boolean,

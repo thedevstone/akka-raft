@@ -7,6 +7,7 @@ case class ServerVolatileState(role: ServerRole,
                                votedFor: (String, Option[String]),
                                currentTerm: (String, Int),
                                nextIndexToSend: (String, Int),
-                               lastMatchedEntry: (String, Int) ){
+                               lastMatchedEntry: (String, Int),
+                               commandLog: CommandLog[BankStateMachine.BankCommand]) {
 
 }
