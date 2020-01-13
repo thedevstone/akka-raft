@@ -2,14 +2,17 @@ package it.unibo.sd1920.akka_raft.view.screens
 
 import com.jfoenix.controls.{JFXButton, JFXComboBox, JFXSlider, JFXTextField}
 import eu.hansolo.enzo.led.Led
-import it.unibo.sd1920.akka_raft.model.ServerVolatileState
-import it.unibo.sd1920.akka_raft.utils.CommandType
+import it.unibo.sd1920.akka_raft.model.{BankStateMachine, Entry, ServerVolatileState}
+import it.unibo.sd1920.akka_raft.model.BankStateMachine.{BankCommand, Withdraw}
+import it.unibo.sd1920.akka_raft.utils.{CommandType, ServerRole}
 import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
 import it.unibo.sd1920.akka_raft.view.utilities.{JavafxEnums, ViewUtilities}
 import javafx.fxml.FXML
+import javafx.geometry.{Insets, Pos}
 import javafx.scene.control.{Label, ScrollPane}
 import javafx.scene.control.ScrollPane.ScrollBarPolicy
 import javafx.scene.layout.{BorderPane, HBox, VBox}
+import javafx.scene.text.Font
 import org.kordamp.ikonli.ionicons.Ionicons
 import org.kordamp.ikonli.material.Material
 
@@ -33,6 +36,7 @@ abstract class AbstractMainScreenView extends View {
   @FXML protected var stateLabelCurrentTerm: Label = _
   @FXML protected var stateLabelNextIndex: Label = _
   @FXML protected var stateLabelLastMatched: Label = _
+  @FXML protected var stateLabelLastCommitted: Label = _
   //SETTINGS
   @FXML protected var sliderMsgLoss: JFXSlider = _
   @FXML protected var buttonStop: JFXButton = _
@@ -69,9 +73,18 @@ abstract class AbstractMainScreenView extends View {
 
   private def initButtons(): Unit = {
     this.buttonSend.setGraphic(ViewUtilities.iconSetter(Material.SEND, JavafxEnums.MEDIUM_ICON))
-    this.buttonSend.setOnAction(t => sendMessage(getSelectedServer(), comboCommand.getSelectionModel.getSelectedItem, textFieldIban.getText, textFieldAmount.getText))
-    this.buttonStop.setOnAction(t => stopServer(getSelectedServer()))
-    this.buttonTimeout.setOnAction(t => timeoutServer(getSelectedServer()))
+    this.buttonSend.setOnAction(_ => sendMessage(getSelectedServer, comboCommand.getSelectionModel.getSelectedItem, textFieldIban.getText, textFieldAmount.getText))
+    this.buttonTimeout.setOnAction(_ => timeoutServer(getSelectedServer))
+    this.buttonStop.setOnAction(_ => {
+      stopServer(getSelectedServer)
+      val state: ServerVolatileState = ServerVolatileState(ServerRole.CANDIDATE, 1, 1, Some("S1"), 2, 3, 3,
+        List(Entry[BankCommand](Withdraw("ciao", 2), 2, 3, 123),
+          Entry[BankCommand](BankStateMachine.Deposit("ciao", 34), 5, 2, 133),
+          Entry[BankCommand](BankStateMachine.Deposit("ciao", 34), 6, 2, 134)))
+      this.manageServerState("S1", state)
+    })
+
+
   }
 
   private def initCombos(): Unit = {
@@ -79,29 +92,34 @@ abstract class AbstractMainScreenView extends View {
       .addListener((_, _, newState) => {
         serverToState.get(newState) match {
           case None => ViewUtilities.showNotificationPopup("Server Errorr", "No server update present", JavafxEnums.MEDIUM_DURATION, JavafxEnums.ERROR_NOTIFICATION, null)
-          case Some(state) => //TODO
+          case Some(state) => updateServerState(state)
         }
       })
     CommandType.values.foreach(this.comboCommand.getItems.add(_))
   }
 
   private def initSlider(): Unit = {
-    this.sliderMsgLoss.setOnMouseReleased(t => messageLoss(getSelectedServer(), this.sliderMsgLoss.getValue / 100))
+    this.sliderMsgLoss.setOnMouseReleased(_ => messageLoss(getSelectedServer, this.sliderMsgLoss.getValue / 100))
   }
 
-  private def getSelectedServer(): String = serverStateCombo.getSelectionModel.getSelectedItem
+  private def getSelectedServer: String = serverStateCombo.getSelectionModel.getSelectedItem
 
   def addServersToMap(serverID: String): Unit = {
     //ID NODE
-    var serverIDNode = new HBox()
-    var labelIDNode = new Label(serverID)
+    val serverIDNode = new HBox()
+    val labelIDNode = new Label(serverID)
     labelIDNode.setGraphic(ViewUtilities.iconSetter(Ionicons.ION_CUBE, JavafxEnums.BIGGER_ICON))
+    serverIDNode.setMinHeight(JavafxEnums.BIGGER_ICON.dim)
+    serverIDNode.setMaxHeight(JavafxEnums.BIGGER_ICON.dim)
     serverIDNode.getChildren.add(labelIDNode)
     //LOG NODE
-    var serverLogNode = new HBox()
-    serverLogNode.setMinHeight(50)
+    val serverLogNode = new HBox()
+    serverLogNode.setMinHeight(JavafxEnums.BIGGER_ICON.dim)
+    serverLogNode.setMaxHeight(JavafxEnums.BIGGER_ICON.dim)
+    serverLogNode.setSpacing(10)
+    serverLogNode.setPadding(new Insets(5, 5, 5, 5))
     //ADDING
-    var scrollPaneLogNode = new ScrollPane()
+    val scrollPaneLogNode = new ScrollPane()
     scrollPaneLogNode.setMinHeight(JavafxEnums.BIGGER_ICON.dim)
     scrollPaneLogNode.setVbarPolicy(ScrollBarPolicy.NEVER)
     scrollPaneLogNode.setHbarPolicy(ScrollBarPolicy.NEVER)
@@ -117,23 +135,40 @@ abstract class AbstractMainScreenView extends View {
     this.serverStateCombo.getItems.add(serverID)
   }
 
-  protected def updateServerState(serverID: String, serverVolatileState: ServerVolatileState): Unit = {
+  protected def manageServerState(serverID: String, serverVolatileState: ServerVolatileState): Unit = {
     serverToHBox.get(serverID) match {
       case None => new IllegalStateException("You sent a serverID that does not exist in map")
       case Some(entry) =>
         //UPDATING INFO
         this.serverToState = this.serverToState + (serverID -> serverVolatileState)
         //UPDATING LOG
-        serverVolatileState.commandLog.getEntries.map(_.command).foreach(c => {
-          val entryToAdd = new EntryBox(s"${serverVolatileState.currentTerm}:$c")
+        entry._2.getChildren.clear()
+        serverVolatileState.commandLog.foreach(c => {
+          val ledOn = entry._2.getChildren.size() <= serverVolatileState.lastCommitted
+          val entryToAdd = new EntryBox(s"${serverVolatileState.currentTerm} : ${c.command.toString.substring(0, 1)}", ledOn)
           entry._2.getChildren.add(entryToAdd)
         })
+        updateServerState(serverVolatileState)
     }
+  }
+
+  private def updateServerState(serverVolatileState: ServerVolatileState): Unit = {
+    this.stateLabelCurrentTerm.setText(serverVolatileState.currentTerm.toString)
+    this.stateLabelLastApplied.setText(serverVolatileState.lastApplied.toString)
+    this.stateLabelVotedFor.setText(serverVolatileState.votedFor.getOrElse(""))
+    this.stateLabelNextIndex.setText(serverVolatileState.nextIndexToSend.toString)
+    this.stateLabelRole.setText(serverVolatileState.role.toString)
+    this.stateLabelLastCommitted.setText(serverVolatileState.lastCommitted.toString)
+    this.stateLabelLastMatched.setText(serverVolatileState.lastMatchedEntry.toString)
   }
 }
 
-class EntryBox(info: String) extends VBox {
+class EntryBox(info: String, on: Boolean) extends VBox {
+  this.setAlignment(Pos.CENTER)
   val entryLed = new Led()
+  entryLed.setOn(on)
+  entryLed.setMinSize(40, 40)
   val entryInfo = new Label(info)
+  entryInfo.setFont(new Font(12))
   this.getChildren.addAll(entryLed, entryInfo)
 }

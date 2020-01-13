@@ -49,7 +49,7 @@ class MainScreenView extends AbstractMainScreenView() with ClientObserver {
 
   override def updateServerState(serverID: String, serverVolatileState: ServerVolatileState): Unit = {
     Platform.runLater(() => {
-      updateServerState(serverID, serverVolatileState)
+      manageServerState(serverID, serverVolatileState)
     })
   }
   override def stopServer(serverID: String): Unit = clientActorRef ! ClientActor.GuiStopServer(serverID)

@@ -90,6 +90,11 @@
                                           <Font size="16.0" />
                                        </font>
                                     </Label>
+                                    <Label text="Last Committed:">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font>
+                                    </Label>
                                  </children>
                                  <padding>
                                     <Insets right="5.0" />
@@ -123,6 +128,11 @@
                                        </font>
                                     </Label>
                                     <Label fx:id="stateLabelLastMatched" text="Undefined">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="stateLabelLastCommitted" text="Undefined">
                                        <font>
                                           <Font size="16.0" />
                                        </font>
