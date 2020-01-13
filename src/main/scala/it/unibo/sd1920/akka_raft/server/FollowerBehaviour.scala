@@ -44,13 +44,31 @@ private trait FollowerBehaviour {
     updateTerm(appendEntry.leaderTerm)
 
     appendEntry match{
-      case AppendEntries(_, _, entry, _) if entry.isEmpty => sender() ! AckAppendEntries
+      //caso heartbeat (da rimuovere)
+      case AppendEntries(_, _, entry, _) if entry.isEmpty => sender() !
+
+      //caso rifiuto append da leader più indietro di me
       case AppendEntries(leaderTerm, _, _, _) if leaderTerm < currentTerm => sender() ! AppendEntriesResult(false)
-      case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
+
+      //caso leader manda prima entry del log.
+      case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty && entry.nonEmpty => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
         sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get))
+
+      //caso leader ha log vuoto e manda append con sia prev che entry vuote. Devo ritornare SEMPRE true
+      case AppendEntries(_, previousEntry, entry, _)  if previousEntry.isEmpty && entry.isEmpty => sender() ! AppendEntriesResult(true)
+
+
+      //caso non ho prev entry nel log. Rispondi false indipendentemente da se entry è empty o meno
       case AppendEntries(_, previousEntry, _, _) if !serverLog.contains(previousEntry.get) => sender() ! AppendEntriesResult(false)
-      case AppendEntries(_, _, entry, leaderLastCommit) => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
+
+      //caso prev entry presente nel log. Se ho entry da appendere lo faccio,
+      case AppendEntries(_, _, entry, leaderLastCommit) if entry.nonEmpty => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
         sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get))
+
+      // altrimenti ritorno solo true
+      case AppendEntries(_, _, _, leaderLastCommit) => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
+        sender() ! AppendEntriesResult(true)
+
       case _ =>
     }
     startTimer()
