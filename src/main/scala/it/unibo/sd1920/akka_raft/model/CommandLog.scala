@@ -25,7 +25,9 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
     case n => Some(entries(n-1))
   }
 
-  def getLastEntry(): Option[Entry[Command]] = {
+  def isReqIdPresent(reqID : Int): Boolean = entries.map(e => e.requestId).contains(reqID)
+
+  def getLastEntry: Option[Entry[Command]] = {
     if (entries.isEmpty) return None
     Some(entries(lastIndex))
   }
@@ -33,6 +35,15 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
     case n if size > 0 && n < size => Some(entries(n)) //positive values
     case _ => None //negative values
   }
+
+  def getIndexFromReqId(reqId: Int ): Option[Int] = {
+    entries.filter(e=> e.requestId == reqId).map(entry => entry.index).lastOption
+  }
+
+  def isReqIdCommitted(reqId : Int): Boolean =  {
+    if (getIndexFromReqId(reqId).isEmpty) return  false
+    getIndexFromReqId(reqId).get <= commitIndex
+  };
 
   def committedEntries: List[Entry[Command]] = entries.slice(0, commitIndex + 1)
 
@@ -42,14 +53,17 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
   def append(entry: Entry[Command]): Unit = entries = entries :+ entry
   def remove(index: Int): Unit = entries = entries.slice(0, index)
 
-  def putElementAtIndex(entry: Entry[Command]): Boolean ={
-    if(entry.index > size && entry.index < 0) return false
+  def putElementAtIndex(entry: Entry[Command]): Boolean = {
+    if(entry.index > size || entry.index < 0) return false
 
     if(entries.nonEmpty && entry.index < size ) this.remove(entry.index)
 
+    lastIndex += 1
     this.append(entry)
     true
   }
+
+
 }
 
 object CommandLog {
