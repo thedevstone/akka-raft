@@ -9,8 +9,7 @@ import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
 import it.unibo.sd1920.akka_raft.view.utilities.{JavafxEnums, ViewUtilities}
 import javafx.fxml.FXML
 import javafx.geometry.{Insets, Pos}
-import javafx.scene.control.{Label, ScrollPane}
-import javafx.scene.control.ScrollPane.ScrollBarPolicy
+import javafx.scene.control.Label
 import javafx.scene.layout.{BorderPane, HBox, VBox}
 import javafx.scene.text.Font
 import org.kordamp.ikonli.ionicons.Ionicons
@@ -83,8 +82,6 @@ abstract class AbstractMainScreenView extends View {
           Entry[BankCommand](BankStateMachine.Deposit("ciao", 34), 6, 2, 134)))
       this.manageServerState("S1", state)
     })
-
-
   }
 
   private def initCombos(): Unit = {
@@ -96,6 +93,7 @@ abstract class AbstractMainScreenView extends View {
         }
       })
     CommandType.values.foreach(this.comboCommand.getItems.add(_))
+    this.comboCommand.getSelectionModel.select(0)
   }
 
   private def initSlider(): Unit = {
@@ -119,13 +117,6 @@ abstract class AbstractMainScreenView extends View {
     serverLogNode.setSpacing(10)
     serverLogNode.setPadding(new Insets(5, 5, 5, 5))
     //ADDING
-    val scrollPaneLogNode = new ScrollPane()
-    scrollPaneLogNode.setMinHeight(JavafxEnums.BIGGER_ICON.dim)
-    scrollPaneLogNode.setVbarPolicy(ScrollBarPolicy.NEVER)
-    scrollPaneLogNode.setHbarPolicy(ScrollBarPolicy.NEVER)
-    scrollPaneLogNode.setPannable(true)
-    scrollPaneLogNode.setFitToHeight(true)
-    scrollPaneLogNode.setContent(serverLogNode)
     this.vBoxServerNames.getChildren.add(serverIDNode)
     this.vBoxServerLogs.getChildren.add(serverLogNode)
     this.serverToHBox = this.serverToHBox + (serverID -> (serverIDNode, serverLogNode))
@@ -133,6 +124,7 @@ abstract class AbstractMainScreenView extends View {
 
   protected def addServerToCombos(serverID: String): Unit = {
     this.serverStateCombo.getItems.add(serverID)
+    this.serverStateCombo.getSelectionModel.select(0)
   }
 
   protected def manageServerState(serverID: String, serverVolatileState: ServerVolatileState): Unit = {

@@ -9,15 +9,14 @@ import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog}
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
 import it.unibo.sd1920.akka_raft.raft.RaftMessage
 import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientRequest, GuiCommand, SchedulerTick, SchedulerTickKey}
-import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, RandomUtil, ServerRole}
+import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, RaftConstants, RandomUtil, ServerRole}
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
 import it.unibo.sd1920.akka_raft.utils.ServerRole.ServerRole
 
 import scala.concurrent.duration._
 
-
 private class ServerActor extends Actor with ServerActorDiscovery with LeaderBehaviour with CandidateBehaviour with FollowerBehaviour with ActorLogging with Timers {
-  protected[this] val SERVERS_MAJORITY = (NetworkConstants.numberOfServer / 2) + 1
+  protected[this] val SERVERS_MAJORITY: Int = (NetworkConstants.numberOfServer / 2) + 1
   protected[this] val cluster: Cluster = Cluster(context.system)
   protected[this] var servers: Map[String, ActorRef] = Map()
   protected[this] var clients: Map[String, ActorRef] = Map()
@@ -28,12 +27,12 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   protected[this] var votedFor: Option[String] = None
   protected[this] val serverLog: CommandLog[BankCommand] = CommandLog.emptyLog()
 
-
   override def preStart(): Unit = {
     cluster.subscribe(self, classOf[MemberUp], classOf[MemberDowned])
     cluster.registerOnMemberUp({
     })
-    context.actorOf(BankStateMachine.props(RandomUtil.randomBetween(500, 2000).millis), "StateMachine")
+    context.actorOf(BankStateMachine.props(RandomUtil.randomBetween(RaftConstants.minimumStateMachineExecutionTime,
+      RaftConstants.maximumStateMachineExecutionTime).millis), "StateMachine")
   }
 
   override def receive: Receive = followerBehaviour
@@ -46,14 +45,12 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   }
 
   protected def startTimer(): Unit = {
-    timers startTimerWithFixedDelay(SchedulerTickKey, SchedulerTick, RandomUtil.randomBetween(150, 300) millis)
+    timers startTimerWithFixedDelay(SchedulerTickKey, SchedulerTick, RandomUtil.randomBetween(RaftConstants.minimumTimeout, RaftConstants.maximumTimeout) millis)
   }
 
   protected def broadcastMessage(raftMessage: RaftMessage): Unit = {
     servers.filter(s => s._2 != self).foreach(v => v._2 ! raftMessage)
   }
-
-
 }
 
 object ServerActor {
@@ -71,7 +68,6 @@ object ServerActor {
   private sealed trait TimerKey
   private case object SchedulerTickKey extends TimerKey
 
-  //STARTING CLIENT
   def props: Props = Props(new ServerActor())
 
   def main(args: Array[String]): Unit = {

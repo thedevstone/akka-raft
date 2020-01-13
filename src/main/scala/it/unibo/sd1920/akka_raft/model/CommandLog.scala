@@ -1,7 +1,8 @@
 package it.unibo.sd1920.akka_raft.model
 
-class CommandLog[Command](private var entries: List[Entry[Command]]
-                         ) {
+class CommandLog[Command](
+  private var entries: List[Entry[Command]]
+) {
   //Log indexes
   private var commitIndex = -1
   //index ->                    prevI lastI nextI
@@ -26,7 +27,7 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
   }
 
 
-  def isReqIdPresent(reqID : Int): Boolean = entries.map(e => e.requestId).contains(reqID)
+  def isReqIdPresent(reqID: Int): Boolean = entries.map(e => e.requestId).contains(reqID)
 
   def getLastEntry: Option[Entry[Command]] = {
     if (entries.isEmpty) return None
@@ -37,12 +38,12 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
     case _ => None //negative values
   }
 
-  def getIndexFromReqId(reqId: Int ): Option[Int] = {
-    entries.filter(e=> e.requestId == reqId).map(entry => entry.index).lastOption
+  def getIndexFromReqId(reqId: Int): Option[Int] = {
+    entries.filter(e => e.requestId == reqId).map(entry => entry.index).lastOption
   }
 
-  def isReqIdCommitted(reqId : Int): Boolean =  {
-    if (getIndexFromReqId(reqId).isEmpty) return  false
+  def isReqIdCommitted(reqId: Int): Boolean = {
+    if (getIndexFromReqId(reqId).isEmpty) return false
     getIndexFromReqId(reqId).get <= commitIndex
   }
 
@@ -56,7 +57,7 @@ class CommandLog[Command](private var entries: List[Entry[Command]]
 
   def putElementAtIndex(entry: Entry[Command]): Boolean = {
 
-    if(entry.index > size || entry.index < 0) return false
+    if (entry.index > size || entry.index < 0) return false
 
     if (entries.nonEmpty && entry.index < size) this.remove(entry.index)
 
@@ -72,11 +73,12 @@ object CommandLog {
   def populatedLog[T](initialLog: List[Entry[T]]): CommandLog[T] = new CommandLog(initialLog)
 }
 
-case class Entry[Command](command: Command,
-                          term: Int,
-                          index: Int,
-                          requestId: Long
-                         ) {
+case class Entry[Command](
+  command: Command,
+  term: Int,
+  index: Int,
+  requestId: Long
+) {
   assert(index >= 0) //Come in java
   assert(term >= 0)
 }

@@ -63,7 +63,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
   private def elaborateGuiSendRequest(targetServer: String, command: CommandType, iban: String, amount: String): Unit = {
     var amountInt = 0
     try amountInt = amount.toInt catch {
-      case e: Exception =>
+      case _: Throwable =>
     }
     val serverCommand = command match {
       case CommandType.DEPOSIT => BankStateMachine.Deposit(iban, amountInt)
@@ -77,17 +77,17 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
 
   private def stopServer(targetServer: String): Unit = {
     //TODO
-    log info (s"Stop: $targetServer")
+    log info s"Stop: $targetServer"
   }
 
   private def timeoutServer(targetServer: String): Unit = {
     //TODO
-    log info (s"Timout: $targetServer")
+    log info s"Timout: $targetServer"
   }
 
   private def setLossServer(targetServer: String, loss: Double): Unit = {
     //TODO
-    log info (s"Loss: $targetServer percentage: $loss")
+    log info s"Loss: $targetServer percentage: $loss"
   }
 
   private def resolveNodeID(actorRef: ActorRef): String = servers.filter(e => e._2 == sender()).last._1
@@ -125,7 +125,7 @@ object ClientActor {
 }
 
 case class Result(
-                   executed: Boolean,
-                   command: BankCommand,
-                   result: Option[Int]
-                 )
+  executed: Boolean,
+  command: BankCommand,
+  result: Option[Int]
+)
