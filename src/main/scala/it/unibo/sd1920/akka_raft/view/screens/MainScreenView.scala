@@ -34,9 +34,6 @@ class MainScreenView extends AbstractMainScreenView() with ClientObserver {
     stage.show()
   }
 
-  // ##################### TO CLIENT ACTOR
-  override def log(message: String): Unit = clientActorRef ! ClientActor.Log(message)
-
   // ##################### FROM CLIENT ACTOR
   override def setViewActorRef(actorRef: ActorRef): Unit = this.clientActorRef = actorRef
 
@@ -52,6 +49,9 @@ class MainScreenView extends AbstractMainScreenView() with ClientObserver {
       manageServerState(serverID, serverVolatileState)
     })
   }
+
+  // ##################### TO CLIENT ACTOR
+  override def log(message: String): Unit = clientActorRef ! ClientActor.Log(message)
   override def stopServer(serverID: String): Unit = clientActorRef ! ClientActor.GuiStopServer(serverID)
   override def timeoutServer(serverID: String): Unit = clientActorRef ! ClientActor.GuiTimeoutServer(serverID)
   override def sendMessage(serverID: String, commandType: CommandType, iban: String, amount: String): Unit =

@@ -27,7 +27,7 @@ abstract class AbstractMainScreenView extends View {
   @FXML protected var mainBorder: BorderPane = _
   @FXML protected var vBoxServerNames: VBox = _
   @FXML protected var vBoxServerLogs: VBox = _
-  @FXML protected var serverStateCombo: JFXComboBox[String] = _
+  @FXML protected var serverIDCombo: JFXComboBox[String] = _
   //STATE LABELS
   @FXML protected var stateLabelRole: Label = _
   @FXML protected var stateLabelLastApplied: Label = _
@@ -62,7 +62,7 @@ abstract class AbstractMainScreenView extends View {
     assert(mainBorder != null, "fx:id=\"mainBorder\" was not injected: check your FXML file 'MainScreen.fxml'.")
     assert(vBoxServerNames != null, "fx:id=\"vBoxServerNames\" was not injected: check your FXML file 'MainScreen.fxml'.")
     assert(vBoxServerLogs != null, "fx:id=\"vBoxServerLogs\" was not injected: check your FXML file 'MainScreen.fxml'.")
-    assert(serverStateCombo != null, "fx:id=\"serverStateCombo\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(serverIDCombo != null, "fx:id=\"serverStateCombo\" was not injected: check your FXML file 'MainScreen.fxml'.")
   }
 
   protected def showPopupInfo(): Unit = {
@@ -85,7 +85,7 @@ abstract class AbstractMainScreenView extends View {
   }
 
   private def initCombos(): Unit = {
-    this.serverStateCombo.getSelectionModel.selectedItemProperty()
+    this.serverIDCombo.getSelectionModel.selectedItemProperty()
       .addListener((_, _, newState) => {
         serverToState.get(newState) match {
           case None => ViewUtilities.showNotificationPopup("Server Errorr", "No server update present", JavafxEnums.MEDIUM_DURATION, JavafxEnums.ERROR_NOTIFICATION, null)
@@ -100,7 +100,7 @@ abstract class AbstractMainScreenView extends View {
     this.sliderMsgLoss.setOnMouseReleased(_ => messageLoss(getSelectedServer, this.sliderMsgLoss.getValue / 100))
   }
 
-  private def getSelectedServer: String = serverStateCombo.getSelectionModel.getSelectedItem
+  private def getSelectedServer: String = serverIDCombo.getSelectionModel.getSelectedItem
 
   def addServersToMap(serverID: String): Unit = {
     //ID NODE
@@ -123,8 +123,8 @@ abstract class AbstractMainScreenView extends View {
   }
 
   protected def addServerToCombos(serverID: String): Unit = {
-    this.serverStateCombo.getItems.add(serverID)
-    this.serverStateCombo.getSelectionModel.select(0)
+    this.serverIDCombo.getItems.add(serverID)
+    this.serverIDCombo.getSelectionModel.select(0)
   }
 
   protected def manageServerState(serverID: String, serverVolatileState: ServerVolatileState): Unit = {

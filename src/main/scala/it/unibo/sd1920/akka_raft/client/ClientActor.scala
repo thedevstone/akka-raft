@@ -51,6 +51,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
 
   private def handleResult(reqID: Int, result: Option[Int]): Unit = {
     this.requestHistory = Map(reqID -> Result(executed = true, this.requestHistory(reqID).command, result))
+    //TODO showResultInGui
   }
 
   //TO GUI
