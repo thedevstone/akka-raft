@@ -74,9 +74,11 @@
     -fx-background-color: rgba(255, 255, 255, 0.95);
     -fx-background-radius: 0 0 10 10;
     -fx-opacity: 1;
-    -fx-max-height: 150;
+    -fx-max-height: 200;
     /*-fx-pref-height: 150;*/
-    -fx-min-width: 100;
+    -fx-min-width: 150;
+    -fx-max-width: 150;
+    -fx-vbar-policy: never;
 }
 
 
