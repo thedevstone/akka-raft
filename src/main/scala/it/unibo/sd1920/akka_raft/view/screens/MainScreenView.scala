@@ -52,11 +52,11 @@ class MainScreenView extends AbstractMainScreenView() with ClientObserver {
       updateServerState(serverID, serverVolatileState)
     })
   }
-  override def stopServer(serverID: String): Unit = log(serverID)
-  override def timeoutServer(serverID: String): Unit = log(serverID)
-  override def sendMessage(serverID: String, commandType: CommandType, iban: String, balance: String): Unit =
-    log(s"Server: $serverID, comando: $commandType, iban: $iban, balance: $balance")
-  override def messageLoss(serverID: String, value: Double): Unit = log(s"Server: $serverID loss: $value")
+  override def stopServer(serverID: String): Unit = clientActorRef ! ClientActor.GuiStopServer(serverID)
+  override def timeoutServer(serverID: String): Unit = clientActorRef ! ClientActor.GuiTimeoutServer(serverID)
+  override def sendMessage(serverID: String, commandType: CommandType, iban: String, amount: String): Unit =
+    clientActorRef ! ClientActor.GuiSendMessage(serverID, commandType, iban, amount)
+  override def messageLoss(serverID: String, value: Double): Unit = clientActorRef ! ClientActor.GuiMsgLossServer(serverID, value)
 }
 
 object MainScreenView {
