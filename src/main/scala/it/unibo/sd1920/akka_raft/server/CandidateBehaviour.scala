@@ -11,7 +11,7 @@ private trait CandidateBehaviour {
   private var voteCounter: Int = 1
 
   protected def candidateBehaviour: Receive = controlBehaviour orElse {
-    case SchedulerTick => restart()
+    case SchedulerTick => electionTimeout()
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case requestResult: RequestVoteResult => handleVoteResult(requestResult)
     case _ =>
@@ -45,7 +45,7 @@ private trait CandidateBehaviour {
     currentTerm = term
     context.become(followerBehaviour)
     voteForMyself()
-    startTimer()
+    startTimeoutTimer()
   }
 
   private def electionRestriction(lastLogTerm: Int, lastLogIndex: Int): Boolean = {
@@ -58,14 +58,14 @@ private trait CandidateBehaviour {
       if (lastEntry.isEmpty) None else serverLog.getPreviousEntry(lastEntry.get), lastEntry, lastCommittedIndex))
     context.become(leaderBehaviour)
     voteForMyself()
-    startTimer()
+    startHeartbeatTimer()
   }
 
-  private def restart(): Unit = {
+  private def electionTimeout(): Unit = {
     currentTerm += 1
     voteForMyself()
     broadcastMessage(RequestVote(currentTerm, self, serverLog.lastTerm, serverLog.lastIndex))
-    startTimer()
+    startTimeoutTimer()
   }
 
   private def voteForMyself(): Unit = {

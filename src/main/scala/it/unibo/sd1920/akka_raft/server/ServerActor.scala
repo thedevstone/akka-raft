@@ -21,6 +21,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   protected[this] val cluster: Cluster = Cluster(context.system)
   protected[this] var servers: Map[String, ActorRef] = Map()
   protected[this] var clients: Map[String, ActorRef] = Map()
+  protected[this] var stateMachineActor: ActorRef = _
   protected[this] var currentRole: ServerRole = ServerRole.FOLLOWER
   protected[this] var currentTerm: Int = 0
   protected[this] var lastApplied: Int = 0
@@ -32,7 +33,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
     cluster.subscribe(self, classOf[MemberUp], classOf[MemberDowned])
     cluster.registerOnMemberUp({
     })
-    context.actorOf(BankStateMachine.props(RandomUtil.randomBetween(RaftConstants.minimumStateMachineExecutionTime,
+    stateMachineActor = context.actorOf(BankStateMachine.props(RandomUtil.randomBetween(RaftConstants.minimumStateMachineExecutionTime,
       RaftConstants.maximumStateMachineExecutionTime).millis), "StateMachine")
   }
 
@@ -44,8 +45,12 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
     case GuiMsgLossServer(serverID, loss) => //TODO
   }
 
-  protected def startTimer(): Unit = {
+  protected def startTimeoutTimer(): Unit = {
     timers startTimerWithFixedDelay(SchedulerTickKey, SchedulerTick, RandomUtil.randomBetween(RaftConstants.minimumTimeout, RaftConstants.maximumTimeout) millis)
+  }
+
+  protected def startHeartbeatTimer(): Unit = {
+    timers startTimerWithFixedDelay(SchedulerTickKey, SchedulerTick, RaftConstants.heartbeatTimeout millis)
   }
 
   protected def broadcastMessage(raftMessage: RaftMessage): Unit = {
@@ -59,9 +64,10 @@ object ServerActor {
   case class IdentifyServer(senderRole: NodeRole) extends ServerInput with ControlMessage
   case class ServerIdentity(name: String) extends ServerInput with ControlMessage
   case class ClientIdentity(name: String) extends ServerInput with ControlMessage
-
+  //FROM STATE MACHINE
+  case class StateMachineResult(result: (Int, Option[Int])) extends ServerInput
+  //FROM SELF
   case object SchedulerTick extends ServerInput
-
   private sealed trait TimerKey
   private case object SchedulerTickKey extends TimerKey
 

@@ -2,6 +2,7 @@ package it.unibo.sd1920.akka_raft.model
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{ImplicitSender, TestKit, TestProbe}
+import it.unibo.sd1920.akka_raft.server.ServerActor.StateMachineResult
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -28,23 +29,23 @@ class BankStateMachineTest()
   "A State Machine actor with Deposit('A', 100) command" must {
     "send back messages executed to parent" in {
       parent.send(stateMachineActor, BankStateMachine.ApplyCommand(Entry(BankStateMachine.Deposit("A", 100), 0, 0, 256)))
-      parent.expectMsg(BankStateMachine.CommandResult(0, Some(100)))
+      parent.expectMsg(StateMachineResult(0, Some(100)))
     }
     "send back messages executed to parent after withdrawing" in {
       parent.send(stateMachineActor, BankStateMachine.ApplyCommand(Entry(BankStateMachine.Withdraw("A", 75), 1, 2, 234)))
-      parent.expectMsg(BankStateMachine.CommandResult(2, Some(25)))
+      parent.expectMsg(StateMachineResult(2, Some(25)))
     }
     "send empty back messages executed to parent after getBalance" in {
       parent.send(stateMachineActor, BankStateMachine.ApplyCommand(Entry(BankStateMachine.GetBalance("B"), 1, 5, 123)))
-      parent.expectMsg(BankStateMachine.CommandResult(5, None))
+      parent.expectMsg(StateMachineResult(5, None))
     }
     "send empty back messages executed to parent after withdraw B" in {
       parent.send(stateMachineActor, BankStateMachine.ApplyCommand(Entry(BankStateMachine.Withdraw("B", 10), 1, 7, 305)))
-      parent.expectMsg(BankStateMachine.CommandResult(7, None))
+      parent.expectMsg(StateMachineResult(7, None))
     }
     "send same response with duplicated request" in {
       parent.send(stateMachineActor, BankStateMachine.ApplyCommand(Entry(BankStateMachine.Withdraw("B", 10), 1, 7, 305)))
-      parent.expectMsg(BankStateMachine.CommandResult(7, None))
+      parent.expectMsg(StateMachineResult(7, None))
     }
   }
 }

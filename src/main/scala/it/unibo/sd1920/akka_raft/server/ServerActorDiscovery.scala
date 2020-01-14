@@ -35,7 +35,7 @@ private trait ServerActorDiscovery {
     this.servers = this.servers + (name -> sender())
     if (servers.size >= 5) {
       context.become(followerBehaviour)
-      startTimer()
+      startTimeoutTimer()
     }
   }
 }

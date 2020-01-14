@@ -2,6 +2,7 @@ package it.unibo.sd1920.akka_raft.model
 
 import akka.actor.{Actor, ActorLogging, Props, Timers}
 import it.unibo.sd1920.akka_raft.model.BankStateMachine._
+import it.unibo.sd1920.akka_raft.server.ServerActor.StateMachineResult
 
 import scala.collection.immutable.Queue
 import scala.concurrent.duration.FiniteDuration
@@ -18,7 +19,6 @@ object BankStateMachine {
 
   sealed trait StateMachineMsg
   case class ApplyCommand(entry: Entry[BankCommand]) extends StateMachineMsg
-  case class CommandResult(result: (Int, Option[Int])) extends StateMachineMsg
   case object SchedulerTick extends StateMachineMsg
 
   private sealed trait TimerKey
@@ -42,7 +42,7 @@ class BankStateMachine(schedulerTickPeriod: FiniteDuration) extends Actor with A
 
   private def onMessage: Receive = {
     case ApplyCommand(entry: Entry[BankCommand]) => commandQueue = commandQueue enqueue entry
-    case SchedulerTick => if (commandQueue.nonEmpty) context.parent ! CommandResult(applyNextEntry())
+    case SchedulerTick => if (commandQueue.nonEmpty) context.parent ! StateMachineResult(applyNextEntry())
   }
 
   private def applyNextEntry(): (Int, Option[Int]) = {

@@ -2,6 +2,7 @@ package it.unibo.sd1920.akka_raft.server
 
 
 import akka.actor.ActorRef
+import it.unibo.sd1920.akka_raft.model.BankStateMachine.ApplyCommand
 import it.unibo.sd1920.akka_raft.protocol._
 import it.unibo.sd1920.akka_raft.server.ServerActor.SchedulerTick
 
@@ -12,19 +13,19 @@ private trait FollowerBehaviour {
   private var leaderRef: Option[ActorRef] = None
 
   protected def followerBehaviour: Receive = controlBehaviour orElse {
-    case SchedulerTick => becomingCandidate()
+    case SchedulerTick => followerTimeout()
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case appendEntry: AppendEntries => handleAppendEntries(appendEntry)
     case ClientRequest(_, _) => sender() ! Redirect(leaderRef)
     case _ =>
   }
 
-  private def becomingCandidate(): Unit = {
+  private def followerTimeout(): Unit = {
     leaderRef = None
     currentTerm += 1
     context.become(candidateBehaviour)
     broadcastMessage(RequestVote(currentTerm, self, serverLog.lastTerm, serverLog.lastIndex))
-    startTimer()
+    startTimeoutTimer()
   }
 
   private def handleRequestVote(requestVote: RequestVote): Unit = {
@@ -36,7 +37,7 @@ private trait FollowerBehaviour {
         sender() ! RequestVoteResult(voteGranted = true, currentTerm)
       case RequestVote(_, _, _, _) => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
     }
-    startTimer()
+    startTimeoutTimer()
   }
 
   private def handleAppendEntries(appendEntry: AppendEntries): Unit = {
@@ -68,7 +69,7 @@ private trait FollowerBehaviour {
 
       case _ =>
     }
-    startTimer()
+    startTimeoutTimer()
   }
 
   private def checkAndUpdateTerm(term: Int): Unit = {
@@ -79,7 +80,9 @@ private trait FollowerBehaviour {
   }
 
   private def callCommit(index: Int): Unit = {
+    val lastCommitted: Int = serverLog.getCommitIndex
     serverLog.commit(index)
+    serverLog.getEntriesBetween(lastCommitted, index).foreach(e => stateMachineActor ! ApplyCommand(e))
   }
 
   private def checkElectionRestriction(lastLogTerm: Int, lastLogIndex: Int): Boolean = {
