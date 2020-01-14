@@ -6,7 +6,7 @@ import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
 import akka.dispatch.ControlMessage
 import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog}
-import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
+import it.unibo.sd1920.akka_raft.model.BankStateMachine.{ApplyCommand, BankCommand}
 import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage.{GuiMsgLossServer, GuiStopServer, GuiTimeoutServer}
 import it.unibo.sd1920.akka_raft.protocol.RaftMessage
 import it.unibo.sd1920.akka_raft.server.ServerActor.{SchedulerTick, SchedulerTickKey}
@@ -55,6 +55,12 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
 
   protected def broadcastMessage(raftMessage: RaftMessage): Unit = {
     servers.filter(s => s._2 != self).foreach(v => v._2 ! raftMessage)
+  }
+
+  protected def callCommit(index: Int): Unit = {
+    val lastCommitted: Int = serverLog.getCommitIndex
+    serverLog.commit(index)
+    serverLog.getEntriesBetween(lastCommitted, index).foreach(e => stateMachineActor ! ApplyCommand(e))
   }
 }
 

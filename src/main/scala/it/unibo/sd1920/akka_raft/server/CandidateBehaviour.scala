@@ -14,6 +14,7 @@ private trait CandidateBehaviour {
     case SchedulerTick => electionTimeout()
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case requestResult: RequestVoteResult => handleVoteResult(requestResult)
+    //TODO AppendEntries almeno guarda il term
     case _ =>
   }
 
@@ -59,6 +60,7 @@ private trait CandidateBehaviour {
     context.become(leaderBehaviour)
     voteForMyself()
     startHeartbeatTimer()
+    leaderPreBecome()
   }
 
   private def electionTimeout(): Unit = {

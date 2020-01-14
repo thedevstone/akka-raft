@@ -2,7 +2,6 @@ package it.unibo.sd1920.akka_raft.server
 
 
 import akka.actor.ActorRef
-import it.unibo.sd1920.akka_raft.model.BankStateMachine.ApplyCommand
 import it.unibo.sd1920.akka_raft.protocol._
 import it.unibo.sd1920.akka_raft.server.ServerActor.SchedulerTick
 
@@ -77,12 +76,6 @@ private trait FollowerBehaviour {
       currentTerm = term
       votedFor = None
     }
-  }
-
-  private def callCommit(index: Int): Unit = {
-    val lastCommitted: Int = serverLog.getCommitIndex
-    serverLog.commit(index)
-    serverLog.getEntriesBetween(lastCommitted, index).foreach(e => stateMachineActor ! ApplyCommand(e))
   }
 
   private def checkElectionRestriction(lastLogTerm: Int, lastLogIndex: Int): Boolean = {

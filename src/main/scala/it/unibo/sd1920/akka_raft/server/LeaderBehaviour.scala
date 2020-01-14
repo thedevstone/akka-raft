@@ -12,35 +12,49 @@ private trait LeaderBehaviour {
   private var followersStatusMap: Map[String, FollowerStatus] = Map()
 
   protected def leaderBehaviour: Receive = controlBehaviour orElse {
-    case AppendEntriesResult(res, _) => handleAppendResult(sender().path.name, res)
+    //FROM CLIENT
     case req: ClientRequest => handleRequest(req)
+    //FROM SERVER
+    case SchedulerTick => heartbeatTimeout()
+    case AppendEntriesResult(success, matchIndex) => handleAppendResult(sender().path.name, success, matchIndex)
     case RequestVote(candidateTerm, _, _, _) if candidateTerm > currentTerm =>
     //case StateMachineResult =>
-    case SchedulerTick => heartbeatTimeout()
   }
 
-  private def handleAppendResult(name: String, value: Boolean): Unit = name match {
-    case _ => followersStatusMap = followersStatusMap + (name -> new FollowerStatus(1, 1))
-  }
-
+  //FROM CLIENT
   private def handleRequest(req: ClientRequest): Unit = {
-    log info ("ciao")
     val i: Option[Int] = serverLog.getIndexFromReqId(req.requestID)
     if (serverLog.isReqIdCommitted(req.requestID)) {
       stateMachineActor ! ApplyCommand(new Entry[BankCommand](req.command, currentTerm, i.get, req.requestID))
     } else if (i.isEmpty) {
       val entry = new Entry[BankCommand](req.command, currentTerm, serverLog.size, req.requestID)
       serverLog.putElementAtIndex(entry)
-      log info entry.toString
     }
   }
 
+  //FROM SELF
   private def heartbeatTimeout(): Unit = {
     servers.filter(serverRef => serverRef._2 != self).foreach(server => server._2 ! AppendEntries(currentTerm, None, None, lastCommittedIndex))
   }
+
+  //FROM FOLLOWER
+  private def handleAppendResult(name: String, success: Boolean, matchIndex: Int): Unit = {
+    val previousValue = followersStatusMap(name)
+    if (success) {
+      followersStatusMap = followersStatusMap + (name -> FollowerStatus(previousValue.nextIndexToSend, matchIndex))
+      val entry = serverLog.getEntryAtIndex(previousValue.nextIndexToSend)
+      if (previousValue.nextIndexToSend <= serverLog.lastIndex) sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entry.get), entry, lastCommittedIndex)
+    } else {
+      followersStatusMap = followersStatusMap + (name -> FollowerStatus(previousValue.nextIndexToSend - 1, matchIndex))
+    }
+  }
+
+  protected def leaderPreBecome(): Unit = {
+    servers.keys.foreach(name => followersStatusMap = followersStatusMap + (name -> FollowerStatus(serverLog.lastIndex, -1)))
+  }
 }
 
-class FollowerStatus(nextIndexToSend: Int, lastMatchIndex: Int) {
+case class FollowerStatus(nextIndexToSend: Int, lastMatchIndex: Int) {
   assert(nextIndexToSend >= 0)
   assert(lastMatchIndex >= 0)
 }
