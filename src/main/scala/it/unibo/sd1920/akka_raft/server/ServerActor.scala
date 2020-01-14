@@ -25,7 +25,6 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   protected[this] var currentRole: ServerRole = ServerRole.FOLLOWER
   protected[this] var currentTerm: Int = 0
   protected[this] var lastApplied: Int = 0
-  protected[this] var lastCommittedIndex: Int = 0
   protected[this] var votedFor: Option[String] = None
   protected[this] val serverLog: CommandLog[BankCommand] = CommandLog.emptyLog()
 
@@ -37,7 +36,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
       RaftConstants.maximumStateMachineExecutionTime).millis), "StateMachine")
   }
 
-  override def receive: Receive = followerBehaviour
+  override def receive: Receive = clusterDiscoveryBehaviour
 
   protected def controlBehaviour: Receive = clusterDiscoveryBehaviour orElse {
     case GuiStopServer(serverID) => //TODO
@@ -57,7 +56,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
     servers.filter(s => s._2 != self).foreach(v => v._2 ! raftMessage)
   }
 
-  protected def logWithRole(msg: String): Unit = log info (s"${self.path.name}:$currentRole -> $msg")
+  protected def logWithRole(msg: String): Unit = log info s"${self.path.name}:$currentRole -> $msg"
 }
 
 object ServerActor {
