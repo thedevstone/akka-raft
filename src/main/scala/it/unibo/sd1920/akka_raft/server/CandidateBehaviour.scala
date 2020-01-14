@@ -55,7 +55,7 @@ private trait CandidateBehaviour {
   private def becomingLeader(): Unit = {
     val lastEntry: Option[Entry[BankCommand]] = serverLog.getLastEntry
     broadcastMessage(AppendEntries(currentTerm,
-      if (lastEntry.isEmpty) None else serverLog.getPreviousEntry(lastEntry.get), lastEntry, lastCommittedIndex))
+      if (lastEntry.isEmpty) None else serverLog.getPreviousEntry(lastEntry.get), lastEntry, serverLog.getCommitIndex))
     context.become(leaderBehaviour)
     voteForMyself()
     startHeartbeatTimer()
