@@ -5,9 +5,10 @@ import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
 import akka.dispatch.ControlMessage
 import com.typesafe.config.ConfigFactory
-import it.unibo.sd1920.akka_raft.client.ClientActor._
 import it.unibo.sd1920.akka_raft.model.{BankStateMachine, ServerVolatileState}
 import it.unibo.sd1920.akka_raft.model.BankStateMachine._
+import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage._
+import it.unibo.sd1920.akka_raft.protocol.ResultArrived
 import it.unibo.sd1920.akka_raft.server.ServerActor
 import it.unibo.sd1920.akka_raft.utils.{CommandType, NetworkConstants}
 import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
@@ -33,6 +34,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
   override def receive: Receive = clusterBehaviour orElse onMessage
 
   def onMessage: Receive = {
+    //FROM SERVER
     case ResultArrived(id, result) => handleResult(id, result)
     case Log(message) => log info message
     case GuiServerState(serverState) => guiUpdateServerInfo(serverState)
@@ -100,16 +102,6 @@ object ClientActor {
   case class IdentifyClient(senderRole: NodeRole) extends ClientInput with ControlMessage
   case class ServerIdentity(name: String) extends ClientInput with ControlMessage
   case class ClientIdentity(name: String) extends ClientInput with ControlMessage
-  case class ResultArrived(id: Int, result: Option[Int]) extends ClientInput
-
-  sealed trait GuiClientMessage
-  case class GuiClientCommand(targetServer: String, command: BankCommand) extends GuiClientMessage with ControlMessage
-  case class Log(message: String) extends GuiClientMessage with ControlMessage
-  case class GuiServerState(serverState: ServerVolatileState) extends GuiClientMessage with ControlMessage
-  case class GuiStopServer(serverID: String) extends GuiClientMessage with ControlMessage
-  case class GuiTimeoutServer(serverID: String) extends GuiClientMessage with ControlMessage
-  case class GuiMsgLossServer(serverID: String, value: Double) extends GuiClientMessage with ControlMessage
-  case class GuiSendMessage(serverID: String, commandType: CommandType, iban: String, amount: String) extends GuiClientMessage with ControlMessage
 
   //STARTING CLIENT
   def props: Props = Props(new ClientActor())

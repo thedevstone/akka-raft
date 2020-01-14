@@ -2,8 +2,8 @@ package it.unibo.sd1920.akka_raft.view.screens
 
 import akka.actor.ActorRef
 import com.sun.javafx.application.PlatformImpl
-import it.unibo.sd1920.akka_raft.client.ClientActor
 import it.unibo.sd1920.akka_raft.model.ServerVolatileState
+import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage
 import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
 import it.unibo.sd1920.akka_raft.view.utilities.ViewUtilities
 import it.unibo.sd1920.akka_raft.view.FXMLScreens
@@ -51,12 +51,12 @@ class MainScreenView extends AbstractMainScreenView() with ClientObserver {
   }
 
   // ##################### TO CLIENT ACTOR
-  override def log(message: String): Unit = clientActorRef ! ClientActor.Log(message)
-  override def stopServer(serverID: String): Unit = clientActorRef ! ClientActor.GuiStopServer(serverID)
-  override def timeoutServer(serverID: String): Unit = clientActorRef ! ClientActor.GuiTimeoutServer(serverID)
+  override def log(message: String): Unit = clientActorRef ! GuiControlMessage.Log(message)
+  override def stopServer(serverID: String): Unit = clientActorRef ! GuiControlMessage.GuiStopServer(serverID)
+  override def timeoutServer(serverID: String): Unit = clientActorRef ! GuiControlMessage.GuiTimeoutServer(serverID)
   override def sendMessage(serverID: String, commandType: CommandType, iban: String, amount: String): Unit =
-    clientActorRef ! ClientActor.GuiSendMessage(serverID, commandType, iban, amount)
-  override def messageLoss(serverID: String, value: Double): Unit = clientActorRef ! ClientActor.GuiMsgLossServer(serverID, value)
+    clientActorRef ! GuiControlMessage.GuiSendMessage(serverID, commandType, iban, amount)
+  override def messageLoss(serverID: String, value: Double): Unit = clientActorRef ! GuiControlMessage.GuiMsgLossServer(serverID, value)
 }
 
 object MainScreenView {

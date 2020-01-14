@@ -7,7 +7,7 @@ import akka.dispatch.ControlMessage
 import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog}
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
-import it.unibo.sd1920.akka_raft.raft.RaftMessage
+import it.unibo.sd1920.akka_raft.protocol.RaftMessage
 import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientRequest, GuiCommand, SchedulerTick, SchedulerTickKey}
 import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, RaftConstants, RandomUtil, ServerRole}
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole

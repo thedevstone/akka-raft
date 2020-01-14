@@ -2,7 +2,7 @@ package it.unibo.sd1920.akka_raft.server
 
 
 import akka.actor.ActorRef
-import it.unibo.sd1920.akka_raft.raft._
+import it.unibo.sd1920.akka_raft.protocol._
 import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientRequest, SchedulerTick}
 
 

@@ -1,4 +1,4 @@
-package it.unibo.sd1920.akka_raft.raft
+package it.unibo.sd1920.akka_raft.protocol
 
 import akka.actor.ActorRef
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
@@ -41,4 +41,4 @@ case class Redirect(
   leaderRef: Option[ActorRef]
 ) extends RaftMessage
 
-
+case class ResultArrived(id: Int, result: Option[Int]) extends RaftMessage
