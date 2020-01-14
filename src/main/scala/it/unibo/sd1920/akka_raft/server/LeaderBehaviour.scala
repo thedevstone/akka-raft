@@ -2,8 +2,8 @@ package it.unibo.sd1920.akka_raft.server
 
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{ApplyCommand, BankCommand, CommandResult}
 import it.unibo.sd1920.akka_raft.model.Entry
-import it.unibo.sd1920.akka_raft.protocol.{AppendEntries, AppendEntriesResult, RequestVote}
-import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientRequest, SchedulerTick}
+import it.unibo.sd1920.akka_raft.protocol.{AppendEntries, AppendEntriesResult, ClientRequest, RequestVote}
+import it.unibo.sd1920.akka_raft.server.ServerActor.SchedulerTick
 
 
 private trait LeaderBehaviour {

@@ -7,9 +7,8 @@ import akka.dispatch.ControlMessage
 import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.model.{BankStateMachine, ServerVolatileState}
 import it.unibo.sd1920.akka_raft.model.BankStateMachine._
+import it.unibo.sd1920.akka_raft.protocol.{ClientRequest, RequestResult}
 import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage._
-import it.unibo.sd1920.akka_raft.protocol.ResultArrived
-import it.unibo.sd1920.akka_raft.server.ServerActor
 import it.unibo.sd1920.akka_raft.utils.{CommandType, NetworkConstants}
 import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
@@ -20,7 +19,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
   protected[this] val cluster: Cluster = Cluster(context.system)
   protected[this] var servers: Map[String, ActorRef] = Map()
   protected[this] var clients: Map[String, ActorRef] = Map()
-  protected[this] var requestHistory: Map[Int, Result] = Map()
+  protected[this] var requestHistory: Map[Int, ResultState] = Map()
   protected[this] var requestID: Int = 0
 
   view.setViewActorRef(self)
@@ -34,35 +33,30 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
   override def receive: Receive = clusterBehaviour orElse onMessage
 
   def onMessage: Receive = {
-    //FROM SERVER
-    case ResultArrived(id, result) => handleResult(id, result)
-    case Log(message) => log info message
+    //FROM SERVER TO GUI
+    case RequestResult(id, result) => handleResult(id, result)
     case GuiServerState(serverState) => guiUpdateServerInfo(serverState)
 
-    //FROM GUI
-    case GuiStopServer(serverID) => stopServer(serverID)
-    case GuiTimeoutServer(serverID) => timeoutServer(serverID)
-    case GuiMsgLossServer(serverID, loss) => setLossServer(serverID, loss)
+    //FROM GUI TO SERVER
+    case GuiStopServer(serverID) => servers(serverID) ! GuiStopServer(serverID)
+    case GuiTimeoutServer(serverID) => servers(serverID) ! GuiTimeoutServer(serverID)
+    case GuiMsgLossServer(serverID, loss) => servers(serverID) ! GuiMsgLossServer(serverID, loss)
     case GuiSendMessage(serverID, commandType, iban, amount) => elaborateGuiSendRequest(serverID, commandType, iban, amount)
+    case Log(message) => log info message
   }
 
-  def sendRequest(targetServer: String, command: BankCommand): Unit = {
-    log.info(s"Server: $targetServer command: $command")
-    this.servers(targetServer) ! ServerActor.ClientRequest(requestID, command)
-  }
-
-  private def handleResult(reqID: Int, result: Option[Int]): Unit = {
-    this.requestHistory = Map(reqID -> Result(executed = true, this.requestHistory(reqID).command, result))
-    //TODO showResultInGui
-  }
-
-  //TO GUI
+  //FROM SERVER TO GUI
   private def guiUpdateServerInfo(serverVolatileState: ServerVolatileState): Unit = {
     val nodeId = resolveNodeID(sender())
     view.updateServerState(nodeId, serverVolatileState)
   }
 
-  //FROM GUI
+  private def handleResult(reqID: Int, result: Option[Int]): Unit = {
+    this.requestHistory = Map(reqID -> ResultState(executed = true, this.requestHistory(reqID).command, result))
+    //TODO showResultInGui
+  }
+
+  //FROM GUI TO SERVER
   private def elaborateGuiSendRequest(targetServer: String, command: CommandType, iban: String, amount: String): Unit = {
     var amountInt = 0
     try amountInt = amount.toInt catch {
@@ -73,24 +67,9 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
       case CommandType.WITHDRAW => BankStateMachine.Withdraw(iban, amountInt)
       case CommandType.GET_BALANCE => BankStateMachine.GetBalance(iban)
     }
-    this.requestHistory = Map(this.requestID -> Result(executed = false, serverCommand, None))
+    this.requestHistory = Map(this.requestID -> ResultState(executed = false, serverCommand, None))
     this.requestID += 1
-    sendRequest(targetServer, serverCommand)
-  }
-
-  private def stopServer(targetServer: String): Unit = {
-    //TODO
-    log info s"Stop: $targetServer"
-  }
-
-  private def timeoutServer(targetServer: String): Unit = {
-    //TODO
-    log info s"Timout: $targetServer"
-  }
-
-  private def setLossServer(targetServer: String, loss: Double): Unit = {
-    //TODO
-    log info s"Loss: $targetServer percentage: $loss"
+    servers(targetServer) ! ClientRequest(requestID, serverCommand)
   }
 
   private def resolveNodeID(actorRef: ActorRef): String = servers.filter(e => e._2 == sender()).last._1
@@ -117,7 +96,7 @@ object ClientActor {
   }
 }
 
-case class Result(
+case class ResultState(
   executed: Boolean,
   command: BankCommand,
   result: Option[Int]

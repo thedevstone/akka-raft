@@ -27,19 +27,15 @@ private trait ServerActorDiscovery {
     case _ =>
   }
 
-  private def addServer(name: String): Unit ={
+  private def addServer(name: String): Unit = {
     this.clients = this.clients + (name -> sender())
   }
 
-  private def addClient(name: String): Unit ={
+  private def addClient(name: String): Unit = {
     this.servers = this.servers + (name -> sender())
     if (servers.size >= 5) {
       context.become(followerBehaviour)
       startTimer()
     }
   }
-
-
-
-
 }

@@ -8,7 +8,7 @@ import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog}
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
 import it.unibo.sd1920.akka_raft.protocol.RaftMessage
-import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientRequest, GuiCommand, SchedulerTick, SchedulerTickKey}
+import it.unibo.sd1920.akka_raft.server.ServerActor.{SchedulerTick, SchedulerTickKey}
 import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, RaftConstants, RandomUtil, ServerRole}
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
 import it.unibo.sd1920.akka_raft.utils.ServerRole.ServerRole
@@ -38,10 +38,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   override def receive: Receive = followerBehaviour
 
   private def onMessage: Receive = clusterBehaviour orElse {
-    case ClientRequest(requestID, bankCommand) =>
-    case GuiCommand(2) => this.context.become(leaderBehaviour, discardOld = true)
-    case GuiCommand(3) =>
-    case GuiCommand(4) =>
+    case _ =>
   }
 
   protected def startTimer(): Unit = {
@@ -59,7 +56,7 @@ object ServerActor {
   case class IdentifyServer(senderRole: NodeRole) extends ServerInput with ControlMessage
   case class ServerIdentity(name: String) extends ServerInput with ControlMessage
   case class ClientIdentity(name: String) extends ServerInput with ControlMessage
-  case class ClientRequest(requestID: Int, command: BankCommand) extends ServerInput
+
   case object SchedulerTick extends ServerInput
 
   sealed trait GuiServerMessage extends ServerInput

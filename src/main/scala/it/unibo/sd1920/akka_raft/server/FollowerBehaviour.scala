@@ -3,7 +3,7 @@ package it.unibo.sd1920.akka_raft.server
 
 import akka.actor.ActorRef
 import it.unibo.sd1920.akka_raft.protocol._
-import it.unibo.sd1920.akka_raft.server.ServerActor.{ClientRequest, SchedulerTick}
+import it.unibo.sd1920.akka_raft.server.ServerActor.SchedulerTick
 
 
 private trait FollowerBehaviour {
