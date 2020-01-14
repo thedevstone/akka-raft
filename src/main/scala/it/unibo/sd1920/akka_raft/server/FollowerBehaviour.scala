@@ -11,7 +11,7 @@ private trait FollowerBehaviour {
 
   private var leaderRef: Option[ActorRef] = None
 
-  protected def followerBehaviour: Receive = clusterBehaviour orElse {
+  protected def followerBehaviour: Receive = controlBehaviour orElse {
     case SchedulerTick => becomingCandidate()
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case appendEntry: AppendEntries => handleAppendEntries(appendEntry)

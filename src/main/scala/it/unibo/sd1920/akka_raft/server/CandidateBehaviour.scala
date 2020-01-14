@@ -10,7 +10,7 @@ private trait CandidateBehaviour {
 
   private var voteCounter: Int = 1
 
-  protected def candidateBehaviour: Receive = clusterBehaviour orElse {
+  protected def candidateBehaviour: Receive = controlBehaviour orElse {
     case SchedulerTick => restart()
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case requestResult: RequestVoteResult => handleVoteResult(requestResult)

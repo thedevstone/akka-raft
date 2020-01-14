@@ -11,7 +11,7 @@ private trait LeaderBehaviour {
 
   private var followersStatusMap: Map[String, FollowerStatus] = Map()
 
-  protected def leaderBehaviour: Receive = clusterBehaviour orElse {
+  protected def leaderBehaviour: Receive = controlBehaviour orElse {
     case AppendEntriesResult(res, _) => handleAppendResult(sender().path.name, res)
     case req: ClientRequest => handleRequest(req)
     case RequestVote(candidateTerm, _, _, _) if candidateTerm > currentTerm =>

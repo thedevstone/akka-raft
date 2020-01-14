@@ -7,6 +7,7 @@ import akka.dispatch.ControlMessage
 import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog}
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
+import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage.{GuiMsgLossServer, GuiStopServer, GuiTimeoutServer}
 import it.unibo.sd1920.akka_raft.protocol.RaftMessage
 import it.unibo.sd1920.akka_raft.server.ServerActor.{SchedulerTick, SchedulerTickKey}
 import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, RaftConstants, RandomUtil, ServerRole}
@@ -37,8 +38,10 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
 
   override def receive: Receive = followerBehaviour
 
-  private def onMessage: Receive = clusterBehaviour orElse {
-    case _ =>
+  protected def controlBehaviour: Receive = clusterBehaviour orElse {
+    case GuiStopServer(serverID) => //TODO
+    case GuiTimeoutServer(serverID) => //TODO
+    case GuiMsgLossServer(serverID, loss) => //TODO
   }
 
   protected def startTimer(): Unit = {
@@ -58,9 +61,6 @@ object ServerActor {
   case class ClientIdentity(name: String) extends ServerInput with ControlMessage
 
   case object SchedulerTick extends ServerInput
-
-  sealed trait GuiServerMessage extends ServerInput
-  case class GuiCommand(commandType: Int) extends GuiServerMessage
 
   private sealed trait TimerKey
   private case object SchedulerTickKey extends TimerKey
