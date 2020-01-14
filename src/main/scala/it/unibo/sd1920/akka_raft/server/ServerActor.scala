@@ -39,7 +39,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
 
   override def receive: Receive = followerBehaviour
 
-  protected def controlBehaviour: Receive = clusterBehaviour orElse {
+  protected def controlBehaviour: Receive = clusterDiscoveryBehaviour orElse {
     case GuiStopServer(serverID) => //TODO
     case GuiTimeoutServer(serverID) => //TODO
     case GuiMsgLossServer(serverID, loss) => //TODO

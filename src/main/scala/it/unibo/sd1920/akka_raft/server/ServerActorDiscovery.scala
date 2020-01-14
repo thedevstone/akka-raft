@@ -9,13 +9,13 @@ import it.unibo.sd1920.akka_raft.utils.NodeRole
 private trait ServerActorDiscovery {
   this: ServerActor =>
 
-  protected def clusterBehaviour: Receive = {
+  protected def clusterDiscoveryBehaviour: Receive = {
     case MemberUp(member) => this.manageNewMember(member)
     case MemberDowned(member) =>
     case IdentifyServer(NodeRole.SERVER) => sender() ! ServerActor.ServerIdentity(self.path.name)
     case IdentifyServer(NodeRole.CLIENT) => sender() ! ClientActor.ServerIdentity(self.path.name)
-    case ServerIdentity(name: String) => addClient(name)
-    case ClientIdentity(name: String) => addServer(name)
+    case ClientIdentity(name: String) => addClient(name)
+    case ServerIdentity(name: String) => addServer(name)
   }
 
 
@@ -27,11 +27,11 @@ private trait ServerActorDiscovery {
     case _ =>
   }
 
-  private def addServer(name: String): Unit = {
+  private def addClient(name: String): Unit = {
     this.clients = this.clients + (name -> sender())
   }
 
-  private def addClient(name: String): Unit = {
+  private def addServer(name: String): Unit = {
     this.servers = this.servers + (name -> sender())
     if (servers.size >= 5) {
       context.become(followerBehaviour)
