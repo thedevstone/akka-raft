@@ -36,7 +36,7 @@ private trait LeaderBehaviour {
 
 
   private def heartbeatTimeout(): Unit = {
-    servers.filter(serverRef => serverRef._2 != self).foreach(server => server._2 ! AppendEntries(currentTerm, None, None, lastCommittedIndex))
+    servers.filter(serverRef => serverRef._2 != self).foreach(server => server._2 ! AppendEntries(currentTerm, None, None, serverLog.getCommitIndex))
   }
 }
 
