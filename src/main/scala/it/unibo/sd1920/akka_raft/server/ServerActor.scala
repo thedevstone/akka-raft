@@ -56,6 +56,8 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   protected def broadcastMessage(raftMessage: RaftMessage): Unit = {
     servers.filter(s => s._2 != self).foreach(v => v._2 ! raftMessage)
   }
+
+  protected def logWithRole(msg: String): Unit = log info (s"${self.path.name}:$currentRole -> $msg")
 }
 
 object ServerActor {

@@ -24,16 +24,16 @@ private trait LeaderBehaviour {
   }
 
   private def handleRequest(req: ClientRequest): Unit = {
-    log info ("ciao")
     val i: Option[Int] = serverLog.getIndexFromReqId(req.requestID)
     if (serverLog.isReqIdCommitted(req.requestID)) {
       stateMachineActor ! ApplyCommand(new Entry[BankCommand](req.command, currentTerm, i.get, req.requestID))
     } else if (i.isEmpty) {
       val entry = new Entry[BankCommand](req.command, currentTerm, serverLog.size, req.requestID)
       serverLog.putElementAtIndex(entry)
-      log info entry.toString
+      logWithRole(entry.toString)
     }
   }
+
 
   private def heartbeatTimeout(): Unit = {
     servers.filter(serverRef => serverRef._2 != self).foreach(server => server._2 ! AppendEntries(currentTerm, None, None, lastCommittedIndex))
