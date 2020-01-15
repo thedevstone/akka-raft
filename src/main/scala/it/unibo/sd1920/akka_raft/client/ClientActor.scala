@@ -33,6 +33,9 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
   override def receive: Receive = clusterBehaviour orElse onMessage
 
   def onMessage: Receive = {
+    //RAFT
+    //TODO Redirect
+    //TODO Timer
     //FROM SERVER TO GUI
     case RequestResult(id, result) => handleResult(id, result)
     case GuiServerState(serverState) => guiUpdateServerInfo(serverState)

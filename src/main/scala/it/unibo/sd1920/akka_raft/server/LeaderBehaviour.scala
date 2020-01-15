@@ -34,18 +34,25 @@ private trait LeaderBehaviour {
 
   //FROM SELF
   private def heartbeatTimeout(): Unit = {
-    servers.filter(serverRef => serverRef._2 != self).foreach(server => server._2 ! AppendEntries(currentTerm, None, None, lastCommittedIndex))
+    servers.toStream.filter(s => s._2 != self).foreach(e => {
+      followersStatusMap(e._1).nextIndexToSend match {
+        case 0 => e._2 ! AppendEntries(currentTerm, None, None, serverLog.getCommitIndex)
+        case nextIndexToSend => e._2 ! AppendEntries(currentTerm, serverLog.getEntryAtIndex(nextIndexToSend - 1), None, serverLog.getCommitIndex)
+      }
+    })
   }
 
   //FROM FOLLOWER
   private def handleAppendResult(name: String, success: Boolean, matchIndex: Int): Unit = {
-    val previousValue = followersStatusMap(name)
-    if (success) {
-      followersStatusMap = followersStatusMap + (name -> FollowerStatus(previousValue.nextIndexToSend, matchIndex))
-      val entry = serverLog.getEntryAtIndex(previousValue.nextIndexToSend)
-      if (previousValue.nextIndexToSend <= serverLog.lastIndex) sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entry.get), entry, lastCommittedIndex)
-    } else {
-      followersStatusMap = followersStatusMap + (name -> FollowerStatus(previousValue.nextIndexToSend - 1, matchIndex))
+    val followerStatus = followersStatusMap(name)
+    if (success) { //
+      followersStatusMap = followersStatusMap + (name -> FollowerStatus(matchIndex + 1, matchIndex))
+      if (followerStatus.nextIndexToSend <= serverLog.lastIndex) {
+        val entryToSend = serverLog.getEntryAtIndex(followerStatus.nextIndexToSend)
+        sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entryToSend.get), entryToSend, lastCommittedIndex)
+      }
+    } else { //Leader Consistency check
+      followersStatusMap = followersStatusMap + (name -> FollowerStatus(followerStatus.nextIndexToSend - 1, matchIndex))
     }
   }
 
