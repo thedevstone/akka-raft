@@ -30,7 +30,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
     cluster.registerOnMemberUp({})
   }
 
-  override def receive: Receive = clusterBehaviour orElse onMessage
+  override def receive: Receive = clusterBehaviour
 
   def onMessage: Receive = {
     //RAFT
@@ -79,11 +79,13 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
 }
 
 object ClientActor {
+
   //MESSAGES TO CLIENT
   sealed trait ClientInput
   case class IdentifyClient(senderRole: NodeRole) extends ClientInput with ControlMessage
   case class ServerIdentity(name: String) extends ClientInput with ControlMessage
   case class ClientIdentity(name: String) extends ClientInput with ControlMessage
+
 
   //STARTING CLIENT
   def props: Props = Props(new ClientActor())

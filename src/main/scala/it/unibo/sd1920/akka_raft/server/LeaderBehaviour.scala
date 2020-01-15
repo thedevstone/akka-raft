@@ -1,10 +1,12 @@
 package it.unibo.sd1920.akka_raft.server
 
+import it.unibo.sd1920.akka_raft.model.{Entry, ServerVolatileState}
 import it.unibo.sd1920.akka_raft.model.Bank.BankTransactionResult
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{ApplyCommand, BankCommand}
-import it.unibo.sd1920.akka_raft.model.Entry
 import it.unibo.sd1920.akka_raft.protocol._
+import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage.GuiServerState
 import it.unibo.sd1920.akka_raft.server.ServerActor.{SchedulerTick, StateMachineResult}
+import it.unibo.sd1920.akka_raft.utils.ServerRole
 
 
 private trait LeaderBehaviour {
@@ -34,7 +36,7 @@ private trait LeaderBehaviour {
     val index = indexAndResult._1
     val result = indexAndResult._2
     val reqID = serverLog.getEntryAtIndex(index).get.requestId
-    clients.last._2 ! RequestResult(reqID, result.isSucceeded, result.balance)
+    //clients.last._2 ! RequestResult(reqID, result.isSucceeded, result.balance) //TODO come mai?
   }
 
   //FROM CLIENT
@@ -56,6 +58,7 @@ private trait LeaderBehaviour {
         case nextIndexToSend => e._2 ! AppendEntries(currentTerm, serverLog.getEntryAtIndex(nextIndexToSend - 1), None, serverLog.getCommitIndex)
       }
     })
+    clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, 1, 1, serverLog.getEntries)) //TODO da cancellare
   }
 
   //FROM CANDIDATE
@@ -80,6 +83,7 @@ private trait LeaderBehaviour {
     currentTerm = term
     context.become(followerBehaviour)
     startTimeoutTimer()
+    currentRole = ServerRole.FOLLOWER
   }
 
   //FROM FOLLOWER
@@ -110,16 +114,25 @@ private trait LeaderBehaviour {
   }
 
   private def checkCommitFromEarlierTerm(commitIndex: Int): Boolean = {
-    val entry = serverLog.getEntryAtIndex(commitIndex).get
-    !(entry.term < currentTerm)
+    if (commitIndex != -1) {
+      val entry = serverLog.getEntryAtIndex(commitIndex).get
+      !(entry.term < currentTerm)
+    } else {
+      false
+    }
+
   }
 
   protected def leaderPreBecome(): Unit = {
-    servers.keys.foreach(name => followersStatusMap = followersStatusMap + (name -> FollowerStatus(serverLog.lastIndex, -1)))
+    if (serverLog.lastIndex == -1) {
+      servers.keys.foreach(name => followersStatusMap = followersStatusMap + (name -> FollowerStatus(0, -1)))
+    } else {
+      servers.keys.foreach(name => followersStatusMap = followersStatusMap + (name -> FollowerStatus(serverLog.lastIndex, -1)))
+    }
   }
 }
 
 case class FollowerStatus(nextIndexToSend: Int, lastMatchIndex: Int) {
   assert(nextIndexToSend >= 0)
-  assert(lastMatchIndex >= 0)
+  assert(lastMatchIndex >= -1)
 }

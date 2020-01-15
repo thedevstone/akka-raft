@@ -2,8 +2,11 @@ package it.unibo.sd1920.akka_raft.server
 
 
 import akka.actor.ActorRef
+import it.unibo.sd1920.akka_raft.model.ServerVolatileState
 import it.unibo.sd1920.akka_raft.protocol._
+import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage.GuiServerState
 import it.unibo.sd1920.akka_raft.server.ServerActor.SchedulerTick
+import it.unibo.sd1920.akka_raft.utils.ServerRole
 
 
 private trait FollowerBehaviour {
@@ -20,11 +23,13 @@ private trait FollowerBehaviour {
   }
 
   private def followerTimeout(): Unit = {
+    logWithRole("Timeout")
     leaderRef = None
     currentTerm += 1
     context.become(candidateBehaviour)
     broadcastMessage(RequestVote(currentTerm, self, serverLog.lastTerm, serverLog.lastIndex))
     startTimeoutTimer()
+    currentRole = ServerRole.CANDIDATE
   }
 
   private def handleRequestVote(requestVote: RequestVote): Unit = {
@@ -42,25 +47,28 @@ private trait FollowerBehaviour {
   private def handleAppendEntries(appendEntry: AppendEntries): Unit = {
     leaderRef = Some(sender())
     checkAndUpdateTerm(appendEntry.leaderTerm)
-
+    logWithRole("Messaggio arrivato" + appendEntry)
     appendEntry match {
 
       //caso rifiuto append da leader più indietro di me
-      case AppendEntries(leaderTerm, _, _, _) if leaderTerm < currentTerm => sender() ! AppendEntriesResult(success = false, -1)
+      case AppendEntries(leaderTerm, _, _, _) if leaderTerm < currentTerm =>
+        sender() ! AppendEntriesResult(success = false, -1)
 
       //caso leader manda prima entry del log.
       case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty && entry.nonEmpty => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
-        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), -1)
+        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), 0) //TODO MODIFICATO LAST MATCH IN 0
 
       //caso leader ha log vuoto e manda append con sia prev che entry vuote. Devo ritornare SEMPRE true
-      case AppendEntries(_, previousEntry, entry, _) if previousEntry.isEmpty && entry.isEmpty => sender() ! AppendEntriesResult(success = true, -1)
+      case AppendEntries(_, previousEntry, entry, _) if previousEntry.isEmpty && entry.isEmpty =>
+        sender() ! AppendEntriesResult(success = true, -1)
 
       //caso non ho prev entry nel log. Rispondi false indipendentemente da se entry è empty o meno
-      case AppendEntries(_, previousEntry, _, _) if !serverLog.contains(previousEntry.get) => sender() ! AppendEntriesResult(success = false, -1)
+      case AppendEntries(_, previousEntry, _, _) if !serverLog.contains(previousEntry.get) =>
+        sender() ! AppendEntriesResult(success = false, -1)
 
       //caso prev entry presente nel log. Se ho entry da appendere lo faccio,
       case AppendEntries(_, previousEntry, entry, leaderLastCommit) if entry.nonEmpty => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
-        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), previousEntry.get.index)
+        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), previousEntry.get.index + 1) //TODO errore +1?? //TODO MODIFICATO LAST MATCH IN +1
 
       // altrimenti ritorno solo true
       case AppendEntries(_, previousEntry, _, leaderLastCommit) => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
@@ -68,6 +76,8 @@ private trait FollowerBehaviour {
 
       case _ =>
     }
+    clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, 1, 1, serverLog.getEntries)) //TODO da cancellare
+
     startTimeoutTimer()
   }
 

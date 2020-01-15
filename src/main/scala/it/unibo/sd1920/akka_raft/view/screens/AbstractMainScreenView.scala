@@ -140,7 +140,9 @@ abstract class AbstractMainScreenView extends View {
           val entryToAdd = new EntryBox(s"${serverVolatileState.currentTerm} : ${c.command.toString.substring(0, 1)}", ledOn)
           entry._2.getChildren.add(entryToAdd)
         })
-        updateServerState(serverVolatileState)
+        if (this.serverIDCombo.getSelectionModel.getSelectedItem == serverID) {
+          updateServerState(serverVolatileState)
+        }
     }
   }
 

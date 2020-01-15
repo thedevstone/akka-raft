@@ -4,6 +4,7 @@ import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
 import it.unibo.sd1920.akka_raft.model.Entry
 import it.unibo.sd1920.akka_raft.protocol.{AppendEntries, RequestVote, RequestVoteResult}
 import it.unibo.sd1920.akka_raft.server.ServerActor.SchedulerTick
+import it.unibo.sd1920.akka_raft.utils.ServerRole
 
 private trait CandidateBehaviour {
   this: ServerActor =>
@@ -51,9 +52,11 @@ private trait CandidateBehaviour {
     context.become(followerBehaviour)
     voteForMyself()
     startTimeoutTimer()
+    currentRole = ServerRole.FOLLOWER
   }
 
   private def becomingLeader(): Unit = {
+    logWithRole("Divento leader")
     val lastEntry: Option[Entry[BankCommand]] = serverLog.getLastEntry
     broadcastMessage(AppendEntries(currentTerm,
       if (lastEntry.isEmpty) None else serverLog.getPreviousEntry(lastEntry.get), lastEntry, serverLog.getCommitIndex))
@@ -61,6 +64,7 @@ private trait CandidateBehaviour {
     voteForMyself()
     startHeartbeatTimer()
     leaderPreBecome()
+    currentRole = ServerRole.LEADER
   }
 
   private def electionTimeout(): Unit = {

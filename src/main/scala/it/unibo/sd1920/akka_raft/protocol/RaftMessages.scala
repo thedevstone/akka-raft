@@ -5,6 +5,7 @@ import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
 import it.unibo.sd1920.akka_raft.model.Entry
 
 sealed trait RaftMessage
+
 case class RequestVote(
   candidateTerm: Int,
   candidateId: ActorRef,
@@ -29,7 +30,7 @@ case class AppendEntries(
   leaderLastCommit: Int,
 ) extends RaftMessage {
   assert(leaderTerm >= 0)
-  assert(leaderLastCommit >= 0)
+  assert(leaderLastCommit >= -1)
 }
 
 case class AppendEntriesResult(

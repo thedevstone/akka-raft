@@ -34,7 +34,7 @@ private trait ClientActorDiscovery {
     this.servers = this.servers + (name -> sender())
     view addServer name
     if (servers.size >= NetworkConstants.numberOfServer) {
-      context become onMessage
+      context become (clusterBehaviour orElse onMessage)
     }
   }
 }

@@ -64,23 +64,31 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   }
 
   protected def checkElectionRestriction(lastLogTerm: Int, lastLogIndex: Int): Boolean = {
-    lastLogTerm >= currentTerm && lastLogIndex >= serverLog.lastIndex
+    lastLogTerm >= serverLog.lastTerm && lastLogIndex >= serverLog.lastIndex
   }
 
   protected def logWithRole(msg: String): Unit = log info s"${self.path.name}:$currentRole -> $msg"
 }
 
 object ServerActor {
+
   //MESSAGES TO SERVER
   sealed trait ServerInput
+
   case class IdentifyServer(senderRole: NodeRole) extends ServerInput with ControlMessage
+
   case class ServerIdentity(name: String) extends ServerInput with ControlMessage
+
   case class ClientIdentity(name: String) extends ServerInput with ControlMessage
+
   //FROM STATE MACHINE
   case class StateMachineResult(indexAndResult: (Int, BankTransactionResult)) extends ServerInput
+
   //FROM SELF
   case object SchedulerTick extends ServerInput
+
   private sealed trait TimerKey
+
   private case object SchedulerTickKey extends TimerKey
 
   def props: Props = Props(new ServerActor())
