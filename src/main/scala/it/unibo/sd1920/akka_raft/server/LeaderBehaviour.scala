@@ -1,9 +1,10 @@
 package it.unibo.sd1920.akka_raft.server
 
+import it.unibo.sd1920.akka_raft.model.Bank.BankTransactionResult
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{ApplyCommand, BankCommand}
 import it.unibo.sd1920.akka_raft.model.Entry
 import it.unibo.sd1920.akka_raft.protocol._
-import it.unibo.sd1920.akka_raft.server.ServerActor.SchedulerTick
+import it.unibo.sd1920.akka_raft.server.ServerActor.{SchedulerTick, StateMachineResult}
 
 
 private trait LeaderBehaviour {
@@ -18,7 +19,14 @@ private trait LeaderBehaviour {
     case SchedulerTick => heartbeatTimeout()
     case AppendEntriesResult(success, matchIndex) => handleAppendResult(sender().path.name, success, matchIndex)
     case requestVote: RequestVote => handleRequestVote(requestVote)
-    //case StateMachineResult(reqID, result) => //TODO
+    case result: StateMachineResult => handleStateMachineResult(result.indexAndResult)
+  }
+  //FROM STATE MACHINE
+  def handleStateMachineResult(indexAndResult: (Int, BankTransactionResult)): Unit = {
+    val index = indexAndResult._1
+    val result = indexAndResult._2
+    val reqID = serverLog.getEntryAtIndex(index).get.requestId
+    clients.last._2 ! RequestResult(reqID, result.isSucceeded, result.balance)
   }
 
   //FROM CLIENT

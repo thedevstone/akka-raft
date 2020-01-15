@@ -77,7 +77,7 @@ object ServerActor {
   case class ServerIdentity(name: String) extends ServerInput with ControlMessage
   case class ClientIdentity(name: String) extends ServerInput with ControlMessage
   //FROM STATE MACHINE
-  case class StateMachineResult(result: (Int, BankTransactionResult)) extends ServerInput
+  case class StateMachineResult(indexAndResult: (Int, BankTransactionResult)) extends ServerInput
   //FROM SELF
   case object SchedulerTick extends ServerInput
   private sealed trait TimerKey

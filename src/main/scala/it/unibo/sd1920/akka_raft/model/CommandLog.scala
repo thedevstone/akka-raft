@@ -80,7 +80,7 @@ case class Entry[Command](
   command: Command,
   term: Int,
   index: Int,
-  requestId: Long
+  requestId: Int
 ) {
   assert(index >= 0) //Come in java
   assert(term >= 0)
