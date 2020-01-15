@@ -20,9 +20,17 @@ private trait LeaderBehaviour {
     case AppendEntriesResult(success, matchIndex) => handleAppendResult(sender().path.name, success, matchIndex)
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case result: StateMachineResult => handleStateMachineResult(result.indexAndResult)
+    case AppendEntries(term, _, _, _) => handleAppendEntries(term)
+    case _ =>
   }
+
+  //FROM OTHER LEADER
+  private def handleAppendEntries(term: Int): Unit = {
+    if (term > currentTerm) becomingFollower(term) //TODO EasyVersion
+  }
+
   //FROM STATE MACHINE
-  def handleStateMachineResult(indexAndResult: (Int, BankTransactionResult)): Unit = {
+  private def handleStateMachineResult(indexAndResult: (Int, BankTransactionResult)): Unit = {
     val index = indexAndResult._1
     val result = indexAndResult._2
     val reqID = serverLog.getEntryAtIndex(index).get.requestId
