@@ -55,7 +55,8 @@ private trait FollowerBehaviour {
         sender() ! AppendEntriesResult(success = false, -1)
 
       //caso leader manda prima entry del log.
-      case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty && entry.nonEmpty => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
+      case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty && entry.nonEmpty =>
+        callCommit(Math.min(serverLog.lastIndex, leaderLastCommit))
         sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), 0) //TODO MODIFICATO LAST MATCH IN 0
 
       //caso leader ha log vuoto e manda append con sia prev che entry vuote. Devo ritornare SEMPRE true
@@ -67,11 +68,12 @@ private trait FollowerBehaviour {
         sender() ! AppendEntriesResult(success = false, -1)
 
       //caso prev entry presente nel log. Se ho entry da appendere lo faccio,
-      case AppendEntries(_, previousEntry, entry, leaderLastCommit) if entry.nonEmpty => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
+      case AppendEntries(_, previousEntry, entry, leaderLastCommit) if entry.nonEmpty =>
+        callCommit(Math.min(serverLog.lastIndex, leaderLastCommit))
         sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), previousEntry.get.index + 1) //TODO errore +1?? //TODO MODIFICATO LAST MATCH IN +1
 
       // altrimenti ritorno solo true
-      case AppendEntries(_, previousEntry, _, leaderLastCommit) => callCommit(Math.min(serverLog.getCommitIndex, leaderLastCommit))
+      case AppendEntries(_, previousEntry, _, leaderLastCommit) => callCommit(Math.min(serverLog.lastIndex, leaderLastCommit))
         sender() ! AppendEntriesResult(success = true, previousEntry.get.index)
 
       case _ =>

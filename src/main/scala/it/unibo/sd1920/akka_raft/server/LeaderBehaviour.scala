@@ -16,10 +16,12 @@ private trait LeaderBehaviour {
 
   protected def leaderBehaviour: Receive = controlBehaviour orElse {
     //FROM CLIENT
-    case req: ClientRequest => handleRequest(req)
+    case req: ClientRequest =>
+      handleRequest(req)
     //FROM SERVER
     case SchedulerTick => heartbeatTimeout()
-    case AppendEntriesResult(success, matchIndex) => handleAppendResult(sender().path.name, success, matchIndex)
+    case AppendEntriesResult(success, matchIndex) =>
+      handleAppendResult(sender().path.name, success, matchIndex)
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case result: StateMachineResult => handleStateMachineResult(result.indexAndResult)
     case AppendEntries(term, _, _, _) => handleAppendEntries(term)
@@ -92,7 +94,8 @@ private trait LeaderBehaviour {
     if (success) {
       followersStatusMap = followersStatusMap + (name -> FollowerStatus(matchIndex + 1, matchIndex))
       val indexToCommit = getIndexToCommit
-      if (checkCommitFromEarlierTerm(indexToCommit)) callCommit(indexToCommit)
+      // if (checkCommitFromEarlierTerm(indexToCommit))//TODO
+      callCommit(indexToCommit)
       if (followerStatus.nextIndexToSend <= serverLog.lastIndex) {
         val entryToSend = serverLog.getEntryAtIndex(followerStatus.nextIndexToSend)
         sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entryToSend.get), entryToSend, serverLog.getCommitIndex)
