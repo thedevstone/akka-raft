@@ -49,11 +49,18 @@ private trait LeaderBehaviour {
       followersStatusMap = followersStatusMap + (name -> FollowerStatus(matchIndex + 1, matchIndex))
       if (followerStatus.nextIndexToSend <= serverLog.lastIndex) {
         val entryToSend = serverLog.getEntryAtIndex(followerStatus.nextIndexToSend)
-        sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entryToSend.get), entryToSend, lastCommittedIndex)
+        sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entryToSend.get), entryToSend, serverLog.getCommitIndex)
       }
     } else { //Leader Consistency check
       followersStatusMap = followersStatusMap + (name -> FollowerStatus(followerStatus.nextIndexToSend - 1, matchIndex))
     }
+  }
+
+  private def safeCommitCheck(): Int = {
+    followersStatusMap.values.map(e => e.lastMatchIndex).foreach(matchIndex => {
+      val number = followersStatusMap.values.map(e => e.lastMatchIndex).count(m => m > serverLog.getCommitIndex)
+    })
+    1
   }
 
   protected def leaderPreBecome(): Unit = {

@@ -25,7 +25,6 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   protected[this] var currentRole: ServerRole = ServerRole.FOLLOWER
   protected[this] var currentTerm: Int = 0
   protected[this] var lastApplied: Int = 0
-  protected[this] var lastCommittedIndex: Int = 0
   protected[this] var votedFor: Option[String] = None
   protected[this] val serverLog: CommandLog[BankCommand] = CommandLog.emptyLog()
 
