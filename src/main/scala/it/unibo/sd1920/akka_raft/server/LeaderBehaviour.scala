@@ -45,8 +45,9 @@ private trait LeaderBehaviour {
   //FROM FOLLOWER
   private def handleAppendResult(name: String, success: Boolean, matchIndex: Int): Unit = {
     val followerStatus = followersStatusMap(name)
-    if (success) { //
+    if (success) {
       followersStatusMap = followersStatusMap + (name -> FollowerStatus(matchIndex + 1, matchIndex))
+      callCommit(safeCommitCheck()) //Committing
       if (followerStatus.nextIndexToSend <= serverLog.lastIndex) {
         val entryToSend = serverLog.getEntryAtIndex(followerStatus.nextIndexToSend)
         sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entryToSend.get), entryToSend, serverLog.getCommitIndex)
@@ -57,10 +58,14 @@ private trait LeaderBehaviour {
   }
 
   private def safeCommitCheck(): Int = {
-    followersStatusMap.values.map(e => e.lastMatchIndex).foreach(matchIndex => {
-      val number = followersStatusMap.values.map(e => e.lastMatchIndex).count(m => m > serverLog.getCommitIndex)
-    })
-    1
+    var commitIndexCounter: Int = serverLog.getCommitIndex - 1
+    val matchIndexes = followersStatusMap.values.map(e => e.lastMatchIndex)
+    var greaterMatches = 0 //number of servers whose matchIndex is greater than lastCommitIndex. They have to be the majority to be committed
+    do {
+      commitIndexCounter += 1
+      greaterMatches = matchIndexes.count(m => m > commitIndexCounter)
+    } while (greaterMatches >= SERVERS_MAJORITY - 1) // -1 because I do not count myself
+    commitIndexCounter
   }
 
   protected def leaderPreBecome(): Unit = {
