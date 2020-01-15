@@ -77,9 +77,4 @@ private trait FollowerBehaviour {
       votedFor = None
     }
   }
-
-  private def checkElectionRestriction(lastLogTerm: Int, lastLogIndex: Int): Boolean = {
-    lastLogTerm >= currentTerm && lastLogIndex >= serverLog.lastIndex
-  }
-
 }

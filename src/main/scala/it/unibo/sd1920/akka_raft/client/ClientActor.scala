@@ -37,7 +37,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
     //TODO Redirect
     //TODO Timer
     //FROM SERVER TO GUI
-    case RequestResult(id, result) => handleResult(id, result)
+    case result: RequestResult => handleResult(result)
     case GuiServerState(serverState) => guiUpdateServerInfo(serverState)
 
     //FROM GUI TO SERVER
@@ -54,8 +54,8 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
     view.updateServerState(nodeId, serverVolatileState)
   }
 
-  private def handleResult(reqID: Int, result: Option[Int]): Unit = {
-    this.requestHistory = Map(reqID -> ResultState(executed = true, this.requestHistory(reqID).command, result))
+  private def handleResult(result: RequestResult): Unit = {
+    this.requestHistory = Map(result.id -> ResultState(executed = true, requestHistory(result.id).command, Some(result)))
     //TODO showResultInGui
   }
 
@@ -102,5 +102,5 @@ object ClientActor {
 case class ResultState(
   executed: Boolean,
   command: BankCommand,
-  result: Option[Int]
+  result: Option[RequestResult]
 )

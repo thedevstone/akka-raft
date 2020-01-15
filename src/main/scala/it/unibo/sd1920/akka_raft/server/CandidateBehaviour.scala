@@ -21,7 +21,7 @@ private trait CandidateBehaviour {
   private def handleRequestVote(requestVote: RequestVote): Unit = {
     requestVote match {
       case RequestVote(candidateTerm, _, _, _) if candidateTerm <= currentTerm => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
-      case RequestVote(candidateTerm, _, lastLogTerm, lastLogIndex) if electionRestriction(lastLogTerm, lastLogIndex) =>
+      case RequestVote(candidateTerm, _, lastLogTerm, lastLogIndex) if checkElectionRestriction(lastLogTerm, lastLogIndex) =>
         voteForApplicantCandidate(candidateTerm)
       case RequestVote(candidateTerm, _, _, _) => becomingFollower(candidateTerm)
         sender() ! RequestVoteResult(voteGranted = false, currentTerm)
@@ -47,10 +47,6 @@ private trait CandidateBehaviour {
     context.become(followerBehaviour)
     voteForMyself()
     startTimeoutTimer()
-  }
-
-  private def electionRestriction(lastLogTerm: Int, lastLogIndex: Int): Boolean = {
-    lastLogTerm > currentTerm && lastLogIndex > serverLog.lastIndex
   }
 
   private def becomingLeader(): Unit = {

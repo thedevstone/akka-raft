@@ -6,6 +6,7 @@ import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
 import akka.dispatch.ControlMessage
 import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog}
+import it.unibo.sd1920.akka_raft.model.Bank.BankTransactionResult
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{ApplyCommand, BankCommand}
 import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage.{GuiMsgLossServer, GuiStopServer, GuiTimeoutServer}
 import it.unibo.sd1920.akka_raft.protocol.RaftMessage
@@ -61,7 +62,11 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
     serverLog.commit(index)
     serverLog.getEntriesBetween(lastCommitted, index).foreach(e => stateMachineActor ! ApplyCommand(e))
   }
-  
+
+  protected def checkElectionRestriction(lastLogTerm: Int, lastLogIndex: Int): Boolean = {
+    lastLogTerm >= currentTerm && lastLogIndex >= serverLog.lastIndex
+  }
+
   protected def logWithRole(msg: String): Unit = log info s"${self.path.name}:$currentRole -> $msg"
 }
 
@@ -72,7 +77,7 @@ object ServerActor {
   case class ServerIdentity(name: String) extends ServerInput with ControlMessage
   case class ClientIdentity(name: String) extends ServerInput with ControlMessage
   //FROM STATE MACHINE
-  case class StateMachineResult(result: (Int, Option[Int])) extends ServerInput
+  case class StateMachineResult(result: (Int, BankTransactionResult)) extends ServerInput
   //FROM SELF
   case object SchedulerTick extends ServerInput
   private sealed trait TimerKey

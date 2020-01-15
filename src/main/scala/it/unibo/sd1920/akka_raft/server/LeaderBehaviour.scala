@@ -2,7 +2,7 @@ package it.unibo.sd1920.akka_raft.server
 
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{ApplyCommand, BankCommand}
 import it.unibo.sd1920.akka_raft.model.Entry
-import it.unibo.sd1920.akka_raft.protocol.{AppendEntries, AppendEntriesResult, ClientRequest, RequestVote}
+import it.unibo.sd1920.akka_raft.protocol._
 import it.unibo.sd1920.akka_raft.server.ServerActor.SchedulerTick
 
 
@@ -17,8 +17,8 @@ private trait LeaderBehaviour {
     //FROM SERVER
     case SchedulerTick => heartbeatTimeout()
     case AppendEntriesResult(success, matchIndex) => handleAppendResult(sender().path.name, success, matchIndex)
-    case RequestVote(candidateTerm, _, _, _) if candidateTerm > currentTerm =>
-    //case StateMachineResult =>
+    case requestVote: RequestVote => handleRequestVote(requestVote)
+    //case StateMachineResult(reqID, result) => //TODO
   }
 
   //FROM CLIENT
@@ -42,12 +42,37 @@ private trait LeaderBehaviour {
     })
   }
 
+  //FROM CANDIDATE
+  private def handleRequestVote(requestVote: RequestVote): Unit = {
+    requestVote match {
+      case RequestVote(candidateTerm, _, _, _) if candidateTerm <= currentTerm => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
+      case RequestVote(candidateTerm, _, lastLogTerm, lastLogIndex) if checkElectionRestriction(lastLogTerm, lastLogIndex) =>
+        voteForApplicantCandidate(candidateTerm)
+      case RequestVote(candidateTerm, _, _, _) => becomingFollower(candidateTerm)
+        sender() ! RequestVoteResult(voteGranted = false, currentTerm)
+      case _ =>
+    }
+  }
+
+  private def voteForApplicantCandidate(term: Int) {
+    becomingFollower(term)
+    votedFor = Some(sender().path.name)
+    sender() ! RequestVoteResult(voteGranted = true, currentTerm)
+  }
+
+  private def becomingFollower(term: Int) {
+    currentTerm = term
+    context.become(followerBehaviour)
+    startTimeoutTimer()
+  }
+
   //FROM FOLLOWER
   private def handleAppendResult(name: String, success: Boolean, matchIndex: Int): Unit = {
     val followerStatus = followersStatusMap(name)
     if (success) {
       followersStatusMap = followersStatusMap + (name -> FollowerStatus(matchIndex + 1, matchIndex))
-      callCommit(safeCommitCheck()) //Committing
+      val indexToCommit = getIndexToCommit
+      if (checkCommitFromEarlierTerm(indexToCommit)) callCommit(indexToCommit)
       if (followerStatus.nextIndexToSend <= serverLog.lastIndex) {
         val entryToSend = serverLog.getEntryAtIndex(followerStatus.nextIndexToSend)
         sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entryToSend.get), entryToSend, serverLog.getCommitIndex)
@@ -57,7 +82,7 @@ private trait LeaderBehaviour {
     }
   }
 
-  private def safeCommitCheck(): Int = {
+  private def getIndexToCommit: Int = {
     var commitIndexCounter: Int = serverLog.getCommitIndex - 1
     val matchIndexes = followersStatusMap.values.map(e => e.lastMatchIndex)
     var greaterMatches = 0 //number of servers whose matchIndex is greater than lastCommitIndex. They have to be the majority to be committed
@@ -66,6 +91,11 @@ private trait LeaderBehaviour {
       greaterMatches = matchIndexes.count(m => m > commitIndexCounter)
     } while (greaterMatches >= SERVERS_MAJORITY - 1) // -1 because I do not count myself
     commitIndexCounter
+  }
+
+  private def checkCommitFromEarlierTerm(commitIndex: Int): Boolean = {
+    val entry = serverLog.getEntryAtIndex(commitIndex).get
+    !(entry.term < currentTerm)
   }
 
   protected def leaderPreBecome(): Unit = {

@@ -43,4 +43,4 @@ case class Redirect(
 
 case class ClientRequest(requestID: Int, command: BankCommand) extends RaftMessage
 
-case class RequestResult(id: Int, result: Option[Int]) extends RaftMessage
+case class RequestResult(id: Int, success: Boolean, result: Option[Int]) extends RaftMessage
