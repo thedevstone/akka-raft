@@ -71,8 +71,8 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
       case CommandType.GET_BALANCE => BankStateMachine.GetBalance(iban)
     }
     this.requestHistory = Map(this.requestID -> ResultState(executed = false, serverCommand, None))
-    this.requestID += 1
     servers(targetServer) ! ClientRequest(requestID, serverCommand)
+    this.requestID += 1
   }
 
   private def resolveNodeID(actorRef: ActorRef): String = servers.filter(e => e._2 == sender()).last._1

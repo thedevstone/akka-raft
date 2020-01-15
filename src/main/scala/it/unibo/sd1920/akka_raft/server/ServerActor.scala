@@ -36,9 +36,9 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
       RaftConstants.maximumStateMachineExecutionTime).millis), "StateMachine")
   }
 
-  override def receive: Receive = followerBehaviour
+  override def receive: Receive = clusterDiscoveryBehaviour
 
-  protected def controlBehaviour: Receive = clusterBehaviour orElse {
+  protected def controlBehaviour: Receive = clusterDiscoveryBehaviour orElse {
     case GuiStopServer(serverID) => //TODO
     case GuiTimeoutServer(serverID) => //TODO
     case GuiMsgLossServer(serverID, loss) => //TODO
@@ -61,6 +61,8 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
     serverLog.commit(index)
     serverLog.getEntriesBetween(lastCommitted, index).foreach(e => stateMachineActor ! ApplyCommand(e))
   }
+  
+  protected def logWithRole(msg: String): Unit = log info s"${self.path.name}:$currentRole -> $msg"
 }
 
 object ServerActor {

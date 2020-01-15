@@ -26,15 +26,15 @@ private trait ClientActorDiscovery {
     case _ =>
   }
 
+  private def addClient(name: String): Unit = {
+    this.clients = this.clients + (name -> sender())
+  }
+
   private def addServer(name: String): Unit = {
     this.servers = this.servers + (name -> sender())
     view addServer name
     if (servers.size >= NetworkConstants.numberOfServer) {
       context become onMessage
     }
-  }
-
-  private def addClient(name: String): Unit = {
-    this.clients = this.clients + (name -> sender())
   }
 }
