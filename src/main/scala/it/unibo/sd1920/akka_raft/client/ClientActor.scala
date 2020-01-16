@@ -56,7 +56,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
       case None => servers.values.toList(Random.nextInt(servers.size))
       case Some(ref: ActorRef) => ref
     }
-    targetServer ! ClientRequest(requestID, request.command)
+    targetServer ! ClientRequest(reqID, request.command)
   }
 
   //FROM SERVER TO GUI
@@ -66,8 +66,8 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
   }
 
   private def handleResult(result: RequestResult): Unit = {
-    this.requestHistory = Map(result.id -> ResultState(executed = true, requestHistory(result.id).command, Some(result)))
-    //TODO showResultInGui
+    this.requestHistory = this.requestHistory + (result.id -> ResultState(executed = true, requestHistory(result.id).command, Some(result)))
+    view.updateResultState(requestHistory)
   }
 
   //FROM GUI TO SERVER

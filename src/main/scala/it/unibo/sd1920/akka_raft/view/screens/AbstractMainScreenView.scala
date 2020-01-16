@@ -1,7 +1,8 @@
 package it.unibo.sd1920.akka_raft.view.screens
 
-import com.jfoenix.controls.{JFXButton, JFXComboBox, JFXSlider, JFXTextField}
+import com.jfoenix.controls._
 import eu.hansolo.enzo.led.Led
+import it.unibo.sd1920.akka_raft.client.ResultState
 import it.unibo.sd1920.akka_raft.model.{BankStateMachine, Entry, ServerVolatileState}
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{BankCommand, Withdraw}
 import it.unibo.sd1920.akka_raft.utils.{CommandType, ServerRole}
@@ -45,6 +46,7 @@ abstract class AbstractMainScreenView extends View {
   @FXML protected var textFieldIban: JFXTextField = _
   @FXML protected var textFieldAmount: JFXTextField = _
   @FXML protected var buttonSend: JFXButton = _
+  @FXML protected var listViewResult: JFXListView[String] = _
 
   type HBoxServerID = HBox
   type HBoxServerLog = HBox
@@ -154,6 +156,11 @@ abstract class AbstractMainScreenView extends View {
     this.stateLabelRole.setText(serverVolatileState.role.toString)
     this.stateLabelLastCommitted.setText(serverVolatileState.lastCommitted.toString)
     this.stateLabelLastMatched.setText(serverVolatileState.lastMatchedEntry.toString)
+  }
+
+  def updateResultList(requestHistory: Map[Int, ResultState]): Unit = {
+    requestHistory.toList.sortWith((a, b) => a._1 < b._1)
+      .foreach(e => this.listViewResult.getItems.add(s"ID: ${e._1} -> [CMD: ${e._2.command}] [Ex: ${e._2.executed}] [Res: ${e._2.result.getOrElse("Not Executed")}]"))
   }
 }
 

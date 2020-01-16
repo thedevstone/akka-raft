@@ -16,12 +16,10 @@ private trait LeaderBehaviour {
 
   protected def leaderBehaviour: Receive = controlBehaviour orElse {
     //FROM CLIENT
-    case req: ClientRequest =>
-      handleRequest(req)
+    case req: ClientRequest => handleRequest(req)
     //FROM SERVER
     case SchedulerTick => heartbeatTimeout()
-    case AppendEntriesResult(success, matchIndex) =>
-      handleAppendResult(sender().path.name, success, matchIndex)
+    case AppendEntriesResult(success, matchIndex) => handleAppendResult(sender().path.name, success, matchIndex)
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case result: StateMachineResult => handleStateMachineResult(result.indexAndResult)
     case AppendEntries(term, _, _, _) => handleAppendEntries(term)
@@ -38,7 +36,7 @@ private trait LeaderBehaviour {
     val index = indexAndResult._1
     val result = indexAndResult._2
     val reqID = serverLog.getEntryAtIndex(index).get.requestId
-    //clients.last._2 ! RequestResult(reqID, result.isSucceeded, result.balance) //TODO come mai?
+    clients.last._2 ! RequestResult(reqID, result.isSucceeded, result.balance) //TODO come mai?
   }
 
   //FROM CLIENT

@@ -2,6 +2,7 @@ package it.unibo.sd1920.akka_raft.view.screens
 
 import akka.actor.ActorRef
 import com.sun.javafx.application.PlatformImpl
+import it.unibo.sd1920.akka_raft.client.ResultState
 import it.unibo.sd1920.akka_raft.model.ServerVolatileState
 import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage
 import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
@@ -18,6 +19,7 @@ trait ClientObserver {
   def addServer(serverID: String)
   def removeServer(serverID: String)
   def updateServerState(serverID: String, serverVolatileState: ServerVolatileState)
+  def updateResultState(requestHistory: Map[Int, ResultState])
 }
 
 class MainScreenView extends AbstractMainScreenView() with ClientObserver {
@@ -47,6 +49,12 @@ class MainScreenView extends AbstractMainScreenView() with ClientObserver {
   override def updateServerState(serverID: String, serverVolatileState: ServerVolatileState): Unit = {
     Platform.runLater(() => {
       manageServerState(serverID, serverVolatileState)
+    })
+  }
+
+  override def updateResultState(requestHistory: Map[Int, ResultState]): Unit = {
+    Platform.runLater(() => {
+      updateResultList(requestHistory: Map[Int, ResultState])
     })
   }
 
