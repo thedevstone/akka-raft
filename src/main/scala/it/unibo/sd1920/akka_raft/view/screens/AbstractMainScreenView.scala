@@ -46,7 +46,9 @@ abstract class AbstractMainScreenView extends View {
   @FXML protected var textFieldIban: JFXTextField = _
   @FXML protected var textFieldAmount: JFXTextField = _
   @FXML protected var buttonSend: JFXButton = _
+  //RESULTS
   @FXML protected var listViewResult: JFXListView[String] = _
+  @FXML protected var radioButtonExecuted: JFXRadioButton = _
 
   type HBoxServerID = HBox
   type HBoxServerLog = HBox
@@ -160,8 +162,13 @@ abstract class AbstractMainScreenView extends View {
 
   def updateResultList(requestHistory: Map[Int, ResultState]): Unit = {
     this.listViewResult.getItems.clear()
-    requestHistory.toList.sortWith((a, b) => a._1 < b._1)
-      .foreach(e => this.listViewResult.getItems.add(s"ID: ${e._1} -> [CMD: ${e._2.command}] [Ex: ${e._2.executed}] [Res: ${e._2.result.getOrElse("Not Executed")}]"))
+    if (!radioButtonExecuted.isSelected) {
+      requestHistory.toList.sortWith((a, b) => a._1 < b._1)
+        .foreach(e => this.listViewResult.getItems.add(s"ID: ${e._1} -> [CMD: ${e._2.command}] [Ex: ${e._2.executed}] [Res: ${e._2.result.getOrElse("Not Executed")}]"))
+    } else {
+      requestHistory.toList.filter(r => !r._2.executed).sortWith((a, b) => a._1 < b._1)
+        .foreach(e => this.listViewResult.getItems.add(s"ID: ${e._1} -> [CMD: ${e._2.command}] [Ex: ${e._2.executed}] [Res: ${e._2.result.getOrElse("Not Executed")}]"))
+    }
   }
 }
 
