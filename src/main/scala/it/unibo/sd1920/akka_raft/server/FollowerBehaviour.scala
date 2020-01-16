@@ -18,7 +18,7 @@ private trait FollowerBehaviour {
     case SchedulerTick => followerTimeout()
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case appendEntry: AppendEntries => handleAppendEntries(appendEntry)
-    case ClientRequest(_, _) => sender() ! Redirect(leaderRef)
+    case ClientRequest(requestID, _) => sender() ! Redirect(requestID, leaderRef)
     case _ =>
   }
 

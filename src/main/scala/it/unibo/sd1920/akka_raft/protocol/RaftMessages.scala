@@ -39,6 +39,7 @@ case class AppendEntriesResult(
 ) extends RaftMessage
 
 case class Redirect(
+  reqID: Int,
   leaderRef: Option[ActorRef]
 ) extends RaftMessage
 

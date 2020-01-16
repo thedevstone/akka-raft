@@ -7,12 +7,14 @@ import akka.dispatch.ControlMessage
 import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.model.{BankStateMachine, ServerVolatileState}
 import it.unibo.sd1920.akka_raft.model.BankStateMachine._
-import it.unibo.sd1920.akka_raft.protocol.{ClientRequest, RequestResult}
+import it.unibo.sd1920.akka_raft.protocol.{ClientRequest, Redirect, RequestResult}
 import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage._
 import it.unibo.sd1920.akka_raft.utils.{CommandType, NetworkConstants}
 import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
 import it.unibo.sd1920.akka_raft.view.screens.{ClientObserver, MainScreenView}
+
+import scala.util.Random
 
 private class ClientActor extends Actor with ClientActorDiscovery with ActorLogging {
   protected[this] val view: ClientObserver = MainScreenView()
@@ -34,18 +36,27 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
 
   def onMessage: Receive = {
     //RAFT
-    //TODO Redirect
+    case Redirect(reqID, leaderRef) => handleRedirect(reqID, leaderRef)
     //TODO Timer
     //FROM SERVER TO GUI
     case result: RequestResult => handleResult(result)
     case GuiServerState(serverState) => guiUpdateServerInfo(serverState)
-
     //FROM GUI TO SERVER
     case GuiStopServer(serverID) => servers(serverID) ! GuiStopServer(serverID)
     case GuiTimeoutServer(serverID) => servers(serverID) ! GuiTimeoutServer(serverID)
     case GuiMsgLossServer(serverID, loss) => servers(serverID) ! GuiMsgLossServer(serverID, loss)
     case GuiSendMessage(serverID, commandType, iban, amount) => elaborateGuiSendRequest(serverID, commandType, iban, amount)
     case Log(message) => log info message
+  }
+
+  //RAFT
+  def handleRedirect(reqID: Int, leaderRef: Option[ActorRef]): Unit = {
+    val request = requestHistory(reqID)
+    val targetServer: ActorRef = leaderRef match {
+      case None => servers.values.toList(Random.nextInt(servers.size))
+      case Some(ref: ActorRef) => ref
+    }
+    targetServer ! ClientRequest(requestID, request.command)
   }
 
   //FROM SERVER TO GUI
