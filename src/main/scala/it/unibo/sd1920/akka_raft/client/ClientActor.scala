@@ -81,7 +81,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
       case CommandType.WITHDRAW => BankStateMachine.Withdraw(iban, amountInt)
       case CommandType.GET_BALANCE => BankStateMachine.GetBalance(iban)
     }
-    this.requestHistory = Map(this.requestID -> ResultState(executed = false, serverCommand, None))
+    this.requestHistory = this.requestHistory + (this.requestID -> ResultState(executed = false, serverCommand, None))
     servers(targetServer) ! ClientRequest(requestID, serverCommand)
     this.requestID += 1
   }
