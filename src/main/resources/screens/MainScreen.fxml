@@ -215,7 +215,7 @@
                               <Font size="18.0" />
                            </font>
                         </Label>
-                        <JFXListView fx:id="listViewResult" />
+                        <JFXListView fx:id="listViewResult" minHeight="200.0" />
                      </children>
                   </VBox>
                </right>

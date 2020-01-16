@@ -47,7 +47,6 @@ private trait FollowerBehaviour {
   private def handleAppendEntries(appendEntry: AppendEntries): Unit = {
     leaderRef = Some(sender())
     checkAndUpdateTerm(appendEntry.leaderTerm)
-    logWithRole("Messaggio arrivato" + appendEntry)
     appendEntry match {
 
       //caso rifiuto append da leader più indietro di me

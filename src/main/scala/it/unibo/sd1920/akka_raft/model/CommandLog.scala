@@ -27,7 +27,7 @@ class CommandLog[Command](
   }
 
   def getEntriesBetween(from: Int, to: Int): List[Entry[Command]] = {
-    entries.slice(from, to + 1)
+    entries.slice(from + 1, to + 1)
   }
 
   def isReqIdPresent(reqID: Int): Boolean = entries.map(e => e.requestId).contains(reqID)
