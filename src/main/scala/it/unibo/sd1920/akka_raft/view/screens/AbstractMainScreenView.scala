@@ -159,6 +159,7 @@ abstract class AbstractMainScreenView extends View {
   }
 
   def updateResultList(requestHistory: Map[Int, ResultState]): Unit = {
+    this.listViewResult.getItems.clear()
     requestHistory.toList.sortWith((a, b) => a._1 < b._1)
       .foreach(e => this.listViewResult.getItems.add(s"ID: ${e._1} -> [CMD: ${e._2.command}] [Ex: ${e._2.executed}] [Res: ${e._2.result.getOrElse("Not Executed")}]"))
   }

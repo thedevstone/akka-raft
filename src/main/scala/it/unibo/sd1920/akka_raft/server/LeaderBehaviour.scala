@@ -126,9 +126,9 @@ private trait LeaderBehaviour {
 
   protected def leaderPreBecome(): Unit = {
     if (serverLog.lastIndex == -1) {
-      servers.keys.foreach(name => followersStatusMap = followersStatusMap + (name -> FollowerStatus(0, -1)))
+      servers.keys.filter(name => name != self.path.name).foreach(name => followersStatusMap = followersStatusMap + (name -> FollowerStatus(0, -1)))
     } else {
-      servers.keys.foreach(name => followersStatusMap = followersStatusMap + (name -> FollowerStatus(serverLog.lastIndex, -1)))
+      servers.keys.filter(name => name != self.path.name).foreach(name => followersStatusMap = followersStatusMap + (name -> FollowerStatus(serverLog.lastIndex, -1)))
     }
   }
 }
