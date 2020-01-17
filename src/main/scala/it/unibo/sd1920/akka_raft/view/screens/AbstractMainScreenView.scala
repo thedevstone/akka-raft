@@ -57,6 +57,7 @@ abstract class AbstractMainScreenView extends View {
   protected var serverToHBox: Map[String, (HBoxServerID, HBoxServerLog)] = Map()
   protected var serverToState: Map[String, ServerVolatileState] = Map()
 
+
   @FXML def initialize(): Unit = {
     this.initButtons()
     this.initCombos()
@@ -69,7 +70,23 @@ abstract class AbstractMainScreenView extends View {
     assert(mainBorder != null, "fx:id=\"mainBorder\" was not injected: check your FXML file 'MainScreen.fxml'.")
     assert(vBoxServerNames != null, "fx:id=\"vBoxServerNames\" was not injected: check your FXML file 'MainScreen.fxml'.")
     assert(vBoxServerLogs != null, "fx:id=\"vBoxServerLogs\" was not injected: check your FXML file 'MainScreen.fxml'.")
-    assert(serverIDCombo != null, "fx:id=\"serverStateCombo\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(serverIDCombo != null, "fx:id=\"serverIDCombo\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(stateLabelRole != null, "fx:id=\"stateLabelRole\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(stateLabelLastApplied != null, "fx:id=\"stateLabelLastApplied\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(stateLabelVotedFor != null, "fx:id=\"stateLabelVotedFor\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(stateLabelCurrentTerm != null, "fx:id=\"stateLabelCurrentTerm\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(stateLabelNextIndex != null, "fx:id=\"stateLabelNextIndex\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(stateLabelLastMatched != null, "fx:id=\"stateLabelLastMatched\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(stateLabelLastCommitted != null, "fx:id=\"stateLabelLastCommitted\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(sliderMsgLoss != null, "fx:id=\"sliderMsgLoss\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(buttonStop != null, "fx:id=\"buttonStop\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(buttonTimeout != null, "fx:id=\"buttonTimeout\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(comboCommand != null, "fx:id=\"comboCommand\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(textFieldIban != null, "fx:id=\"textFieldIban\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(textFieldAmount != null, "fx:id=\"textFieldAmount\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(buttonSend != null, "fx:id=\"buttonSend\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(radioButtonExecuted != null, "fx:id=\"radioButtonExecuted\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(listViewResult != null, "fx:id=\"listViewResult\" was not injected: check your FXML file 'MainScreen.fxml'.")
   }
 
   protected def showPopupInfo(): Unit = {

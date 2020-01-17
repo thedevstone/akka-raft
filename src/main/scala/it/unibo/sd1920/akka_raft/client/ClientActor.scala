@@ -42,11 +42,13 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
     //FROM SERVER TO GUI
     case result: RequestResult => handleResult(result)
     case GuiServerState(serverState) => guiUpdateServerInfo(serverState)
-    //FROM GUI TO SERVER
+    //FROM GUI TO CLIENT TO SERVER
     case GuiStopServer(serverID) => servers(serverID) ! GuiStopServer(serverID)
+    case GuiResumeServer(serverID) => servers(serverID) ! GuiResumeServer(serverID)
     case GuiTimeoutServer(serverID) => servers(serverID) ! GuiTimeoutServer(serverID)
     case GuiMsgLossServer(serverID, loss) => servers(serverID) ! GuiMsgLossServer(serverID, loss)
     case GuiSendMessage(serverID, commandType, iban, amount) => elaborateGuiSendRequest(serverID, commandType, iban, amount)
+    //FROM GUI TO CLIENT
     case Log(message) => log info message
     case UpdateGui() => view.updateResultState(requestHistory)
     case RetryMessage(indexInMap: Int, serverID: String) => handleRetryMessage(indexInMap, serverID)

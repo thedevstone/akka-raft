@@ -8,6 +8,7 @@ object GuiControlMessage {
   sealed trait GuiControlMessage
   //FROM VIEW
   case class GuiStopServer(serverID: String) extends GuiControlMessage with ControlMessage
+  case class GuiResumeServer(serverID: String) extends GuiControlMessage with ControlMessage
   case class GuiTimeoutServer(serverID: String) extends GuiControlMessage with ControlMessage
   case class GuiMsgLossServer(serverID: String, value: Double) extends GuiControlMessage with ControlMessage
   case class GuiSendMessage(serverID: String, commandType: CommandType, iban: String, amount: String) extends GuiControlMessage with ControlMessage
