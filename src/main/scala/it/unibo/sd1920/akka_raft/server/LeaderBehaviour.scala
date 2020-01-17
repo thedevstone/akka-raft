@@ -43,6 +43,7 @@ private trait LeaderBehaviour {
     val i: Option[Int] = serverLog.getIndexFromReqId(req.requestID)
     if (serverLog.isReqIdCommitted(req.requestID)) {
       stateMachineActor ! ApplyCommand(new Entry[BankCommand](req.command, currentTerm, i.get, req.requestID))
+      lastApplied = serverLog.getIndexFromReqId(req.requestID).get
     } else if (i.isEmpty) {
       val entry = new Entry[BankCommand](req.command, currentTerm, serverLog.size, req.requestID)
       serverLog.putElementAtIndex(entry)

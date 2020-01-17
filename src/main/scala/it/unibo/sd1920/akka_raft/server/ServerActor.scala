@@ -27,10 +27,11 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   protected[this] var currentRole: ServerRole = ServerRole.FOLLOWER
   protected[this] var currentTerm: Int = 0
   protected[this] var lastApplied: Int = 0
+  protected[this] var lastMatched: Int = 0
   protected[this] var stopped: Boolean = false
   protected[this] var votedFor: Option[String] = None
   protected[this] val serverLog: CommandLog[BankCommand] = CommandLog.emptyLog()
-  protected[this] var messageLoseSoil: Double = 1.0
+  protected[this] var messageLoseThreashold: Double = 1.0
   override def preStart(): Unit = {
     cluster.subscribe(self, classOf[MemberUp], classOf[MemberDowned])
     cluster.registerOnMemberUp({
@@ -44,15 +45,16 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
     def apply(msg: Any): Unit = {
       /* do whatever things here */
       receiver.apply(msg)
+
+      clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
     }
     def isDefinedAt(msg: Any): Boolean = {
-      if (Random.nextDouble() > messageLoseSoil && (!classOf[InternalMessage].isAssignableFrom(msg.getClass) || stopped) && (!classOf[ControlMessage].isAssignableFrom(msg.getClass))) {
+      if ((stopped || Random.nextDouble() > messageLoseThreashold && (!classOf[InternalMessage].isAssignableFrom(msg.getClass))) && (!classOf[ControlMessage].isAssignableFrom(msg.getClass))) {
         logWithRole("Messaggio bloccato:: " + msg.toString
         )
         return false
       }
 
-      clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, 1, 1, serverLog.getEntries)) //TODO da cancellare
 
       receiver.isDefinedAt(msg)
     }
@@ -61,11 +63,13 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   override def receive: Receive = clusterDiscoveryBehaviour
 
   protected def controlBehaviour: Receive = clusterDiscoveryBehaviour orElse {
-    case GuiStopServer(serverID) => //TODO
-    case GuiResumeServer(serverID) => //TODO
-    case GuiTimeoutServer(serverID) => //TODO
-    case GuiMsgLossServer(serverID, loss) => logWithRole("\n\n\n\t\tvalore:" + loss)
-      messageLoseSoil = loss
+    case GuiStopServer(_) => stopped = true
+      logWithRole("\n\t\tStopped:")
+    case GuiResumeServer(_) => stopped = false
+      logWithRole("\n\t\tReasume:")
+    case GuiTimeoutServer(_) => //TODO
+    case GuiMsgLossServer(_, loss) => logWithRole("\n\t\tvalore:" + loss)
+      messageLoseThreashold = loss
   }
 
   protected def startTimeoutTimer(): Unit = {
@@ -84,6 +88,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
     val lastCommitted: Int = serverLog.getCommitIndex
     serverLog.commit(index)
     serverLog.getEntriesBetween(lastCommitted, index).foreach(e => stateMachineActor ! ApplyCommand(e))
+    lastApplied = index
   }
 
   protected def checkElectionRestriction(lastLogTerm: Int, lastLogIndex: Int): Boolean = {
