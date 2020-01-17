@@ -177,7 +177,9 @@ abstract class AbstractMainScreenView extends View {
     this.vBoxServerLogs.getChildren.add(serverLogNode)
     this.serverToHBox = this.serverToHBox + (serverID -> (serverIDNode, serverLogNode))
     //ADDING SERVER TO SETTINGS
-    this.serverToSettings = this.serverToSettings + (serverID -> ServerSettings(0, false))
+    val newSetting = ServerSettings(0, stopped = false)
+    this.serverToSettings = this.serverToSettings + (serverID -> newSetting)
+    updateServerSettings(newSetting)
   }
 
   protected def addServerToCombos(serverID: String): Unit = {
@@ -217,9 +219,9 @@ abstract class AbstractMainScreenView extends View {
   private def updateServerSettings(settings: ServerSettings): Unit = {
     this.sliderMsgLoss.setValue(settings.lossValue)
     if (settings.stopped) {
-      this.buttonStop.setText("Resume")
+      this.buttonStop.setGraphic(ViewUtilities.iconSetter(Material.PLAY_ARROW, JavafxEnums.MEDIUM_ICON))
     } else {
-      this.buttonStop.setText("Stop")
+      this.buttonStop.setGraphic(ViewUtilities.iconSetter(Material.STOP, JavafxEnums.MEDIUM_ICON))
     }
   }
 
