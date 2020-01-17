@@ -14,6 +14,7 @@ import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
 import it.unibo.sd1920.akka_raft.view.screens.{ClientObserver, MainScreenView}
 
+import scala.collection.immutable.ListMap
 import scala.util.Random
 
 private class ClientActor extends Actor with ClientActorDiscovery with ActorLogging {
@@ -21,7 +22,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
   protected[this] val cluster: Cluster = Cluster(context.system)
   protected[this] var servers: Map[String, ActorRef] = Map()
   protected[this] var clients: Map[String, ActorRef] = Map()
-  protected[this] var requestHistory: Map[Int, ResultState] = Map()
+  protected[this] var requestHistory: Map[Int, ResultState] = ListMap()
   protected[this] var requestID: Int = 0
 
   view.setViewActorRef(self)
@@ -47,6 +48,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
     case GuiMsgLossServer(serverID, loss) => servers(serverID) ! GuiMsgLossServer(serverID, loss)
     case GuiSendMessage(serverID, commandType, iban, amount) => elaborateGuiSendRequest(serverID, commandType, iban, amount)
     case Log(message) => log info message
+    case UpdateGui() => view.updateResultState(requestHistory)
   }
 
   //RAFT

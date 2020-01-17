@@ -100,3 +100,9 @@
 #scrollPane {
     /*-fx-background-color: transparent;*/
 }
+
+/*List View*/
+#listViewResult {
+    -fx-vbar-policy: Never;
+    -fx-hbar-policy: Never;
+}

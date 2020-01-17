@@ -18,6 +18,7 @@ import org.kordamp.ikonli.material.Material
 
 trait View {
   def log(message: String): Unit
+  def requestUpdate(): Unit
   def stopServer(serverID: String): Unit
   def timeoutServer(serverID: String): Unit
   def sendMessage(serverID: String, commandType: CommandType, iban: String, amount: String)
@@ -54,7 +55,6 @@ abstract class AbstractMainScreenView extends View {
   type HBoxServerLog = HBox
   protected var serverToHBox: Map[String, (HBoxServerID, HBoxServerLog)] = Map()
   protected var serverToState: Map[String, ServerVolatileState] = Map()
-  protected var requestHistoryCache: Map[Int, ResultState] = Map()
 
   @FXML def initialize(): Unit = {
     this.initButtons()
@@ -89,7 +89,7 @@ abstract class AbstractMainScreenView extends View {
     })
     this.radioButtonExecuted.setText("Done")
     this.radioButtonExecuted.setOnAction(_ => {
-      this.updateResultList(requestHistoryCache)
+      requestUpdate()
       if (radioButtonExecuted.isSelected) {
         this.radioButtonExecuted.setText("Done")
       } else {
@@ -171,9 +171,8 @@ abstract class AbstractMainScreenView extends View {
   }
 
   def updateResultList(requestHistory: Map[Int, ResultState]): Unit = {
-    this.requestHistoryCache = requestHistory
     this.listViewResult.getItems.clear()
-    requestHistoryCache.toList.filter(t => {
+    requestHistory.toList.filter(t => {
       if (!this.radioButtonExecuted.isSelected) {
         !t._2.executed
       } else {

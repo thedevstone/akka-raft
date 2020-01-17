@@ -223,7 +223,7 @@
                               <JFXRadioButton fx:id="radioButtonExecuted" contentDisplay="RIGHT" selected="true" BorderPane.alignment="CENTER" />
                            </right>
                         </BorderPane>
-                        <JFXListView fx:id="listViewResult" minHeight="250.0" />
+                        <JFXListView id="listViewResult" fx:id="listViewResult" minHeight="250.0" />
                      </children>
                   </VBox>
                </right>
