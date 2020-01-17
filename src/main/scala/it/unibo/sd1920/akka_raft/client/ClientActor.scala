@@ -14,6 +14,7 @@ import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
 import it.unibo.sd1920.akka_raft.view.screens.{ClientObserver, MainScreenView}
 
+import scala.collection.immutable.ListMap
 import scala.util.Random
 
 private class ClientActor extends Actor with ClientActorDiscovery with ActorLogging {
@@ -21,7 +22,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
   protected[this] val cluster: Cluster = Cluster(context.system)
   protected[this] var servers: Map[String, ActorRef] = Map()
   protected[this] var clients: Map[String, ActorRef] = Map()
-  protected[this] var requestHistory: Map[Int, ResultState] = Map()
+  protected[this] var requestHistory: Map[Int, ResultState] = ListMap()
   protected[this] var requestID: Int = 0
 
   view.setViewActorRef(self)
@@ -47,6 +48,8 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
     case GuiMsgLossServer(serverID, loss) => servers(serverID) ! GuiMsgLossServer(serverID, loss)
     case GuiSendMessage(serverID, commandType, iban, amount) => elaborateGuiSendRequest(serverID, commandType, iban, amount)
     case Log(message) => log info message
+    case UpdateGui() => view.updateResultState(requestHistory)
+    case RetryMessage(indexInMap: Int, serverID: String) => handleRetryMessage(indexInMap, serverID)
   }
 
   //RAFT
@@ -84,6 +87,12 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
     this.requestHistory = this.requestHistory + (this.requestID -> ResultState(executed = false, serverCommand, None))
     servers(targetServer) ! ClientRequest(requestID, serverCommand)
     this.requestID += 1
+  }
+
+  def handleRetryMessage(indexInMap: Int, serverID: String): Unit = {
+    val requestEntry = requestHistory.toList(indexInMap)
+    this.requestHistory = this.requestHistory + (requestEntry._1 -> ResultState(executed = false, requestEntry._2.command, None))
+    servers(serverID) ! ClientRequest(requestEntry._1, requestEntry._2.command)
   }
 
   private def resolveNodeID(actorRef: ActorRef): String = servers.filter(e => e._2 == sender()).last._1
