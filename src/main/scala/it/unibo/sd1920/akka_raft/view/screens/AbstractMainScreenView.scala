@@ -9,7 +9,7 @@ import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
 import it.unibo.sd1920.akka_raft.view.utilities.{JavafxEnums, ViewUtilities}
 import javafx.fxml.FXML
 import javafx.geometry.{Insets, Pos}
-import javafx.scene.control.Label
+import javafx.scene.control.{Label, Tooltip}
 import javafx.scene.layout.{BorderPane, HBox, VBox}
 import javafx.scene.text.Font
 import org.kordamp.ikonli.ionicons.Ionicons
@@ -97,7 +97,10 @@ abstract class AbstractMainScreenView extends View {
   private def initButtons(): Unit = {
     this.buttonSend.setGraphic(ViewUtilities.iconSetter(Material.SEND, JavafxEnums.MEDIUM_ICON))
     this.buttonSend.setOnAction(_ => sendMessage(getSelectedServer, comboCommand.getSelectionModel.getSelectedItem, textFieldIban.getText, textFieldAmount.getText))
+    this.buttonTimeout.setTooltip(new Tooltip("Server timeout"))
+    this.buttonTimeout.setGraphic(ViewUtilities.iconSetter(Material.TIMER_OFF, JavafxEnums.MEDIUM_ICON))
     this.buttonTimeout.setOnAction(_ => timeoutServer(getSelectedServer))
+    this.buttonStop.setTooltip(new Tooltip("Server start stop"))
     this.buttonStop.setOnAction(_ => {
       serverToSettings.get(getSelectedServer) match {
         case None => ViewUtilities.showNotificationPopup("Server Errorr", "Wait servers to join the cluster", JavafxEnums.MEDIUM_DURATION, JavafxEnums.ERROR_NOTIFICATION, null)
