@@ -18,15 +18,15 @@ private trait LeaderBehaviour {
     case req: ClientRequest => handleRequest(req)
     //FROM SERVER
     case SchedulerTick => heartbeatTimeout()
-    case AppendEntriesResult(success, matchIndex) => handleAppendResult(sender().path.name, success, matchIndex)
+    case AppendEntriesResult(success, matchIndex, term) => handleAppendResult(sender().path.name, success, matchIndex, term)
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case result: StateMachineResult => handleStateMachineResult(result.indexAndResult)
-    case AppendEntries(term, _, _, _) => handleAppendEntries(term)
+    case AppendEntries(term, _, _, _) => checkBehindTerm(term)
     case _ =>
   })
 
   //FROM OTHER LEADER
-  private def handleAppendEntries(term: Int): Unit = {
+  private def checkBehindTerm(term: Int): Unit = {
     if (term > currentTerm) becomingFollower(term) //TODO EasyVersion
   }
 
@@ -43,6 +43,7 @@ private trait LeaderBehaviour {
     val i: Option[Int] = serverLog.getIndexFromReqId(req.requestID)
     if (serverLog.isReqIdCommitted(req.requestID)) {
       stateMachineActor ! ApplyCommand(new Entry[BankCommand](req.command, currentTerm, i.get, req.requestID))
+      lastApplied = serverLog.getIndexFromReqId(req.requestID).get
     } else if (i.isEmpty) {
       val entry = new Entry[BankCommand](req.command, currentTerm, serverLog.size, req.requestID)
       serverLog.putElementAtIndex(entry)
@@ -85,7 +86,8 @@ private trait LeaderBehaviour {
   }
 
   //FROM FOLLOWER
-  private def handleAppendResult(name: String, success: Boolean, matchIndex: Int): Unit = {
+  private def handleAppendResult(name: String, success: Boolean, matchIndex: Int, term: Int): Unit = {
+    checkBehindTerm(term)
     val followerStatus = followersStatusMap(name)
     if (success) {
       followersStatusMap = followersStatusMap + (name -> FollowerStatus(matchIndex + 1, matchIndex))
