@@ -18,6 +18,7 @@ import org.kordamp.ikonli.material.Material
 
 trait View {
   def log(message: String): Unit
+  def retryRequest(index: Int, serverID: String): Unit
   def requestUpdate(): Unit
   def stopServer(serverID: String): Unit
   def timeoutServer(serverID: String): Unit
@@ -60,6 +61,7 @@ abstract class AbstractMainScreenView extends View {
     this.initButtons()
     this.initCombos()
     this.initSlider()
+    this.initListView()
     this.assertNodeInjected()
   }
 
@@ -112,6 +114,14 @@ abstract class AbstractMainScreenView extends View {
 
   private def initSlider(): Unit = {
     this.sliderMsgLoss.setOnMouseReleased(_ => messageLoss(getSelectedServer, this.sliderMsgLoss.getValue / 100))
+  }
+
+  private def initListView(): Unit = {
+    this.listViewResult.getSelectionModel.selectedIndexProperty().addListener((_, _, newValue) => {
+      if (newValue.intValue() != -1 && this.radioButtonExecuted.isSelected) {
+        retryRequest(newValue.intValue(), getSelectedServer)
+      }
+    })
   }
 
   private def getSelectedServer: String = serverIDCombo.getSelectionModel.getSelectedItem
@@ -178,7 +188,7 @@ abstract class AbstractMainScreenView extends View {
       } else {
         true
       }
-    }).sortWith(_._1 < _._1).foreach(e => this.listViewResult.getItems
+    }).foreach(e => this.listViewResult.getItems
       .add(s"ID: ${e._1} -> [CMD: ${e._2.command}] [Ex: ${e._2.executed}] [Res: ${e._2.result.getOrElse("Not Executed")}]"))
   }
 }

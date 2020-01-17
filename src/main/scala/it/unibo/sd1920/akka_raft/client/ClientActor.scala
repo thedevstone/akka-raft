@@ -49,6 +49,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
     case GuiSendMessage(serverID, commandType, iban, amount) => elaborateGuiSendRequest(serverID, commandType, iban, amount)
     case Log(message) => log info message
     case UpdateGui() => view.updateResultState(requestHistory)
+    case RetryMessage(indexInMap: Int, serverID: String) => handleRetryMessage(indexInMap, serverID)
   }
 
   //RAFT
@@ -86,6 +87,12 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
     this.requestHistory = this.requestHistory + (this.requestID -> ResultState(executed = false, serverCommand, None))
     servers(targetServer) ! ClientRequest(requestID, serverCommand)
     this.requestID += 1
+  }
+
+  def handleRetryMessage(indexInMap: Int, serverID: String): Unit = {
+    val requestEntry = requestHistory.toList(indexInMap)
+    this.requestHistory = this.requestHistory + (requestEntry._1 -> ResultState(executed = false, requestEntry._2.command, None))
+    servers(serverID) ! ClientRequest(requestEntry._1, requestEntry._2.command)
   }
 
   private def resolveNodeID(actorRef: ActorRef): String = servers.filter(e => e._2 == sender()).last._1

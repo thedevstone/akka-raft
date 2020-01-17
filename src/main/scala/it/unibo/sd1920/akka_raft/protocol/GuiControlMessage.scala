@@ -13,6 +13,7 @@ object GuiControlMessage {
   case class GuiSendMessage(serverID: String, commandType: CommandType, iban: String, amount: String) extends GuiControlMessage with ControlMessage
   case class Log(message: String) extends GuiControlMessage with ControlMessage
   case class UpdateGui() extends GuiControlMessage with ControlMessage
+  case class RetryMessage(indexInMap: Int, serverID: String) extends GuiControlMessage with ControlMessage
   //TO VIEW
   case class GuiServerState(serverState: ServerVolatileState) extends GuiControlMessage with ControlMessage
   case class ResultUpdate(id: Int, result: Option[Int]) extends GuiControlMessage with ControlMessage

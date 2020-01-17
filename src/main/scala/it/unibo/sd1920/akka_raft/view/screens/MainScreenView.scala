@@ -60,6 +60,7 @@ class MainScreenView extends AbstractMainScreenView() with ClientObserver {
 
   // ##################### TO CLIENT ACTOR
   override def log(message: String): Unit = clientActorRef ! GuiControlMessage.Log(message)
+  override def retryRequest(index: Int, serverID: String): Unit = clientActorRef ! GuiControlMessage.RetryMessage(index, serverID)
   override def requestUpdate(): Unit = clientActorRef ! GuiControlMessage.UpdateGui()
   override def stopServer(serverID: String): Unit = clientActorRef ! GuiControlMessage.GuiStopServer(serverID)
   override def timeoutServer(serverID: String): Unit = clientActorRef ! GuiControlMessage.GuiTimeoutServer(serverID)
