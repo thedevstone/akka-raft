@@ -10,13 +10,12 @@ import it.unibo.sd1920.akka_raft.model.Bank.BankTransactionResult
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{ApplyCommand, BankCommand}
 import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage._
 import it.unibo.sd1920.akka_raft.protocol.RaftMessage
-import it.unibo.sd1920.akka_raft.server.ServerActor.{SchedulerTick, SchedulerTickKey}
+import it.unibo.sd1920.akka_raft.server.ServerActor.{InternalMessage, SchedulerTick, SchedulerTickKey}
 import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, RaftConstants, RandomUtil, ServerRole}
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
 import it.unibo.sd1920.akka_raft.utils.ServerRole.ServerRole
 
 import scala.concurrent.duration._
-import scala.util.Random
 
 private class ServerActor extends Actor with ServerActorDiscovery with LeaderBehaviour with CandidateBehaviour with FollowerBehaviour with ActorLogging with Timers {
   protected[this] val SERVERS_MAJORITY: Int = (NetworkConstants.numberOfServer / 2) + 1
@@ -45,8 +44,9 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
       receiver.apply(msg)
     }
     def isDefinedAt(msg: Any): Boolean = {
-      if (Random.nextDouble() > messageLoseSoil && !msg.isInstanceOf[ControlMessage] && !msg.isInstanceOf[SchedulerTick.type]) {
-        logWithRole("messaggio scartato")
+      if (classOf[InternalMessage].isAssignableFrom(msg.getClass)) {
+
+        logWithRole(msg.toString)
         return false
       }
 
@@ -59,8 +59,8 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   override def receive: Receive = clusterDiscoveryBehaviour
 
   protected def controlBehaviour: Receive = clusterDiscoveryBehaviour orElse {
-    case GuiStopServer(serverID) => logWithRole("STOPPPPP")
-    case GuiResumeServer(serverID) => logWithRole("RESUMEE")
+    case GuiStopServer(serverID) => //TODO
+    case GuiResumeServer(serverID) => //TODO
     case GuiTimeoutServer(serverID) => //TODO
     case GuiMsgLossServer(serverID, loss) => logWithRole("\n\n\n\t\tvalore:" + loss)
       messageLoseSoil = loss
@@ -92,25 +92,17 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
 }
 
 object ServerActor {
-
   //MESSAGES TO SERVER
-  sealed trait ServerInput
-
-  case class IdentifyServer(senderRole: NodeRole) extends ServerInput with ControlMessage
-
-  case class ServerIdentity(name: String) extends ServerInput with ControlMessage
-
-  case class ClientIdentity(name: String) extends ServerInput with ControlMessage
+  case class IdentifyServer(senderRole: NodeRole) extends ControlMessage
+  case class ServerIdentity(name: String) extends ControlMessage
+  case class ClientIdentity(name: String) extends ControlMessage
 
   //FROM STATE MACHINE
-  case class StateMachineResult(indexAndResult: (Int, BankTransactionResult)) extends ServerInput
-
+  sealed trait InternalMessage
+  case class StateMachineResult(indexAndResult: (Int, BankTransactionResult)) extends InternalMessage
   //FROM SELF
-  case object SchedulerTick extends ServerInput
-
-  private sealed trait TimerKey
-
-  private case object SchedulerTickKey extends TimerKey
+  case object SchedulerTick extends InternalMessage
+  private case object SchedulerTickKey
 
   def props: Props = Props(new ServerActor())
 

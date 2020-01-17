@@ -101,12 +101,10 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
 }
 
 object ClientActor {
-
   //MESSAGES TO CLIENT
-  sealed trait ClientInput
-  case class IdentifyClient(senderRole: NodeRole) extends ClientInput with ControlMessage
-  case class ServerIdentity(name: String) extends ClientInput with ControlMessage
-  case class ClientIdentity(name: String) extends ClientInput with ControlMessage
+  case class IdentifyClient(senderRole: NodeRole) extends ControlMessage
+  case class ServerIdentity(name: String) extends ControlMessage
+  case class ClientIdentity(name: String) extends ControlMessage
 
 
   //STARTING CLIENT
