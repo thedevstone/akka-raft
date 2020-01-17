@@ -1,10 +1,9 @@
 package it.unibo.sd1920.akka_raft.server
 
-import it.unibo.sd1920.akka_raft.model.{Entry, ServerVolatileState}
 import it.unibo.sd1920.akka_raft.model.Bank.BankTransactionResult
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{ApplyCommand, BankCommand}
+import it.unibo.sd1920.akka_raft.model.Entry
 import it.unibo.sd1920.akka_raft.protocol._
-import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage.GuiServerState
 import it.unibo.sd1920.akka_raft.server.ServerActor.{SchedulerTick, StateMachineResult}
 import it.unibo.sd1920.akka_raft.utils.ServerRole
 
@@ -14,7 +13,7 @@ private trait LeaderBehaviour {
 
   private var followersStatusMap: Map[String, FollowerStatus] = Map()
 
-  protected def leaderBehaviour: Receive = controlBehaviour orElse {
+  protected def leaderBehaviour: Receive = controlBehaviour orElse MessageInterceptor({
     //FROM CLIENT
     case req: ClientRequest => handleRequest(req)
     //FROM SERVER
@@ -24,7 +23,7 @@ private trait LeaderBehaviour {
     case result: StateMachineResult => handleStateMachineResult(result.indexAndResult)
     case AppendEntries(term, _, _, _) => handleAppendEntries(term)
     case _ =>
-  }
+  })
 
   //FROM OTHER LEADER
   private def handleAppendEntries(term: Int): Unit = {
@@ -58,7 +57,6 @@ private trait LeaderBehaviour {
         case nextIndexToSend => e._2 ! AppendEntries(currentTerm, serverLog.getEntryAtIndex(nextIndexToSend - 1), None, serverLog.getCommitIndex)
       }
     })
-    clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, 1, 1, serverLog.getEntries)) //TODO da cancellare
   }
 
   //FROM CANDIDATE
@@ -92,8 +90,8 @@ private trait LeaderBehaviour {
     if (success) {
       followersStatusMap = followersStatusMap + (name -> FollowerStatus(matchIndex + 1, matchIndex))
       val indexToCommit = getIndexToCommit
-      // if (checkCommitFromEarlierTerm(indexToCommit))//TODO
-      callCommit(indexToCommit)
+      if (checkCommitFromEarlierTerm(indexToCommit))
+        callCommit(indexToCommit)
       if (followerStatus.nextIndexToSend <= serverLog.lastIndex) {
         val entryToSend = serverLog.getEntryAtIndex(followerStatus.nextIndexToSend)
         sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entryToSend.get), entryToSend, serverLog.getCommitIndex)

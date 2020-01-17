@@ -11,13 +11,13 @@ private trait CandidateBehaviour {
 
   private var voteCounter: Int = 1
 
-  protected def candidateBehaviour: Receive = controlBehaviour orElse {
+  protected def candidateBehaviour: Receive = controlBehaviour orElse MessageInterceptor({
     case SchedulerTick => electionTimeout()
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case requestResult: RequestVoteResult => handleVoteResult(requestResult)
     case AppendEntries(term, _, _, _) => handleAppendEntries(term)
     case _ =>
-  }
+  })
 
   private def handleAppendEntries(term: Int): Unit = {
     if (term > currentTerm) becomingFollower(term) //TODO EasyVersion

@@ -2,9 +2,7 @@ package it.unibo.sd1920.akka_raft.server
 
 
 import akka.actor.ActorRef
-import it.unibo.sd1920.akka_raft.model.ServerVolatileState
 import it.unibo.sd1920.akka_raft.protocol._
-import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage.GuiServerState
 import it.unibo.sd1920.akka_raft.server.ServerActor.SchedulerTick
 import it.unibo.sd1920.akka_raft.utils.ServerRole
 
@@ -14,12 +12,21 @@ private trait FollowerBehaviour {
 
   private var leaderRef: Option[ActorRef] = None
 
-  protected def followerBehaviour: Receive = controlBehaviour orElse {
+  protected def followerBehaviour: Receive = controlBehaviour orElse MessageInterceptor({
     case SchedulerTick => followerTimeout()
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case appendEntry: AppendEntries => handleAppendEntries(appendEntry)
     case ClientRequest(requestID, _) => sender() ! Redirect(requestID, leaderRef)
-    case _ =>
+  })
+
+
+  private def test(b: Any) {
+    b match {
+      case SchedulerTick => followerTimeout()
+      case requestVote: RequestVote => handleRequestVote(requestVote)
+      case appendEntry: AppendEntries => handleAppendEntries(appendEntry)
+      case ClientRequest(requestID, _) => sender() ! Redirect(requestID, leaderRef)
+    }
   }
 
   private def followerTimeout(): Unit = {
@@ -77,7 +84,6 @@ private trait FollowerBehaviour {
 
       case _ =>
     }
-    clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, 1, 1, serverLog.getEntries)) //TODO da cancellare
 
     startTimeoutTimer()
   }

@@ -5,10 +5,10 @@ import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.{MemberDowned, MemberUp}
 import akka.dispatch.ControlMessage
 import com.typesafe.config.ConfigFactory
-import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog}
+import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog, ServerVolatileState}
 import it.unibo.sd1920.akka_raft.model.Bank.BankTransactionResult
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{ApplyCommand, BankCommand}
-import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage.{GuiMsgLossServer, GuiStopServer, GuiTimeoutServer}
+import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage.{GuiMsgLossServer, GuiServerState, GuiStopServer, GuiTimeoutServer}
 import it.unibo.sd1920.akka_raft.protocol.RaftMessage
 import it.unibo.sd1920.akka_raft.server.ServerActor.{SchedulerTick, SchedulerTickKey}
 import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, RaftConstants, RandomUtil, ServerRole}
@@ -35,6 +35,20 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
     })
     stateMachineActor = context.actorOf(BankStateMachine.props(RandomUtil.randomBetween(RaftConstants.minimumStateMachineExecutionTime,
       RaftConstants.maximumStateMachineExecutionTime).millis), "StateMachine")
+  }
+
+
+  case class MessageInterceptor(receiver: Receive) extends Receive {
+    def apply(msg: Any): Unit = {
+      /* do whatever things here */
+      receiver.apply(msg)
+    }
+    def isDefinedAt(msg: Any): Boolean = {
+      //   if (Random.nextInt(10) > 4) return false
+
+      clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, 1, 1, serverLog.getEntries)) //TODO da cancellare
+      receiver.isDefinedAt(msg)
+    }
   }
 
   override def receive: Receive = clusterDiscoveryBehaviour
