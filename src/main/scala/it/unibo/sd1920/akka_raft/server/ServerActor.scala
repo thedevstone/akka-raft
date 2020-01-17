@@ -8,7 +8,7 @@ import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog, ServerVolatileState}
 import it.unibo.sd1920.akka_raft.model.Bank.BankTransactionResult
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{ApplyCommand, BankCommand}
-import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage.{GuiMsgLossServer, GuiServerState, GuiStopServer, GuiTimeoutServer}
+import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage._
 import it.unibo.sd1920.akka_raft.protocol.RaftMessage
 import it.unibo.sd1920.akka_raft.server.ServerActor.{SchedulerTick, SchedulerTickKey}
 import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, RaftConstants, RandomUtil, ServerRole}
@@ -59,7 +59,8 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   override def receive: Receive = clusterDiscoveryBehaviour
 
   protected def controlBehaviour: Receive = clusterDiscoveryBehaviour orElse {
-    case GuiStopServer(serverID) => //TODO
+    case GuiStopServer(serverID) => logWithRole("STOPPPPP")
+    case GuiResumeServer(serverID) => logWithRole("RESUMEE")
     case GuiTimeoutServer(serverID) => //TODO
     case GuiMsgLossServer(serverID, loss) => logWithRole("\n\n\n\t\tvalore:" + loss)
       messageLoseSoil = loss

@@ -3,9 +3,8 @@ package it.unibo.sd1920.akka_raft.view.screens
 import com.jfoenix.controls._
 import eu.hansolo.enzo.led.Led
 import it.unibo.sd1920.akka_raft.client.ResultState
-import it.unibo.sd1920.akka_raft.model.{BankStateMachine, Entry, ServerVolatileState}
-import it.unibo.sd1920.akka_raft.model.BankStateMachine.{BankCommand, Withdraw}
-import it.unibo.sd1920.akka_raft.utils.{CommandType, ServerRole}
+import it.unibo.sd1920.akka_raft.model.ServerVolatileState
+import it.unibo.sd1920.akka_raft.utils.CommandType
 import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
 import it.unibo.sd1920.akka_raft.view.utilities.{JavafxEnums, ViewUtilities}
 import javafx.fxml.FXML
@@ -21,6 +20,7 @@ trait View {
   def retryRequest(index: Int, serverID: String): Unit
   def requestUpdate(): Unit
   def stopServer(serverID: String): Unit
+  def resumeServer(serverID: String): Unit
   def timeoutServer(serverID: String): Unit
   def sendMessage(serverID: String, commandType: CommandType, iban: String, amount: String)
   def messageLoss(serverID: String, value: Double): Unit
@@ -56,7 +56,7 @@ abstract class AbstractMainScreenView extends View {
   type HBoxServerLog = HBox
   protected var serverToHBox: Map[String, (HBoxServerID, HBoxServerLog)] = Map()
   protected var serverToState: Map[String, ServerVolatileState] = Map()
-
+  protected var serverToSettings: Map[String, ServerSettings] = Map()
 
   @FXML def initialize(): Unit = {
     this.initButtons()
@@ -99,12 +99,19 @@ abstract class AbstractMainScreenView extends View {
     this.buttonSend.setOnAction(_ => sendMessage(getSelectedServer, comboCommand.getSelectionModel.getSelectedItem, textFieldIban.getText, textFieldAmount.getText))
     this.buttonTimeout.setOnAction(_ => timeoutServer(getSelectedServer))
     this.buttonStop.setOnAction(_ => {
-      stopServer(getSelectedServer)
-      val state: ServerVolatileState = ServerVolatileState(ServerRole.CANDIDATE, 1, 1, Some("S1"), 2, 3, 3,
-        List(Entry[BankCommand](Withdraw("ciao", 2), 2, 3, 123),
-          Entry[BankCommand](BankStateMachine.Deposit("ciao", 34), 5, 2, 133),
-          Entry[BankCommand](BankStateMachine.Deposit("ciao", 34), 6, 2, 134)))
-      this.manageServerState("S1", state)
+      serverToSettings.get(getSelectedServer) match {
+        case None => ViewUtilities.showNotificationPopup("Server Errorr", "Wait servers to join the cluster", JavafxEnums.MEDIUM_DURATION, JavafxEnums.ERROR_NOTIFICATION, null)
+        case Some(s) =>
+          val selectedServer = getSelectedServer
+          if (s.stopped) {
+            resumeServer(selectedServer)
+          } else {
+            stopServer(selectedServer)
+          }
+          val newSetting = ServerSettings(s.lossValue, !s.stopped)
+          serverToSettings = serverToSettings + (selectedServer -> newSetting)
+          updateServerSettings(newSetting)
+      }
     })
     this.radioButtonExecuted.setText("Done")
     this.radioButtonExecuted.setOnAction(_ => {
@@ -118,19 +125,27 @@ abstract class AbstractMainScreenView extends View {
   }
 
   private def initCombos(): Unit = {
-    this.serverIDCombo.getSelectionModel.selectedItemProperty()
-      .addListener((_, _, newState) => {
-        serverToState.get(newState) match {
-          case None => ViewUtilities.showNotificationPopup("Server Errorr", "No server update present", JavafxEnums.MEDIUM_DURATION, JavafxEnums.ERROR_NOTIFICATION, null)
-          case Some(state) => updateServerState(state)
-        }
-      })
+    this.serverIDCombo.getSelectionModel.selectedItemProperty().addListener((_, _, newState) => {
+      serverToState.get(newState) match {
+        case None => ViewUtilities.showNotificationPopup("Server Errorr", "No server update present", JavafxEnums.MEDIUM_DURATION, JavafxEnums.ERROR_NOTIFICATION, null)
+        case Some(state) => updateServerState(state)
+      }
+      serverToSettings.get(newState) match {
+        case None => ViewUtilities.showNotificationPopup("Server Errorr", "No server update present", JavafxEnums.MEDIUM_DURATION, JavafxEnums.ERROR_NOTIFICATION, null)
+        case Some(settings) => updateServerSettings(settings)
+      }
+    })
     CommandType.values.foreach(this.comboCommand.getItems.add(_))
     this.comboCommand.getSelectionModel.select(0)
   }
 
   private def initSlider(): Unit = {
-    this.sliderMsgLoss.setOnMouseReleased(_ => messageLoss(getSelectedServer, 1 - (this.sliderMsgLoss.getValue / 100)))
+    this.sliderMsgLoss.setOnMouseReleased(_ => {
+      val newLoss = this.sliderMsgLoss.getValue
+      val oldEntry = serverToSettings(getSelectedServer)
+      messageLoss(getSelectedServer, 1 - (newLoss / 100))
+      serverToSettings = serverToSettings + (getSelectedServer -> ServerSettings(newLoss, oldEntry.stopped))
+    })
   }
 
   private def initListView(): Unit = {
@@ -161,6 +176,8 @@ abstract class AbstractMainScreenView extends View {
     this.vBoxServerNames.getChildren.add(serverIDNode)
     this.vBoxServerLogs.getChildren.add(serverLogNode)
     this.serverToHBox = this.serverToHBox + (serverID -> (serverIDNode, serverLogNode))
+    //ADDING SERVER TO SETTINGS
+    this.serverToSettings = this.serverToSettings + (serverID -> ServerSettings(0, false))
   }
 
   protected def addServerToCombos(serverID: String): Unit = {
@@ -197,6 +214,15 @@ abstract class AbstractMainScreenView extends View {
     this.stateLabelLastMatched.setText(serverVolatileState.lastMatchedEntry.toString)
   }
 
+  private def updateServerSettings(settings: ServerSettings): Unit = {
+    this.sliderMsgLoss.setValue(settings.lossValue)
+    if (settings.stopped) {
+      this.buttonStop.setText("Resume")
+    } else {
+      this.buttonStop.setText("Stop")
+    }
+  }
+
   def updateResultList(requestHistory: Map[Int, ResultState]): Unit = {
     this.listViewResult.getItems.clear()
     requestHistory.toList.filter(t => {
@@ -219,3 +245,5 @@ class EntryBox(info: String, on: Boolean) extends VBox {
   entryInfo.setFont(new Font(12))
   this.getChildren.addAll(entryLed, entryInfo)
 }
+
+case class ServerSettings(lossValue: Double, stopped: Boolean)
