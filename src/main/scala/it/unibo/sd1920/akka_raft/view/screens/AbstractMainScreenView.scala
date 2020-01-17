@@ -113,7 +113,7 @@ abstract class AbstractMainScreenView extends View {
   }
 
   private def initSlider(): Unit = {
-    this.sliderMsgLoss.setOnMouseReleased(_ => messageLoss(getSelectedServer, this.sliderMsgLoss.getValue / 100))
+    this.sliderMsgLoss.setOnMouseReleased(_ => messageLoss(getSelectedServer, 1 - (this.sliderMsgLoss.getValue / 100)))
   }
 
   private def initListView(): Unit = {

@@ -16,6 +16,7 @@ import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
 import it.unibo.sd1920.akka_raft.utils.ServerRole.ServerRole
 
 import scala.concurrent.duration._
+import scala.util.Random
 
 private class ServerActor extends Actor with ServerActorDiscovery with LeaderBehaviour with CandidateBehaviour with FollowerBehaviour with ActorLogging with Timers {
   protected[this] val SERVERS_MAJORITY: Int = (NetworkConstants.numberOfServer / 2) + 1
@@ -28,7 +29,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   protected[this] var lastApplied: Int = 0
   protected[this] var votedFor: Option[String] = None
   protected[this] val serverLog: CommandLog[BankCommand] = CommandLog.emptyLog()
-
+  protected[this] var messageLoseSoil: Double = 1.0
   override def preStart(): Unit = {
     cluster.subscribe(self, classOf[MemberUp], classOf[MemberDowned])
     cluster.registerOnMemberUp({
@@ -44,9 +45,13 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
       receiver.apply(msg)
     }
     def isDefinedAt(msg: Any): Boolean = {
-      //   if (Random.nextInt(10) > 4) return false
+      if (Random.nextDouble() > messageLoseSoil && !msg.isInstanceOf[ControlMessage] && !msg.isInstanceOf[SchedulerTick.type]) {
+        logWithRole("messaggio scartato")
+        return false
+      }
 
       clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, 1, 1, serverLog.getEntries)) //TODO da cancellare
+
       receiver.isDefinedAt(msg)
     }
   }
@@ -56,7 +61,8 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   protected def controlBehaviour: Receive = clusterDiscoveryBehaviour orElse {
     case GuiStopServer(serverID) => //TODO
     case GuiTimeoutServer(serverID) => //TODO
-    case GuiMsgLossServer(serverID, loss) => //TODO
+    case GuiMsgLossServer(serverID, loss) => logWithRole("\n\n\n\t\tvalore:" + loss)
+      messageLoseSoil = loss
   }
 
   protected def startTimeoutTimer(): Unit = {
