@@ -15,11 +15,11 @@ private trait CandidateBehaviour {
     case SchedulerTick => electionTimeout()
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case requestResult: RequestVoteResult => handleVoteResult(requestResult)
-    case AppendEntries(term, _, _, _) => handleAppendEntries(term)
+    case AppendEntries(term, _, _, _) => checkBehindTerm(term)
     case _ =>
   })
 
-  private def handleAppendEntries(term: Int): Unit = {
+  private def checkBehindTerm(term: Int): Unit = {
     if (term > currentTerm) becomingFollower(term) //TODO EasyVersion
   }
 

@@ -35,7 +35,8 @@ case class AppendEntries(
 
 case class AppendEntriesResult(
   success: Boolean,
-  matchIndex: Int
+  matchIndex: Int,
+  term: Int
 ) extends RaftMessage
 
 case class Redirect(

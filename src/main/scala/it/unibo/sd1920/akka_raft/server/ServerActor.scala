@@ -16,6 +16,7 @@ import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
 import it.unibo.sd1920.akka_raft.utils.ServerRole.ServerRole
 
 import scala.concurrent.duration._
+import scala.util.Random
 
 private class ServerActor extends Actor with ServerActorDiscovery with LeaderBehaviour with CandidateBehaviour with FollowerBehaviour with ActorLogging with Timers {
   protected[this] val SERVERS_MAJORITY: Int = (NetworkConstants.numberOfServer / 2) + 1
@@ -26,6 +27,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   protected[this] var currentRole: ServerRole = ServerRole.FOLLOWER
   protected[this] var currentTerm: Int = 0
   protected[this] var lastApplied: Int = 0
+  protected[this] var stopped: Boolean = false
   protected[this] var votedFor: Option[String] = None
   protected[this] val serverLog: CommandLog[BankCommand] = CommandLog.emptyLog()
   protected[this] var messageLoseSoil: Double = 1.0
@@ -44,9 +46,9 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
       receiver.apply(msg)
     }
     def isDefinedAt(msg: Any): Boolean = {
-      if (classOf[InternalMessage].isAssignableFrom(msg.getClass)) {
-
-        logWithRole(msg.toString)
+      if (Random.nextDouble() > messageLoseSoil && (!classOf[InternalMessage].isAssignableFrom(msg.getClass) || stopped) && (!classOf[ControlMessage].isAssignableFrom(msg.getClass))) {
+        logWithRole("Messaggio bloccato:: " + msg.toString
+        )
         return false
       }
 
