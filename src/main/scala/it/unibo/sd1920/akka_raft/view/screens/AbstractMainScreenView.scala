@@ -54,6 +54,7 @@ abstract class AbstractMainScreenView extends View {
   type HBoxServerLog = HBox
   protected var serverToHBox: Map[String, (HBoxServerID, HBoxServerLog)] = Map()
   protected var serverToState: Map[String, ServerVolatileState] = Map()
+  protected var requestHistoryCache: Map[Int, ResultState] = Map()
 
   @FXML def initialize(): Unit = {
     this.initButtons()
@@ -85,6 +86,15 @@ abstract class AbstractMainScreenView extends View {
           Entry[BankCommand](BankStateMachine.Deposit("ciao", 34), 5, 2, 133),
           Entry[BankCommand](BankStateMachine.Deposit("ciao", 34), 6, 2, 134)))
       this.manageServerState("S1", state)
+    })
+    this.radioButtonExecuted.setText("Done")
+    this.radioButtonExecuted.setOnAction(_ => {
+      this.updateResultList(requestHistoryCache)
+      if (radioButtonExecuted.isSelected) {
+        this.radioButtonExecuted.setText("Done")
+      } else {
+        this.radioButtonExecuted.setText("Running")
+      }
     })
   }
 
@@ -161,14 +171,16 @@ abstract class AbstractMainScreenView extends View {
   }
 
   def updateResultList(requestHistory: Map[Int, ResultState]): Unit = {
+    this.requestHistoryCache = requestHistory
     this.listViewResult.getItems.clear()
-    if (!radioButtonExecuted.isSelected) {
-      requestHistory.toList.sortWith((a, b) => a._1 < b._1)
-        .foreach(e => this.listViewResult.getItems.add(s"ID: ${e._1} -> [CMD: ${e._2.command}] [Ex: ${e._2.executed}] [Res: ${e._2.result.getOrElse("Not Executed")}]"))
-    } else {
-      requestHistory.toList.filter(r => !r._2.executed).sortWith((a, b) => a._1 < b._1)
-        .foreach(e => this.listViewResult.getItems.add(s"ID: ${e._1} -> [CMD: ${e._2.command}] [Ex: ${e._2.executed}] [Res: ${e._2.result.getOrElse("Not Executed")}]"))
-    }
+    requestHistoryCache.toList.filter(t => {
+      if (!this.radioButtonExecuted.isSelected) {
+        !t._2.executed
+      } else {
+        true
+      }
+    }).sortWith(_._1 < _._1).foreach(e => this.listViewResult.getItems
+      .add(s"ID: ${e._1} -> [CMD: ${e._2.command}] [Ex: ${e._2.executed}] [Res: ${e._2.result.getOrElse("Not Executed")}]"))
   }
 }
 

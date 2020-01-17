@@ -220,10 +220,10 @@
                               </Label>
                            </center>
                            <right>
-                              <JFXRadioButton fx:id="radioButtonExecuted" BorderPane.alignment="CENTER" />
+                              <JFXRadioButton fx:id="radioButtonExecuted" contentDisplay="RIGHT" selected="true" BorderPane.alignment="CENTER" />
                            </right>
                         </BorderPane>
-                        <JFXListView fx:id="listViewResult" minHeight="200.0" />
+                        <JFXListView fx:id="listViewResult" minHeight="250.0" />
                      </children>
                   </VBox>
                </right>
