@@ -9,7 +9,7 @@ import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
 import it.unibo.sd1920.akka_raft.view.utilities.{JavafxEnums, ViewUtilities}
 import javafx.fxml.FXML
 import javafx.geometry.{Insets, Pos}
-import javafx.scene.control.{Label, Tooltip}
+import javafx.scene.control.{Label, ScrollPane, Tooltip}
 import javafx.scene.layout.{BorderPane, HBox, VBox}
 import javafx.scene.text.Font
 import org.kordamp.ikonli.ionicons.Ionicons
@@ -31,6 +31,8 @@ abstract class AbstractMainScreenView extends View {
   @FXML protected var vBoxServerNames: VBox = _
   @FXML protected var vBoxServerLogs: VBox = _
   @FXML protected var serverIDCombo: JFXComboBox[String] = _
+  @FXML protected var borderLog: BorderPane = _
+  @FXML protected var scrollLog: ScrollPane = _
   //STATE LABELS
   @FXML protected var stateLabelRole: Label = _
   @FXML protected var stateLabelLastApplied: Label = _
@@ -87,6 +89,8 @@ abstract class AbstractMainScreenView extends View {
     assert(buttonSend != null, "fx:id=\"buttonSend\" was not injected: check your FXML file 'MainScreen.fxml'.")
     assert(radioButtonExecuted != null, "fx:id=\"radioButtonExecuted\" was not injected: check your FXML file 'MainScreen.fxml'.")
     assert(listViewResult != null, "fx:id=\"listViewResult\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(borderLog != null, "fx:id=\"borderLog\" was not injected: check your FXML file 'MainScreen.fxml'.")
+    assert(scrollLog != null, "fx:id=\"scrollLog\" was not injected: check your FXML file 'MainScreen.fxml'.")
   }
 
   protected def showPopupInfo(): Unit = {
@@ -95,6 +99,7 @@ abstract class AbstractMainScreenView extends View {
   }
 
   private def initButtons(): Unit = {
+    scrollLog.hvalueProperty().bind(borderLog.widthProperty())
     this.buttonSend.setGraphic(ViewUtilities.iconSetter(Material.SEND, JavafxEnums.MEDIUM_ICON))
     this.buttonSend.setOnAction(_ => sendMessage(getSelectedServer, comboCommand.getSelectionModel.getSelectedItem, textFieldIban.getText, textFieldAmount.getText))
     this.buttonTimeout.setTooltip(new Tooltip("Server timeout"))

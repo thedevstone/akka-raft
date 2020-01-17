@@ -22,9 +22,9 @@
                 <Insets />
             </BorderPane.margin>
             <content>
-                <ScrollPane id="scrollPane" maxHeight="350.0" maxWidth="800.0" minHeight="350.0" minWidth="800.0">
+                <ScrollPane id="scrollPane" fx:id="scrollLog" maxHeight="350.0" maxWidth="800.0" minHeight="350.0" minWidth="800.0">
                     <content>
-                        <BorderPane minHeight="350.0" minWidth="800.0">
+                        <BorderPane id="borderLog" fx:id="borderLog" minHeight="350.0" minWidth="800.0">
                             <left>
                                 <VBox fx:id="vBoxServerNames" alignment="CENTER_LEFT" BorderPane.alignment="CENTER" />
                             </left>
