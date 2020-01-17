@@ -197,7 +197,7 @@ abstract class AbstractMainScreenView extends View {
         entry._2.getChildren.clear()
         serverVolatileState.commandLog.foreach(c => {
           val ledOn = entry._2.getChildren.size() <= serverVolatileState.lastCommitted
-          val entryToAdd = new EntryBox(s"${serverVolatileState.currentTerm} : ${c.command.toString.substring(0, 1)}", ledOn)
+          val entryToAdd = new EntryBox(s"${c.term} : ${c.command.toString.substring(0, 1)}", ledOn)
           entry._2.getChildren.add(entryToAdd)
         })
         if (this.serverIDCombo.getSelectionModel.getSelectedItem == serverID) {
