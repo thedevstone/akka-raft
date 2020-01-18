@@ -96,7 +96,7 @@ private class ClientActor extends Actor with ClientActorDiscovery with ActorLogg
    * @param result the request result form leader
    */
   private def handleResult(result: RequestResult): Unit = {
-    this.requestHistory = this.requestHistory + (result.id -> ResultState(executed = true, requestHistory(result.id).command, Some(result)))
+    this.requestHistory = this.requestHistory + (result.requestID -> ResultState(executed = true, requestHistory(result.requestID).command, Some(result)))
     view.updateResultState(requestHistory)
   }
 

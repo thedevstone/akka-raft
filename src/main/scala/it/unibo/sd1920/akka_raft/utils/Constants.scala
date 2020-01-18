@@ -1,5 +1,8 @@
 package it.unibo.sd1920.akka_raft.utils
 
+/**
+ * Network constants for Akka Cluster.
+ */
 object NetworkConstants {
   val numberOfServer = 5
   val firstSeedPort = 5000
@@ -8,10 +11,13 @@ object NetworkConstants {
   val clusterName = "RaftCluster"
 }
 
+/**
+ * Raft constants.
+ */
 object RaftConstants {
   val minimumTimeout = 7500
   val maximumTimeout = 10000
   val minimumStateMachineExecutionTime = 1000
   val maximumStateMachineExecutionTime = 2000
-  val heartbeatTimeout = 5000
+  val heartbeatTimeout = 100
 }

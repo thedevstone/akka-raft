@@ -4,6 +4,9 @@ import akka.dispatch.ControlMessage
 import it.unibo.sd1920.akka_raft.model.ServerVolatileState
 import it.unibo.sd1920.akka_raft.utils.CommandType.CommandType
 
+/**
+ * Message with priority directed to Gui.
+ */
 object GuiControlMessage {
   sealed trait GuiControlMessage
   //FROM VIEW
