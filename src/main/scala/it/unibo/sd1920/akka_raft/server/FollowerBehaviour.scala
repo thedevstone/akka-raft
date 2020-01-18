@@ -54,7 +54,7 @@ private trait FollowerBehaviour {
 
       //caso leader manda prima entry del log.
       case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty && entry.nonEmpty =>
-        callCommit(Math.min(serverLog.lastIndex, leaderLastCommit))
+        handleCommit(leaderLastCommit)
         lastMatched = 0
         sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), lastMatched, currentTerm)
 
@@ -70,12 +70,12 @@ private trait FollowerBehaviour {
 
       //caso prev entry presente nel log. Se ho entry da appendere lo faccio,
       case AppendEntries(_, previousEntry, entry, leaderLastCommit) if entry.nonEmpty =>
-        callCommit(Math.min(serverLog.lastIndex, leaderLastCommit))
+        handleCommit(leaderLastCommit)
         lastMatched = entry.get.index
         sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), lastMatched, currentTerm)
 
       // altrimenti ritorno solo true
-      case AppendEntries(_, previousEntry, _, leaderLastCommit) => callCommit(Math.min(serverLog.lastIndex, leaderLastCommit))
+      case AppendEntries(_, previousEntry, _, leaderLastCommit) => handleCommit(leaderLastCommit)
         lastMatched = previousEntry.get.index
         sender() ! AppendEntriesResult(success = true, lastMatched, currentTerm)
 
@@ -90,5 +90,9 @@ private trait FollowerBehaviour {
       currentTerm = term
       votedFor = None
     }
+  }
+
+  private def handleCommit(leaderLastCommit: Int): Unit ={
+    if (leaderLastCommit > serverLog.getCommitIndex) callCommit(Math.min(serverLog.lastIndex, leaderLastCommit))
   }
 }

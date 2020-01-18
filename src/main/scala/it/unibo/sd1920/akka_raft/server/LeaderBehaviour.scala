@@ -88,18 +88,20 @@ private trait LeaderBehaviour {
   //FROM FOLLOWER
   private def handleAppendResult(name: String, success: Boolean, matchIndex: Int, term: Int): Unit = {
     checkBehindTerm(term)
-    val followerStatus = followersStatusMap(name)
-    if (success) {
-      followersStatusMap = followersStatusMap + (name -> FollowerStatus(matchIndex + 1, matchIndex))
-      val indexToCommit = getIndexToCommit
-      if (checkCommitFromEarlierTerm(indexToCommit))
-        callCommit(indexToCommit)
-      if (followerStatus.nextIndexToSend <= serverLog.lastIndex) {
-        val entryToSend = serverLog.getEntryAtIndex(followerStatus.nextIndexToSend)
-        sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entryToSend.get), entryToSend, serverLog.getCommitIndex)
+    if(currentRole == ServerRole.LEADER){
+      val followerStatus = followersStatusMap(name)
+      if (success) {
+        followersStatusMap = followersStatusMap + (name -> FollowerStatus(matchIndex + 1, matchIndex))
+        val indexToCommit = getIndexToCommit
+        if (checkCommitFromEarlierTerm(indexToCommit))
+          callCommit(indexToCommit)
+        if (followerStatus.nextIndexToSend <= serverLog.lastIndex) {
+          val entryToSend = serverLog.getEntryAtIndex(followerStatus.nextIndexToSend)
+          sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entryToSend.get), entryToSend, serverLog.getCommitIndex)
+        }
+      } else { //Leader Consistency check
+        followersStatusMap = followersStatusMap + (name -> FollowerStatus(followerStatus.nextIndexToSend - 1, matchIndex))
       }
-    } else { //Leader Consistency check
-      followersStatusMap = followersStatusMap + (name -> FollowerStatus(followerStatus.nextIndexToSend - 1, matchIndex))
     }
   }
 
