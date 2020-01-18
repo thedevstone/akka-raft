@@ -13,7 +13,7 @@ import javafx.util.Duration
 import org.kordamp.ikonli.Ikon
 import org.kordamp.ikonli.javafx.FontIcon
 
-object ViewUtilities {
+private[view] object ViewUtilities {
   def loadFxml(controller: Any, fxml: FXMLScreens): Node = {
     val loader = new FXMLLoader(ViewUtilities.getClass.getResource(fxml.resourcePath))
     loader.setController(controller)
