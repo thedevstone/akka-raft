@@ -28,11 +28,17 @@ object BankStateMachine {
   def props(schedulerTickPeriod: FiniteDuration): Props = Props(new BankStateMachine(schedulerTickPeriod))
 }
 
+/**
+ * Bank State Machine Actor that emulate a state machine behaviour.
+ */
 class BankStateMachine(schedulerTickPeriod: FiniteDuration) extends Actor with ActorLogging with Timers {
   private val bank: Bank = Bank()
   private var commandQueue: Queue[Entry[BankCommand]] = Queue()
   private var transactionsHistory: Map[TransactionID, BankTransactionResult] = Map()
 
+  /**
+   * Init the scheduler that elaborate request on every schedule tick.
+   */
   override def preStart(): Unit = {
     super.preStart()
     timers startTimerWithFixedDelay(SchedulerTickKey, SchedulerTick, schedulerTickPeriod)
@@ -46,6 +52,15 @@ class BankStateMachine(schedulerTickPeriod: FiniteDuration) extends Actor with A
     case SchedulerTick => if (commandQueue.nonEmpty) context.parent ! StateMachineResult(applyNextEntry())
   }
 
+  /**
+   * Apply the next command present in the queue.
+   *
+   * - The state machine get the next message from the queue.
+   * - Then it execute the command and put the result in a transaction cache.
+   * - If a request is executed then the result is immediately returned.
+   *
+   * @return
+   */
   private def applyNextEntry(): (Int, BankTransactionResult) = {
     val dequeued = commandQueue.dequeue
     commandQueue = dequeued._2
@@ -58,12 +73,25 @@ class BankStateMachine(schedulerTickPeriod: FiniteDuration) extends Actor with A
     (entry.index, executionResult)
   }
 
+  /**
+   * Execute the specific command on the bank instance.
+   *
+   * @param command the command
+   * @return the transaction result from the bank
+   */
   private def execute(command: BankCommand): BankTransactionResult = command match {
     case BankStateMachine.Withdraw(iban, amount) => bank.withdraw(iban, amount)
     case BankStateMachine.Deposit(iban, amount) => bank.deposit(iban, amount)
     case BankStateMachine.GetBalance(iban) => bank.getBalance(iban)
   }
 
+  /**
+   * Add the transaction to the transaction cache.
+   *
+   * @param entry  the entry from the log
+   * @param result the result form the bank
+   * @return the transaction result
+   */
   def addTransaction(entry: Entry[BankCommand], result: BankTransactionResult): BankTransactionResult = {
     transactionsHistory = transactionsHistory + (entry.index -> result)
     result
@@ -72,26 +100,51 @@ class BankStateMachine(schedulerTickPeriod: FiniteDuration) extends Actor with A
 
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{Balance, Iban}
 
+/**
+ * A simple bank implementation.
+ */
 class Bank {
   private var bankAccounts: Map[Iban, Balance] = Map()
-
+  /**
+   * Withdraw an amount of money from a specific account, given the account iban.
+   *
+   * @param iban   the transaction iban
+   * @param amount the transaction amount
+   * @return the transaction result
+   */
   def withdraw(iban: Iban, amount: Int): BankTransactionResult = bankAccounts get iban match {
     case None => getBalance(iban)
     case Some(balance) if balance >= amount => bankAccounts = bankAccounts + (iban -> (balance - amount))
       getBalance(iban)
     case Some(balance) => BankTransactionResult(Some(balance), isSucceeded = false)
   }
+  /**
+   * Deposit an amount of money from a specific account, given the account iban.
+   *
+   * @param iban   the transaction iban
+   * @param amount the transaction amount
+   * @return the transaction result
+   */
   def deposit(iban: Iban, amount: Int): BankTransactionResult = bankAccounts get iban match {
     case None => bankAccounts = bankAccounts + (iban -> amount)
       getBalance(iban)
     case Some(balance) => bankAccounts = bankAccounts + (iban -> (balance + amount))
       getBalance(iban)
   }
+  /**
+   * Get balance of a specific account, given the account iban.
+   *
+   * @param iban the transaction iban
+   * @return the transaction result
+   */
   def getBalance(iban: Iban): BankTransactionResult = bankAccounts get iban match {
     case None => BankTransactionResult(None, isSucceeded = false)
     case balance => BankTransactionResult(balance, isSucceeded = true)
   }
 }
+/**
+ * Factory for bank.
+ */
 object Bank {
   case class BankTransactionResult(balance: Option[Balance], isSucceeded: Boolean)
   def apply(): Bank = new Bank()
