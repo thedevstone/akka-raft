@@ -221,7 +221,7 @@ abstract class AbstractMainScreenView extends View {
     this.stateLabelNextIndex.setText(serverVolatileState.nextIndexToSend.toString)
     this.stateLabelRole.setText(serverVolatileState.role.toString)
     this.stateLabelLastCommitted.setText(serverVolatileState.lastCommitted.toString)
-    this.stateLabelLastMatched.setText(serverVolatileState.lastMatchedEntry.toString)
+    this.stateLabelLastMatched.setText(serverVolatileState.lastMatchedIndex.toString)
   }
 
   private def updateServerSettings(settings: ServerSettings): Unit = {

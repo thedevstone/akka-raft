@@ -26,6 +26,10 @@ class CommandLogTest extends AnyFunSpec with BeforeAndAfterEach {
     it("should have size == 0") {
       assert(commandLog.size == 0)
     }
+    it("should have previous index == -1") {
+      assert(commandLog.previousIndex == None)
+    }
+
   }
   describe("A log with 3 entries (testing previous)") {
     it("should have previous index == 2") {
