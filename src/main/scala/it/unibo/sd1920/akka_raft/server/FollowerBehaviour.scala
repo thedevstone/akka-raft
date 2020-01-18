@@ -17,10 +17,11 @@ private trait FollowerBehaviour {
     case requestVote: RequestVote => handleRequestVote(requestVote)
     case appendEntry: AppendEntries => handleAppendEntries(appendEntry)
     case ClientRequest(requestID, _) => sender() ! Redirect(requestID, leaderRef)
+    case _ =>
   })
-  
+
   private def followerTimeout(): Unit = {
-    logWithRole("Timeout")
+    logWithRole("Timeout, Divento Candidate")
     leaderRef = None
     currentTerm += 1
     context.become(candidateBehaviour)
@@ -55,7 +56,7 @@ private trait FollowerBehaviour {
       case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty && entry.nonEmpty =>
         callCommit(Math.min(serverLog.lastIndex, leaderLastCommit))
         lastMatched = 0
-        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), lastMatched, currentTerm) //TODO MODIFICATO LAST MATCH IN 0
+        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), lastMatched, currentTerm)
 
       //caso leader ha log vuoto e manda append con sia prev che entry vuote. Devo ritornare SEMPRE true
       case AppendEntries(_, previousEntry, entry, _) if previousEntry.isEmpty && entry.isEmpty =>
@@ -70,8 +71,8 @@ private trait FollowerBehaviour {
       //caso prev entry presente nel log. Se ho entry da appendere lo faccio,
       case AppendEntries(_, previousEntry, entry, leaderLastCommit) if entry.nonEmpty =>
         callCommit(Math.min(serverLog.lastIndex, leaderLastCommit))
-        lastMatched = previousEntry.get.index + 1
-        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), lastMatched, currentTerm) //TODO errore +1?? //TODO MODIFICATO LAST MATCH IN +1
+        lastMatched = entry.get.index
+        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), lastMatched, currentTerm)
 
       // altrimenti ritorno solo true
       case AppendEntries(_, previousEntry, _, leaderLastCommit) => callCommit(Math.min(serverLog.lastIndex, leaderLastCommit))

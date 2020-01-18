@@ -43,18 +43,21 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
 
   case class MessageInterceptor(receiver: Receive) extends Receive {
     def apply(msg: Any): Unit = {
-      /* do whatever things here */
-      receiver.apply(msg)
+      clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
 
+      receiver.apply(msg)
       clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
     }
     def isDefinedAt(msg: Any): Boolean = {
+      clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
+
       if ((stopped || Random.nextDouble() > messageLoseThreashold && (!classOf[InternalMessage].isAssignableFrom(msg.getClass))) && (!classOf[ControlMessage].isAssignableFrom(msg.getClass))) {
         logWithRole("Messaggio bloccato:: " + msg.toString
         )
         return false
       }
 
+      clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
 
       receiver.isDefinedAt(msg)
     }
@@ -67,9 +70,18 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
       logWithRole("\n\t\tStopped:")
     case GuiResumeServer(_) => stopped = false
       logWithRole("\n\t\tReasume:")
-    case GuiTimeoutServer(_) => //TODO
+    case GuiTimeoutServer(_) => handleRequestTimeOut()
     case GuiMsgLossServer(_, loss) => logWithRole("\n\t\tvalore:" + loss)
       messageLoseThreashold = loss
+  }
+
+  private def handleRequestTimeOut(){
+    self ! SchedulerTick
+    currentRole match {
+      case ServerRole.FOLLOWER => startTimeoutTimer()
+      case ServerRole.CANDIDATE => startTimeoutTimer()
+      case ServerRole.LEADER => startHeartbeatTimer()
+    }
   }
 
   protected def startTimeoutTimer(): Unit = {

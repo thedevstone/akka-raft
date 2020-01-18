@@ -20,7 +20,7 @@ private trait CandidateBehaviour {
   })
 
   private def checkBehindTerm(term: Int): Unit = {
-    if (term > currentTerm) becomingFollower(term) //TODO EasyVersion
+    if (term > currentTerm) becomingFollower(term)
   }
 
   private def handleRequestVote(requestVote: RequestVote): Unit = {
@@ -57,14 +57,14 @@ private trait CandidateBehaviour {
 
   private def becomingLeader(): Unit = {
     logWithRole("Divento leader")
-    val lastEntry: Option[Entry[BankCommand]] = serverLog.getLastEntry
-    broadcastMessage(AppendEntries(currentTerm,
-      if (lastEntry.isEmpty) None else serverLog.getPreviousEntry(lastEntry.get), lastEntry, serverLog.getCommitIndex))
     context.become(leaderBehaviour)
     voteForMyself()
     startHeartbeatTimer()
     leaderPreBecome()
     currentRole = ServerRole.LEADER
+    val lastEntry: Option[Entry[BankCommand]] = serverLog.getLastEntry
+    broadcastMessage(AppendEntries(currentTerm,
+      if (lastEntry.isEmpty) None else serverLog.getPreviousEntry(lastEntry.get), lastEntry, serverLog.getCommitIndex))
   }
 
   private def electionTimeout(): Unit = {
