@@ -18,17 +18,7 @@ private trait FollowerBehaviour {
     case appendEntry: AppendEntries => handleAppendEntries(appendEntry)
     case ClientRequest(requestID, _) => sender() ! Redirect(requestID, leaderRef)
   })
-
-
-  private def test(b: Any) {
-    b match {
-      case SchedulerTick => followerTimeout()
-      case requestVote: RequestVote => handleRequestVote(requestVote)
-      case appendEntry: AppendEntries => handleAppendEntries(appendEntry)
-      case ClientRequest(requestID, _) => sender() ! Redirect(requestID, leaderRef)
-    }
-  }
-
+  
   private def followerTimeout(): Unit = {
     logWithRole("Timeout")
     leaderRef = None
