@@ -15,18 +15,18 @@ import javafx.scene.text.Font
 import org.kordamp.ikonli.ionicons.Ionicons
 import org.kordamp.ikonli.material.Material
 
-trait View {
-  def log(message: String): Unit
-  def retryRequest(index: Int, serverID: String): Unit
-  def requestUpdate(): Unit
-  def stopServer(serverID: String): Unit
-  def resumeServer(serverID: String): Unit
-  def timeoutServer(serverID: String): Unit
-  def sendMessage(serverID: String, commandType: CommandType, iban: String, amount: String)
-  def messageLoss(serverID: String, value: Double): Unit
+private trait View {
+  protected def log(message: String): Unit
+  protected def retryRequest(index: Int, serverID: String): Unit
+  protected def requestUpdate(): Unit
+  protected def stopServer(serverID: String): Unit
+  protected def resumeServer(serverID: String): Unit
+  protected def timeoutServer(serverID: String): Unit
+  protected def sendMessage(serverID: String, commandType: CommandType, iban: String, amount: String)
+  protected def messageLoss(serverID: String, value: Double): Unit
 }
 
-abstract class AbstractMainScreenView extends View {
+private[screens] abstract class AbstractMainScreenView extends View {
   @FXML protected var mainBorder: BorderPane = _
   @FXML protected var vBoxServerNames: VBox = _
   @FXML protected var vBoxServerLogs: VBox = _
@@ -65,6 +65,7 @@ abstract class AbstractMainScreenView extends View {
     this.initCombos()
     this.initSlider()
     this.initListView()
+    this.initScrollPane()
     this.assertNodeInjected()
   }
 
@@ -98,8 +99,8 @@ abstract class AbstractMainScreenView extends View {
       JavafxEnums.LONG_DURATION, JavafxEnums.INFO_NOTIFICATION, null)
   }
 
+  //INITIALIZE
   private def initButtons(): Unit = {
-    scrollLog.hvalueProperty().bind(borderLog.widthProperty())
     this.buttonSend.setGraphic(ViewUtilities.iconSetter(Material.SEND, JavafxEnums.MEDIUM_ICON))
     this.buttonSend.setOnAction(_ => sendMessage(getSelectedServer, comboCommand.getSelectionModel.getSelectedItem, textFieldIban.getText, textFieldAmount.getText))
     this.buttonTimeout.setTooltip(new Tooltip("Server timeout"))
@@ -164,9 +165,10 @@ abstract class AbstractMainScreenView extends View {
     })
   }
 
-  private def getSelectedServer: String = serverIDCombo.getSelectionModel.getSelectedItem
+  protected def initScrollPane(): Unit = scrollLog.hvalueProperty().bind(borderLog.widthProperty())
 
-  def addServersToMap(serverID: String): Unit = {
+
+  protected def addServersToMap(serverID: String): Unit = {
     //ID NODE
     val serverIDNode = new HBox()
     val labelIDNode = new Label(serverID)
@@ -188,6 +190,10 @@ abstract class AbstractMainScreenView extends View {
     val newSetting = ServerSettings(0, stopped = false)
     this.serverToSettings = this.serverToSettings + (serverID -> newSetting)
     updateServerSettings(newSetting)
+  }
+
+  protected def removeServerFromMap(serverID: String): Unit = {
+    this.serverToSettings = this.serverToSettings - serverID
   }
 
   protected def addServerToCombos(serverID: String): Unit = {
@@ -233,7 +239,7 @@ abstract class AbstractMainScreenView extends View {
     }
   }
 
-  def updateResultList(requestHistory: Map[Int, ResultState]): Unit = {
+  protected def updateResultList(requestHistory: Map[Int, ResultState]): Unit = {
     this.listViewResult.getItems.clear()
     requestHistory.toList.filter(t => {
       if (!this.radioButtonExecuted.isSelected) {
@@ -244,8 +250,16 @@ abstract class AbstractMainScreenView extends View {
     }).foreach(e => this.listViewResult.getItems
       .add(s"ID: ${e._1} -> [CMD: ${e._2.command}] [Ex: ${e._2.executed}] [Res: ${e._2.result.getOrElse("Not Executed")}]"))
   }
+
+  private def getSelectedServer: String = serverIDCombo.getSelectionModel.getSelectedItem
 }
 
+/**
+ * Custom box used to build the command log.
+ *
+ * @param info the info text
+ * @param on   if the entry is committed
+ */
 class EntryBox(info: String, on: Boolean) extends VBox {
   this.setAlignment(Pos.CENTER)
   val entryLed = new Led()

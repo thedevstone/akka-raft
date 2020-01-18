@@ -37,21 +37,49 @@ class MainScreenView extends AbstractMainScreenView() with ClientObserver {
   }
 
   // ##################### FROM CLIENT ACTOR
+  /**
+   * Set the client actor ref.
+   *
+   * @param actorRef the actor ref
+   */
   override def setViewActorRef(actorRef: ActorRef): Unit = this.clientActorRef = actorRef
 
+  /**
+   * Add the server to gui.
+   *
+   * @param serverID
+   */
   override def addServer(serverID: String): Unit = Platform.runLater(() => {
     addServersToMap(serverID)
     addServerToCombos(serverID)
   })
 
-  override def removeServer(serverID: String): Unit = {} //TODO
+  /**
+   * Remove the server from gui.
+   *
+   * @param serverID the server id
+   */
+  override def removeServer(serverID: String): Unit = {
+    removeServerFromMap(serverID)
+  }
 
+  /**
+   * Update the server state in gui.
+   *
+   * @param serverID            the server id
+   * @param serverVolatileState the server state
+   */
   override def updateServerState(serverID: String, serverVolatileState: ServerVolatileState): Unit = {
     Platform.runLater(() => {
       manageServerState(serverID, serverVolatileState)
     })
   }
 
+  /**
+   * Update the client result in gui.
+   *
+   * @param requestHistory the request history
+   */
   override def updateResultState(requestHistory: Map[Int, ResultState]): Unit = {
     Platform.runLater(() => {
       updateResultList(requestHistory: Map[Int, ResultState])

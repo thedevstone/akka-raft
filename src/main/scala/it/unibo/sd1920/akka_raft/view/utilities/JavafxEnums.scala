@@ -1,6 +1,6 @@
 package it.unibo.sd1920.akka_raft.view.utilities
 
-object JavafxEnums {
+private[view] object JavafxEnums {
   sealed abstract class DimDialog(val dim: Int) {}
   case object BIG_DIALOG extends DimDialog(3)
   case object MEDIUM_DIALOG extends DimDialog(2)
