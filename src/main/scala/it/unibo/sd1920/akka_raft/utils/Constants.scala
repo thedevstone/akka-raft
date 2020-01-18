@@ -13,5 +13,5 @@ object RaftConstants {
   val maximumTimeout = 10000
   val minimumStateMachineExecutionTime = 1000
   val maximumStateMachineExecutionTime = 2000
-  val heartbeatTimeout = 100
+  val heartbeatTimeout = 5000
 }
