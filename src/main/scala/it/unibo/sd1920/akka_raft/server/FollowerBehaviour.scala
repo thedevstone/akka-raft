@@ -2,7 +2,9 @@ package it.unibo.sd1920.akka_raft.server
 
 
 import akka.actor.ActorRef
+import it.unibo.sd1920.akka_raft.model.ServerVolatileState
 import it.unibo.sd1920.akka_raft.protocol._
+import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage.GuiServerState
 import it.unibo.sd1920.akka_raft.server.ServerActor.SchedulerTick
 import it.unibo.sd1920.akka_raft.utils.ServerRole
 
@@ -54,9 +56,10 @@ private trait FollowerBehaviour {
 
       //caso leader manda prima entry del log.
       case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty && entry.nonEmpty =>
+        val result :Boolean = serverLog.putElementAtIndex(entry.get)
         handleCommit(leaderLastCommit)
         lastMatched = 0
-        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), lastMatched, currentTerm)
+        sender() ! AppendEntriesResult(result, lastMatched, currentTerm)
 
       //caso leader ha log vuoto e manda append con sia prev che entry vuote. Devo ritornare SEMPRE true
       case AppendEntries(_, previousEntry, entry, _) if previousEntry.isEmpty && entry.isEmpty =>
@@ -69,10 +72,11 @@ private trait FollowerBehaviour {
         sender() ! AppendEntriesResult(success = false, lastMatched, currentTerm)
 
       //caso prev entry presente nel log. Se ho entry da appendere lo faccio,
-      case AppendEntries(_, previousEntry, entry, leaderLastCommit) if entry.nonEmpty =>
+      case AppendEntries(_, _, entry, leaderLastCommit) if entry.nonEmpty =>
+        val result :Boolean = serverLog.putElementAtIndex(entry.get)
         handleCommit(leaderLastCommit)
         lastMatched = entry.get.index
-        sender() ! AppendEntriesResult(serverLog.putElementAtIndex(entry.get), lastMatched, currentTerm)
+        sender() ! AppendEntriesResult(result, lastMatched, currentTerm)
 
       // altrimenti ritorno solo true
       case AppendEntries(_, previousEntry, _, leaderLastCommit) => handleCommit(leaderLastCommit)

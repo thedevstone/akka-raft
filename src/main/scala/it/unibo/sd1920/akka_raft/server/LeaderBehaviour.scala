@@ -27,7 +27,7 @@ private trait LeaderBehaviour {
 
   //FROM OTHER LEADER
   private def checkBehindTerm(term: Int): Unit = {
-    if (term > currentTerm) becomingFollower(term) //TODO EasyVersion
+    if (term > currentTerm) becomingFollower(term)
   }
 
   //FROM STATE MACHINE
@@ -35,7 +35,7 @@ private trait LeaderBehaviour {
     val index = indexAndResult._1
     val result = indexAndResult._2
     val reqID = serverLog.getEntryAtIndex(index).get.requestId
-    clients.last._2 ! RequestResult(reqID, result.isSucceeded, result.balance) //TODO come mai?
+    clients.last._2 ! RequestResult(reqID, result.isSucceeded, result.balance)
   }
 
   //FROM CLIENT
@@ -89,17 +89,19 @@ private trait LeaderBehaviour {
   private def handleAppendResult(name: String, success: Boolean, matchIndex: Int, term: Int): Unit = {
     checkBehindTerm(term)
     if(currentRole == ServerRole.LEADER){
-      val followerStatus = followersStatusMap(name)
       if (success) {
         followersStatusMap = followersStatusMap + (name -> FollowerStatus(matchIndex + 1, matchIndex))
+        val followerStatus = followersStatusMap(name)
         val indexToCommit = getIndexToCommit
-        if (checkCommitFromEarlierTerm(indexToCommit))
+        if (checkCommitFromEarlierTerm(indexToCommit)) {
           callCommit(indexToCommit)
+        }
         if (followerStatus.nextIndexToSend <= serverLog.lastIndex) {
           val entryToSend = serverLog.getEntryAtIndex(followerStatus.nextIndexToSend)
           sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entryToSend.get), entryToSend, serverLog.getCommitIndex)
         }
       } else { //Leader Consistency check
+        val followerStatus = followersStatusMap(name)
         followersStatusMap = followersStatusMap + (name -> FollowerStatus(followerStatus.nextIndexToSend - 1, matchIndex))
       }
     }

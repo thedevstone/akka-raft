@@ -15,7 +15,7 @@ private trait ClientActorDiscovery {
 
   protected def clusterBehaviour: Receive = {
     case MemberUp(member) => this.manageNewMember(member)
-    case MemberDowned(member) => //TODO
+    case MemberDowned(member) =>
     case IdentifyClient(NodeRole.CLIENT) => sender() ! ClientActor.ClientIdentity(self.path.name)
     case IdentifyClient(NodeRole.SERVER) => sender() ! ServerActor.ClientIdentity(self.path.name)
     case ClientIdentity(name: String) => addClient(name)

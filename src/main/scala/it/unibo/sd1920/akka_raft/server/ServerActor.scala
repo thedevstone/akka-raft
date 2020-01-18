@@ -41,24 +41,19 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   }
 
 
-  case class MessageInterceptor(receiver: Receive) extends Receive {
+  case class  MessageInterceptor(receiver: Receive) extends Receive {
     def apply(msg: Any): Unit = {
-      clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
 
       receiver.apply(msg)
       clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
     }
     def isDefinedAt(msg: Any): Boolean = {
-      clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
 
       if ((stopped || Random.nextDouble() > messageLoseThreashold && (!classOf[InternalMessage].isAssignableFrom(msg.getClass))) && (!classOf[ControlMessage].isAssignableFrom(msg.getClass))) {
         logWithRole("Messaggio bloccato:: " + msg.toString
         )
         return false
       }
-
-      clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
-
       receiver.isDefinedAt(msg)
     }
   }
