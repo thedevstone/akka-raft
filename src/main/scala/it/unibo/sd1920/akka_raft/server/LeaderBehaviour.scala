@@ -40,11 +40,11 @@ private trait LeaderBehaviour {
 
   //FROM CLIENT
   private def handleRequest(req: ClientRequest): Unit = {
-    val i: Option[Int] = serverLog.getIndexFromReqId(req.requestID)
+    val requestIndex: Option[Int] = serverLog.getIndexFromReqId(req.requestID)
     if (serverLog.isReqIdCommitted(req.requestID)) {
-      stateMachineActor ! ApplyCommand(new Entry[BankCommand](req.command, currentTerm, i.get, req.requestID))
-      lastApplied = serverLog.getIndexFromReqId(req.requestID).get
-    } else if (i.isEmpty) {
+      stateMachineActor ! ApplyCommand(new Entry[BankCommand](req.command, currentTerm, requestIndex.get, req.requestID))
+      lastApplied = requestIndex.get
+    } else if (requestIndex.isEmpty) {
       val entry = new Entry[BankCommand](req.command, currentTerm, serverLog.size, req.requestID)
       serverLog.putElementAtIndex(entry)
     }
