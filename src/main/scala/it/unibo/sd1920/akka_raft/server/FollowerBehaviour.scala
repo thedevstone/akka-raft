@@ -36,28 +36,6 @@ private trait FollowerBehaviour {
     currentRole = ServerRole.CANDIDATE
   }
 
-  //REQUEST VOTE FROM CANDIDATE
-  /**
-   * Handles RequestVote message.
-   * <p>
-   * When a request vote arrives to follower then it has to check and update its term. Then it has to:
-   *
-   *    - Give a negative vote if candidate term is not updated to latest follower term
-   *    - Give a positive vote if candidate term is updated and follower's replicated log is more updated than candidate's one
-   *    - Give a negative vote in all other situations
-   *
-   * @param requestVote the request vote
-   */
-  private def handleRequestVote(requestVote: RequestVote): Unit = {
-    checkAndUpdateTerm(requestVote.candidateTerm)
-    requestVote match {
-      case RequestVote(candidateTerm, _, _, _) if candidateTerm < currentTerm => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
-      case RequestVote(_, _, lastLogTerm, lastLogIndex) if votedFor.isEmpty && checkElectionRestriction(lastLogTerm, lastLogIndex) => votedFor = Some(sender().path.name)
-        sender() ! RequestVoteResult(voteGranted = true, currentTerm)
-      case RequestVote(_, _, _, _) => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
-    }
-    startTimeoutTimer()
-  }
 
   /**
    * Check if candidate term is more updated than follower term, if so update follower term.
@@ -99,7 +77,7 @@ private trait FollowerBehaviour {
         val result: Boolean = serverLog.insertEntry(entry.get)
         handleCommit(leaderLastCommit)
         lastMatched = 0
-        sender() ! AppendEntriesResult(result, lastMatched, currentTerm)
+        sender() ! AppendEntriesResult(success = result, lastMatched, currentTerm)
       // ############# NORMAL OPERATIONS
       //consistency check totally fails. If follower does not contains previous entry then all log diverges
       case AppendEntries(_, previousEntry, _, _) if !serverLog.contains(previousEntry.get) =>
@@ -110,7 +88,7 @@ private trait FollowerBehaviour {
         val result: Boolean = serverLog.insertEntry(entry.get)
         handleCommit(leaderLastCommit)
         lastMatched = entry.get.index
-        sender() ! AppendEntriesResult(result, lastMatched, currentTerm)
+        sender() ! AppendEntriesResult(success = result, lastMatched, currentTerm)
       //if simple heartbeat return true and perform commit
       case AppendEntries(_, previousEntry, _, leaderLastCommit) =>
         handleCommit(leaderLastCommit)

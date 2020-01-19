@@ -112,7 +112,7 @@ private trait LeaderBehaviour {
     do {
       commitIndexCounter += 1
       greaterMatches = matchIndexes.count(m => m > commitIndexCounter)
-    } while (greaterMatches >= SERVERS_MAJORITY - 1) // -1 because I do not count myself
+    } while (greaterMatches >= HALF_FOLLOWERS_NUMBER) // Remember! I do not count myself because i'm the leader
     commitIndexCounter
   }
 
@@ -131,48 +131,6 @@ private trait LeaderBehaviour {
     } else {
       false
     }
-  }
-
-  //REQUEST VOTES FROM CANDIDATES
-  /**
-   * Handles RequestVote message.
-   * <p>
-   * When a request vote arrives to leader then it has to deny the request or in some special case accept convert and vote.
-   *
-   * @param requestVote the request vote
-   */
-  private def handleRequestVote(requestVote: RequestVote): Unit = {
-    requestVote match {
-      case RequestVote(candidateTerm, _, _, _) if candidateTerm <= currentTerm => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
-      case RequestVote(candidateTerm, _, lastLogTerm, lastLogIndex) if checkElectionRestriction(lastLogTerm, lastLogIndex) =>
-        voteForApplicantCandidate(candidateTerm)
-      case RequestVote(candidateTerm, _, _, _) => becomingFollower(candidateTerm)
-        sender() ! RequestVoteResult(voteGranted = false, currentTerm)
-      case _ =>
-    }
-  }
-
-  /**
-   * Vote for candidate.
-   *
-   * @param term the candidate term
-   */
-  private def voteForApplicantCandidate(term: Int) {
-    becomingFollower(term)
-    votedFor = Some(sender().path.name)
-    sender() ! RequestVoteResult(voteGranted = true, currentTerm)
-  }
-
-  /**
-   * Become follower.
-   *
-   * @param term the candidate term
-   */
-  private def becomingFollower(term: Int) {
-    currentTerm = term
-    context.become(followerBehaviour)
-    startTimeoutTimer()
-    currentRole = ServerRole.FOLLOWER
   }
 
   //RESULT FROM STATE MACHINE

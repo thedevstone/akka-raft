@@ -1,7 +1,5 @@
 package it.unibo.sd1920.akka_raft.server
 
-import it.unibo.sd1920.akka_raft.model.BankStateMachine.BankCommand
-import it.unibo.sd1920.akka_raft.model.Entry
 import it.unibo.sd1920.akka_raft.protocol.{AppendEntries, RequestVote, RequestVoteResult}
 import it.unibo.sd1920.akka_raft.server.ServerActor.SchedulerTick
 import it.unibo.sd1920.akka_raft.utils.ServerRole
@@ -9,7 +7,7 @@ import it.unibo.sd1920.akka_raft.utils.ServerRole
 private trait CandidateBehaviour {
   this: ServerActor =>
 
-  private var voteCounter: Int = 1
+  private var voteCounter: Int = 0
 
   protected def candidateBehaviour: Receive = controlBehaviour orElse MessageInterceptor({
     case SchedulerTick => electionTimeout()
@@ -28,30 +26,13 @@ private trait CandidateBehaviour {
    *
    */
   private def electionTimeout(): Unit = {
+    resetVoteCounter()
     currentTerm += 1
-    voteForMyself()
     broadcastMessage(RequestVote(currentTerm, self, serverLog.lastTerm, serverLog.lastIndex))
     startTimeoutTimer()
   }
 
-  //REQUEST VOTES FROM CANDIDATES
-  /**
-   * Handles RequestVote message.
-   * <p>
-   * When a request vote arrives to candidate then it has to deny the request or in some special case accept convert and vote.
-   *
-   * @param requestVote the request vote
-   */
-  private def handleRequestVote(requestVote: RequestVote): Unit = {
-    requestVote match {
-      case RequestVote(candidateTerm, _, _, _) if candidateTerm <= currentTerm => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
-      case RequestVote(candidateTerm, _, lastLogTerm, lastLogIndex) if checkElectionRestriction(lastLogTerm, lastLogIndex) =>
-        voteForApplicantCandidate(candidateTerm)
-      case RequestVote(candidateTerm, _, _, _) => becomingFollower(candidateTerm)
-        sender() ! RequestVoteResult(voteGranted = false, currentTerm)
-      case _ =>
-    }
-  }
+  //REQUEST VOTES RESULTS
 
   /**
    * Handles RequestVoteResult message.
@@ -63,47 +44,31 @@ private trait CandidateBehaviour {
    * @param result the result of the request
    */
   private def handleVoteResult(result: RequestVoteResult): Unit = result match {
-    case RequestVoteResult(_, followerTerm) if followerTerm > currentTerm => becomingFollower(followerTerm)
+    case RequestVoteResult(_, followerTerm) if followerTerm > currentTerm =>
+      resetVoteCounter()
+      becomingFollower(followerTerm)
     case RequestVoteResult(result, followerTerm) if result && followerTerm == currentTerm =>
       voteCounter += 1
-      if (voteCounter >= SERVERS_MAJORITY) becomingLeader()
+      if (voteCounter >= HALF_FOLLOWERS_NUMBER) {
+        resetVoteCounter()
+        becomingLeader()
+      }
     case _ =>
   }
 
   /**
-   * Vote for candidate.
-   *
-   * @param term the candidate term
+   * Become leader.
    */
-  private def voteForApplicantCandidate(term: Int) {
-    becomingFollower(term)
-    votedFor = Some(sender().path.name)
-    sender() ! RequestVoteResult(voteGranted = true, currentTerm)
-  }
-
-  /**
-   * Become follower.
-   *
-   * @param term the candidate term
-   */
-  private def becomingFollower(term: Int) {
-    currentTerm = term
-    context.become(followerBehaviour)
-    voteForMyself()
-    startTimeoutTimer()
-    currentRole = ServerRole.FOLLOWER
-  }
-
   private def becomingLeader(): Unit = {
     logWithRole(s"Becoming leader")
     context.become(leaderBehaviour)
-    voteForMyself()
     startHeartbeatTimer()
     followerStateInitialization()
     currentRole = ServerRole.LEADER
-    val lastEntry: Option[Entry[BankCommand]] = serverLog.getLastEntry
-    broadcastMessage(AppendEntries(currentTerm,
-      if (lastEntry.isEmpty) None else serverLog.getPreviousEntry(lastEntry.get), lastEntry, serverLog.getCommitIndex))
+    self ! SchedulerTick
+    //val lastEntry: Option[Entry[BankCommand]] = serverLog.getLastEntry
+    //broadcastMessage(AppendEntries(currentTerm,
+    // if (lastEntry.isEmpty) None else serverLog.getPreviousEntry(lastEntry.get), lastEntry, serverLog.getCommitIndex))
   }
 
   /**
@@ -116,13 +81,14 @@ private trait CandidateBehaviour {
    * @param term the most updated term to check
    */
   private def checkBehindTerm(term: Int): Unit = {
-    if (term > currentTerm) becomingFollower(term)
+    if (term > currentTerm) {
+      resetVoteCounter()
+      becomingFollower(term)
+    }
   }
 
   /**
-   * Reset the vote counter and
+   * Reset vote counter.
    */
-  private def voteForMyself(): Unit = {
-    voteCounter = 1
-  }
+  private def resetVoteCounter(): Unit = voteCounter = 0
 }

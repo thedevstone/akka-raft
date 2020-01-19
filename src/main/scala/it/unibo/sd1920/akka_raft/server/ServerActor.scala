@@ -8,8 +8,8 @@ import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.model.{BankStateMachine, CommandLog, ServerVolatileState}
 import it.unibo.sd1920.akka_raft.model.Bank.BankTransactionResult
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{ApplyCommand, BankCommand}
+import it.unibo.sd1920.akka_raft.protocol.{RaftMessage, RequestVote, RequestVoteResult}
 import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage._
-import it.unibo.sd1920.akka_raft.protocol.RaftMessage
 import it.unibo.sd1920.akka_raft.server.ServerActor.{InternalMessage, SchedulerTick, SchedulerTickKey}
 import it.unibo.sd1920.akka_raft.utils.{NetworkConstants, RaftConstants, RandomUtil, ServerRole}
 import it.unibo.sd1920.akka_raft.utils.NodeRole.NodeRole
@@ -23,7 +23,7 @@ import scala.util.Random
  */
 private class ServerActor extends Actor with ServerActorDiscovery with LeaderBehaviour with CandidateBehaviour with FollowerBehaviour with ActorLogging with Timers {
   //CLUSTER NODE
-  protected[this] val SERVERS_MAJORITY: Int = (NetworkConstants.numberOfServer / 2) + 1
+  protected[this] val HALF_FOLLOWERS_NUMBER: Int = NetworkConstants.numberOfServer / 2
   protected[this] val cluster: Cluster = Cluster(context.system)
   protected[this] var servers: Map[String, ActorRef] = Map()
   protected[this] var clients: Map[String, ActorRef] = Map()
@@ -58,19 +58,16 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
    */
   case class MessageInterceptor(receiver: Receive) extends Receive {
     def apply(msg: Any): Unit = {
-      clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
+      //clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
       receiver.apply(msg)
       clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
     }
     def isDefinedAt(msg: Any): Boolean = {
-
-
       if ((stopped || Random.nextDouble() > messageLossThreshold && (!classOf[InternalMessage].isAssignableFrom(msg.getClass))) && (!classOf[ControlMessage].isAssignableFrom(msg.getClass))) {
         logWithRole("Messaggio bloccato:: " + msg.toString
         )
         return false
       }
-
       receiver.isDefinedAt(msg)
     }
   }
@@ -93,7 +90,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   }
 
   /**
-   * Handle GuiTimeoutServer.
+   * Handles GuiTimeoutServer.
    * <p>
    * Send a timeout message that triggers timeout and restart timers.
    */
@@ -151,6 +148,49 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
   protected def checkElectionRestriction(lastLogTerm: Int, lastLogIndex: Int): Boolean = {
     lastLogTerm >= serverLog.lastTerm && lastLogIndex >= serverLog.lastIndex
   }
+
+  //REQUEST VOTES FROM CANDIDATES
+  /**
+   * Handles RequestVote message.
+   * <p>
+   * When a request vote arrives to leader then it has to deny the request or in some special case accept convert and vote.
+   *
+   * @param requestVote the request vote
+   */
+  protected def handleRequestVote(requestVote: RequestVote): Unit = {
+    requestVote match {
+      case RequestVote(candidateTerm, _, _, _) if candidateTerm <= currentTerm => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
+      case RequestVote(candidateTerm, _, lastLogTerm, lastLogIndex) if checkElectionRestriction(lastLogTerm, lastLogIndex) =>
+        voteForApplicantCandidate(candidateTerm)
+      case RequestVote(candidateTerm, _, _, _) => becomingFollower(candidateTerm)
+        sender() ! RequestVoteResult(voteGranted = false, currentTerm)
+      case _ =>
+    }
+  }
+
+  /**
+   * Vote for candidate.
+   *
+   * @param term the candidate term
+   */
+  protected def voteForApplicantCandidate(term: Int) {
+    becomingFollower(term)
+    votedFor = Some(sender().path.name)
+    sender() ! RequestVoteResult(voteGranted = true, currentTerm)
+  }
+
+  /**
+   * Become follower.
+   *
+   * @param term the candidate term
+   */
+  protected def becomingFollower(term: Int) {
+    currentTerm = term
+    context.become(followerBehaviour)
+    startTimeoutTimer()
+    currentRole = ServerRole.FOLLOWER
+  }
+
 
   /**
    * Log message with the server role.
