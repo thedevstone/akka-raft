@@ -184,10 +184,10 @@ class CommandLog[Command](
    * @param entry the entry
    * @return true if put succeeded, false otherwise
    */
-  def putElementAtIndex(entry: Entry[Command]): Boolean = {
+  def insertEntry(entry: Entry[Command]): Boolean = {
     if (entry.index > size || entry.index < 0) return false
     if (entries.nonEmpty && entry.index < size) this.remove(entry.index)
-    this.append(entry)
+    append(entry)
     true
   }
 }
