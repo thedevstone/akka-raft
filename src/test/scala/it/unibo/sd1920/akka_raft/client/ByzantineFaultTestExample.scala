@@ -140,7 +140,7 @@ class ByzantineFaultTestExample
     serversRef :::= List(serverActor4)
   }
 
-  "Testing Cluster long running" must {
+  "Testing Byzantine fault long running" must {
     "" ignore {
       //Attendo che tutto sia online
       Thread.sleep(20000)
