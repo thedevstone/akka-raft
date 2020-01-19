@@ -1,8 +1,7 @@
 % -*- root: ../main.tex -*-
 \section{Obiettivi e requisiti}
 	L'implementazione che si intende realizzare mira allo sviluppo di un sistema che simuli un ambiente distribuito in cui n server utilizzano l'algoritmo RAFT per raggiungere il consenso. In particolare si è deciso di utilizzare, come scenario, quello di un client che contatta i server per effettuare delle operazioni su un conto corrente bancario.
-	Il sistema dovrà rispettare i seguenti requisiti:
-		\begin{itemize}
+	\begin{itemize}
 			\item \textbf{Richieste del client:} il client deve poter sottomettere ai server delle operazioni da eseguire sul database dei conti corrente. Le operazioni consentite saranno:
 				\begin{itemize}
 					\item \emph{Deposito}
@@ -10,8 +9,46 @@
 					\item \emph{Richiesta saldo}
 				\end{itemize}
 			\item \textbf{Gestione lato server:} i server devono gestire le richieste provenienti dal client e rispondere con un risultato contente l'esito dell'operazione e il saldo dopo che questa è stata effettuata.
-			\item \textbf{Replicazione database:} il database dei conti correnti deve essere replicati su tutti i server in maniera tale che questi ultimi eseguano le stesse identiche istruzioni nello stesso identico ordine ottenendo il medesimo risultato.
+			\item \textbf{Replicazione database:} il database dei conti correnti deve essere replicato su tutti i server in maniera tale che questi ultimi eseguano le stesse identiche istruzioni nello stesso identico ordine ottenendo il medesimo risultato.
 		\end{itemize}
+
+	Il sistema dovrà inoltre rispettare requisiti che riguardano la visualizzazione delle informazioni rilevanti e l'interazione con l'utente.
+
+
+	\subsection{Requisiti di visualizzazione}
+	All'utente dovrà essere dato un feedback dell'avanzamento delle operazioni, per questi motivi dovranno essere visualizzate le seguenti informazioni: 
+		\begin{itemize}
+			\item \textbf{Ruolo:} per ciascun server dovrà essere chiaro il ruolo che esso ricopre in un dato momento. I ruoli possibili sono:
+				\begin{itemize}
+					\item \emph{Leader (0-1)}
+					\item \emph{Candidate (0-n)}
+					\item \emph{Follower(0-n)}
+				\end{itemize}
+			\item \textbf{Ultimo commit:} l'indice dell'ultima entry che è stata committata da ciascun server.
+			\item \textbf{Term corrente:} il term in cui si trova correntemente ognuno dei server.
+			\item \textbf{Log:} dovrà essere visibile lo stato dei log di ciascun server affinchè si possano seguire le fasi che portano al raggiungimento del consenso e valutare se l'implementazione ricalca correttamente l'algoritmo. Ogni log è costituito da entry; per ogni entry si vogliono visualizzare le seguenti informazioni:
+				\begin{itemize}
+					\item \textbf{Term:} si tratta del term in cui si trovava il leader che ha creato l'entry, nel momento in cui questa è stata generata. 
+					\item \textbf{Comando:} l'operazione da eseguire, contenuta nella richiesta del client 
+					\item \textbf{Indice:} la posizione di quella determinata entry all'interno del log del relativo server.
+					\item \textbf{Stato:} se l'entry è committed o meno. Se una entry è committed, non dovrà in alcun modo essere possibile che ne compaia una non committata con indice precedente ad essa.
+				\end{itemize} 
+			\item \textbf{Stato di esecuzione:} dovrà esserci la possibilità di visualizzare le richieste sottomesse dal client e, per ognuna di esse, capire se essa è già stata eseguita
+			\item \textbf{Risultati:} nel caso in cui una richiesta del client sia stata eseguita, sarà necessario mostrare all'utente il risultato relativo, ricevuto dal client. Esso non dovrà differire dai risultati ottenuti su ciascuno dei server.
+		\end{itemize}
+
+	\subsection{Requisiti di interazione}
+	All'utente dovrà essere fornito un modo per interagire con il sistema. I modi in cui il sistema potrà essere manovrato dall'utente sono i seguenti:
+		\begin{itemize}
+			\item \textbf{Operazione:}
+			\item \textbf{Stop/Resume:}
+			\item \textbf{Perdita dei messaggi:}
+			\item \textbf{Timer:}
+
+		\end{itemize}
+
+
+	
 
 	Detailed description of the project goals, requirements, and expected outcomes.
 	%
