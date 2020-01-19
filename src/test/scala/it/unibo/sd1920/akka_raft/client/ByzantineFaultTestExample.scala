@@ -6,7 +6,7 @@ import com.typesafe.config.ConfigFactory
 import it.unibo.sd1920.akka_raft.model.BankStateMachine.{BankCommand, Deposit, GetBalance, Withdraw}
 import it.unibo.sd1920.akka_raft.model.Entry
 import it.unibo.sd1920.akka_raft.protocol.{AppendEntries, RequestVote}
-import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage.GuiSendMessage
+import it.unibo.sd1920.akka_raft.protocol.GuiControlMessage.{GuiSendMessage, GuiTimeoutServer}
 import it.unibo.sd1920.akka_raft.server.ServerActor
 import it.unibo.sd1920.akka_raft.utils.{CommandType, NetworkConstants}
 import org.scalatest.matchers.should.Matchers
@@ -39,7 +39,7 @@ class ByzantineFaultTestExample
     Thread.sleep(50000)
   }
 
-  private def getConfig(serverType: Boolean,config: String): com.typesafe.config.Config = {
+  private def getConfig(config: String): com.typesafe.config.Config = {
     var port = config
     if(port.isEmpty) port = "0"
     ConfigFactory.parseString(s"""akka.remote.artery.canonical.port=$port""")
@@ -84,9 +84,11 @@ class ByzantineFaultTestExample
     }
   }
 
-  private def randomBehavior(actorRef: ActorRef): Any = {
+  private def randomBehavior(actorRef: ActorRef, name: String): Any = {
+
     Stream.range(0,Random.nextInt(6)).foreach(_ => {
-      var byzantineTarget: ActorRef = getRandomServerRef
+      if(Random.nextBoolean()) clientGuiActor.tell(GuiTimeoutServer(name),clientGuiActor)
+      val byzantineTarget: ActorRef = getRandomServerRef
       byzantineTarget.tell(getRandomMessage(actorRef),actorRef)
     })
   }
@@ -99,20 +101,20 @@ class ByzantineFaultTestExample
     val clientSystem0 = ActorSystem(NetworkConstants.clusterName, ConfigFactory.parseString("""akka.remote.artery.canonical.port=5000""")
       .withFallback(ConfigFactory.load("client")))
     clientGuiActor = clientSystem0 actorOf(ClientActor.props, "C0")
-    val serverSystem0 = ActorSystem(NetworkConstants.clusterName, getConfig(serverType = true, NetworkConstants.secondSeedPort.toString))
+    val serverSystem0 = ActorSystem(NetworkConstants.clusterName, getConfig(NetworkConstants.secondSeedPort.toString))
     serverActor0 = serverSystem0 actorOf(ServerActor.props, "S0")
     serversRef :::= List(serverActor0)
 
-    val serverSystem1 = ActorSystem(NetworkConstants.clusterName, getConfig(serverType = true,""))
+    val serverSystem1 = ActorSystem(NetworkConstants.clusterName, getConfig(""))
     serverActor1 = serverSystem1 actorOf(ServerActor.props, "S1")
     serversRef :::= List(serverActor1)
-    val serverSystem2 = ActorSystem(NetworkConstants.clusterName, getConfig(serverType = true,""))
+    val serverSystem2 = ActorSystem(NetworkConstants.clusterName, getConfig(""))
     serverActor2 = serverSystem2 actorOf(ServerActor.props, "S2")
     serversRef :::= List(serverActor2)
-    val serverSystem3 = ActorSystem(NetworkConstants.clusterName, getConfig(serverType = true,""))
+    val serverSystem3 = ActorSystem(NetworkConstants.clusterName, getConfig(""))
     serverActor3 = serverSystem3 actorOf(ServerActor.props, "S3")
     serversRef :::= List(serverActor3)
-    val serverSystem4 = ActorSystem(NetworkConstants.clusterName, getConfig(serverType = true,""))
+    val serverSystem4 = ActorSystem(NetworkConstants.clusterName, getConfig(""))
     serverActor4 = serverSystem4 actorOf(ServerActor.props, "S4")
     serversRef :::= List(serverActor4)
   }
@@ -125,9 +127,9 @@ class ByzantineFaultTestExample
       //Sottometto al cluster una serie di richieste, seguite da una serie di messaggi "bizzantini", messaggi generati e spediti con
       //L'indirizzo di in un server casuale che portano scompiglio, l'effetto più immediato è l'assenza nel server di un Leader fisso.
       //Possono presentarsi anche comportamenti non conteplati.
-      Stream.range(0,40).foreach(x => {
+      Stream.range(0,40).foreach(_ => {
         clientGuiActor.tell(GuiSendMessage(getRandomServerName , CommandType(Random.nextInt(3)), Random.nextInt(100).toString , Random.nextInt(100).toString), clientGuiActor)
-        randomBehavior(serverActor0)
+        randomBehavior(serverActor0, serverActor0.path.name)
         Thread.sleep(500)
       })
 
