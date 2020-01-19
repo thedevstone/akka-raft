@@ -60,7 +60,7 @@ private trait CandidateBehaviour {
     context.become(leaderBehaviour)
     voteForMyself()
     startHeartbeatTimer()
-    leaderPreBecome()
+    followerStateInitialization()
     currentRole = ServerRole.LEADER
     val lastEntry: Option[Entry[BankCommand]] = serverLog.getLastEntry
     broadcastMessage(AppendEntries(currentTerm,
