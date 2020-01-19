@@ -7,14 +7,9 @@ import it.unibo.sd1920.akka_raft.protocol._
 import it.unibo.sd1920.akka_raft.server.ServerActor.{SchedulerTick, StateMachineResult}
 import it.unibo.sd1920.akka_raft.utils.ServerRole
 
-/**
- * Leader Behaviour
- */
 private trait LeaderBehaviour {
   this: ServerActor =>
-  /**
-   * RAFT follower status.
-   */
+
   private var followersStatusMap: Map[String, FollowerStatus] = Map()
 
   protected def leaderBehaviour: Receive = controlBehaviour orElse MessageInterceptor({
@@ -45,7 +40,7 @@ private trait LeaderBehaviour {
       lastApplied = requestIndex.get
     } else if (requestIndex.isEmpty) {
       val entry = new Entry[BankCommand](req.command, currentTerm, serverLog.size, req.requestID)
-      serverLog.putElementAtIndex(entry)
+      serverLog.insertEntry(entry)
     }
   }
 
@@ -140,7 +135,7 @@ private trait LeaderBehaviour {
 
   //REQUEST VOTES FROM CANDIDATES
   /**
-   * Handle RequestVote message.
+   * Handles RequestVote message.
    * <p>
    * When a request vote arrives to leader then it has to deny the request or in some special case accept convert and vote.
    *
