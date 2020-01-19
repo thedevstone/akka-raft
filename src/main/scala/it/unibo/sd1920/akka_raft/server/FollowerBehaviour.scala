@@ -36,26 +36,53 @@ private trait FollowerBehaviour {
     currentRole = ServerRole.CANDIDATE
   }
 
-  //REQUEST VOTE FROM CANDIDATE
+  //APPEND ENTRIES FROM LEADER
   /**
-   * Handles RequestVote message.
+   * Handles AppendEntries message
    * <p>
-   * When a request vote arrives to follower then it has to check and update its term. Then it has to:
+   * Follower has to send different responses based on AppendEntries message:
+   *    - Send negative response if leader term is not updated as follower term
+   * -
    *
-   *    - Give a negative vote if candidate term is not updated to latest follower term
-   *    - Give a positive vote if candidate term is updated and follower's replicated log is more updated than candidate's one
-   *    - Give a negative vote in all other situations
-   *
-   * @param requestVote the request vote
+   * @param appendEntry AppendEntries message
    */
-  private def handleRequestVote(requestVote: RequestVote): Unit = {
-    checkAndUpdateTerm(requestVote.candidateTerm)
-    requestVote match {
-      case RequestVote(candidateTerm, _, _, _) if candidateTerm < currentTerm => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
-      case RequestVote(_, _, lastLogTerm, lastLogIndex) if votedFor.isEmpty && checkElectionRestriction(lastLogTerm, lastLogIndex) => votedFor = Some(sender().path.name)
-        sender() ! RequestVoteResult(voteGranted = true, currentTerm)
-      case RequestVote(_, _, _, _) => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
+  private def handleAppendEntries(appendEntry: AppendEntries): Unit = {
+    leaderRef = Some(sender())
+    var success: Boolean = false
+    var lastMatchedIndex: Int = -1
+    checkAndUpdateTerm(appendEntry.leaderTerm)
+    appendEntry match {
+      //reject message from leader behind me
+      case AppendEntries(leaderTerm, _, _, _) if leaderTerm < currentTerm =>
+        lastMatchedIndex = -1
+        success = false
+      //leader has empty log and send empty previous entry and empty entry. So empty heartbeat
+      case AppendEntries(_, previousEntry, entry, _) if previousEntry.isEmpty && entry.isEmpty =>
+        lastMatchedIndex = -1
+        success = true
+      //leader send first entry presents in log, previous is empty. Insert entry and handle commit
+      case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty && entry.nonEmpty =>
+        success = serverLog.insertEntry(entry.get)
+        handleCommit(leaderLastCommit)
+        lastMatchedIndex = 0
+      //consistency check totally fails. If follower does not contains previous entry then all log diverges
+      case AppendEntries(_, previousEntry, _, _) if !serverLog.contains(previousEntry.get) =>
+        lastMatchedIndex = -1
+        success = false
+      //consistency check works and previous entry is present. insert entry and handle commit.
+      case AppendEntries(_, _, entry, leaderLastCommit) if entry.nonEmpty =>
+        success = serverLog.insertEntry(entry.get)
+        handleCommit(leaderLastCommit)
+        lastMatchedIndex = entry.get.index
+      //if simple heartbeat return true and perform commit
+      case AppendEntries(_, previousEntry, _, leaderLastCommit) =>
+        handleCommit(leaderLastCommit)
+        lastMatchedIndex = previousEntry.get.index
+        success = true
+      case _ =>
     }
+    lastMatched = lastMatchedIndex
+    sender() ! AppendEntriesResult(success, lastMatchedIndex, currentTerm)
     startTimeoutTimer()
   }
 
@@ -69,56 +96,6 @@ private trait FollowerBehaviour {
       currentTerm = term
       votedFor = None
     }
-  }
-
-  //APPEND ENTRIES FROM LEADER
-  /**
-   * Handles AppendEntries message
-   * <p>
-   * Follower has to send different responses based on AppendEntries message:
-   *    - Send negative response if leader term is not updated as follower term
-   * -
-   *
-   * @param appendEntry AppendEntries message
-   */
-  private def handleAppendEntries(appendEntry: AppendEntries): Unit = {
-    leaderRef = Some(sender())
-    checkAndUpdateTerm(appendEntry.leaderTerm)
-    appendEntry match {
-      // ############# SPECIAL CASES
-      //reject message from leader behind me
-      case AppendEntries(leaderTerm, _, _, _) if leaderTerm < currentTerm =>
-        lastMatched = -1
-        sender() ! AppendEntriesResult(success = false, lastMatched, currentTerm)
-      //leader has empty log and send empty previous entry and empty entry. So empty heartbeat
-      case AppendEntries(_, previousEntry, entry, _) if previousEntry.isEmpty && entry.isEmpty =>
-        lastMatched = -1
-        sender() ! AppendEntriesResult(success = true, lastMatched, currentTerm)
-      //leader send first entry presents in log, previous is empty. Insert entry and handle commit
-      case AppendEntries(_, previousEntry, entry, leaderLastCommit) if previousEntry.isEmpty && entry.nonEmpty =>
-        val result: Boolean = serverLog.insertEntry(entry.get)
-        handleCommit(leaderLastCommit)
-        lastMatched = 0
-        sender() ! AppendEntriesResult(result, lastMatched, currentTerm)
-      // ############# NORMAL OPERATIONS
-      //consistency check totally fails. If follower does not contains previous entry then all log diverges
-      case AppendEntries(_, previousEntry, _, _) if !serverLog.contains(previousEntry.get) =>
-        lastMatched = -1
-        sender() ! AppendEntriesResult(success = false, lastMatched, currentTerm)
-      //consistency check works and previous entry is present. insert entry and handle commit.
-      case AppendEntries(_, _, entry, leaderLastCommit) if entry.nonEmpty =>
-        val result: Boolean = serverLog.insertEntry(entry.get)
-        handleCommit(leaderLastCommit)
-        lastMatched = entry.get.index
-        sender() ! AppendEntriesResult(result, lastMatched, currentTerm)
-      //if simple heartbeat return true and perform commit
-      case AppendEntries(_, previousEntry, _, leaderLastCommit) =>
-        handleCommit(leaderLastCommit)
-        lastMatched = previousEntry.get.index
-        sender() ! AppendEntriesResult(success = true, lastMatched, currentTerm)
-      case _ =>
-    }
-    startTimeoutTimer()
   }
 
   private def handleCommit(leaderLastCommit: Int): Unit = {

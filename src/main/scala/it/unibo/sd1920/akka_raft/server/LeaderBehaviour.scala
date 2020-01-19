@@ -65,7 +65,6 @@ private trait LeaderBehaviour {
    * Handles AppendEntriesResult message
    * <p>
    * When a '''positive response''' arrives from followers then the leader has to:
-   *
    *    - retrieve follower info from map
    *    - check if the majority of the followers share the same new entry/entries
    *    - check if the last entry to commit is from the leader term -> safe to commit
@@ -83,8 +82,8 @@ private trait LeaderBehaviour {
     checkBehindTerm(term)
     if (currentRole == ServerRole.LEADER) {
       if (success) {
-        followersStatusMap = followersStatusMap + (name -> FollowerStatus(matchIndex + 1, matchIndex))
-        val followerStatus = followersStatusMap(name)
+        val followerStatus = FollowerStatus(matchIndex + 1, matchIndex)
+        followersStatusMap = followersStatusMap + (name -> followerStatus)
         val indexToCommit = getIndexToCommit
         if (checkCommitFromEarlierTerm(indexToCommit)) {
           callCommit(indexToCommit)
@@ -93,7 +92,7 @@ private trait LeaderBehaviour {
           val entryToSend = serverLog.getEntryAtIndex(followerStatus.nextIndexToSend)
           sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entryToSend.get), entryToSend, serverLog.getCommitIndex)
         }
-      } else { //Leader Consistency check
+      } else {
         val followerStatus = followersStatusMap(name)
         followersStatusMap = followersStatusMap + (name -> FollowerStatus(followerStatus.nextIndexToSend - 1, matchIndex))
       }
@@ -112,7 +111,7 @@ private trait LeaderBehaviour {
     do {
       commitIndexCounter += 1
       greaterMatches = matchIndexes.count(m => m > commitIndexCounter)
-    } while (greaterMatches >= SERVERS_MAJORITY - 1) // -1 because I do not count myself
+    } while (greaterMatches >= HALF_FOLLOWERS_NUMBER) // Remember! I do not count myself because i'm the leader
     commitIndexCounter
   }
 
@@ -131,48 +130,6 @@ private trait LeaderBehaviour {
     } else {
       false
     }
-  }
-
-  //REQUEST VOTES FROM CANDIDATES
-  /**
-   * Handles RequestVote message.
-   * <p>
-   * When a request vote arrives to leader then it has to deny the request or in some special case accept convert and vote.
-   *
-   * @param requestVote the request vote
-   */
-  private def handleRequestVote(requestVote: RequestVote): Unit = {
-    requestVote match {
-      case RequestVote(candidateTerm, _, _, _) if candidateTerm <= currentTerm => sender() ! RequestVoteResult(voteGranted = false, currentTerm)
-      case RequestVote(candidateTerm, _, lastLogTerm, lastLogIndex) if checkElectionRestriction(lastLogTerm, lastLogIndex) =>
-        voteForApplicantCandidate(candidateTerm)
-      case RequestVote(candidateTerm, _, _, _) => becomingFollower(candidateTerm)
-        sender() ! RequestVoteResult(voteGranted = false, currentTerm)
-      case _ =>
-    }
-  }
-
-  /**
-   * Vote for candidate.
-   *
-   * @param term the candidate term
-   */
-  private def voteForApplicantCandidate(term: Int) {
-    becomingFollower(term)
-    votedFor = Some(sender().path.name)
-    sender() ! RequestVoteResult(voteGranted = true, currentTerm)
-  }
-
-  /**
-   * Become follower.
-   *
-   * @param term the candidate term
-   */
-  private def becomingFollower(term: Int) {
-    currentTerm = term
-    context.become(followerBehaviour)
-    startTimeoutTimer()
-    currentRole = ServerRole.FOLLOWER
   }
 
   //RESULT FROM STATE MACHINE
