@@ -8,7 +8,7 @@
 					\item \emph{Prelievo}
 					\item \emph{Richiesta saldo}
 				\end{itemize}
-			\item \textbf{Gestione lato server:} i server devono gestire le richieste provenienti dal client e rispondere con un risultato contente l'esito dell'operazione e il saldo dopo che questa è stata effettuata.
+			\item \textbf{Gestione lato server:} i server devono gestire le richieste provenienti dal client e rispondere con un risultato contenente l'esito dell'operazione e il saldo dopo che questa è stata effettuata.
 			\item \textbf{Replicazione database:} il database dei conti correnti deve essere replicato su tutti i server in maniera tale che questi ultimi eseguano le stesse identiche istruzioni nello stesso identico ordine ottenendo il medesimo risultato.
 		\end{itemize}
 
@@ -18,7 +18,7 @@
 	\subsection{Requisiti di visualizzazione}
 	All'utente dovrà essere dato un feedback dell'avanzamento delle operazioni, per questi motivi dovranno essere visualizzate le seguenti informazioni: 
 		\begin{itemize}
-			\item \textbf{Ruolo:} per ciascun server dovrà essere chiaro il ruolo che esso ricopre in un dato momento. I ruoli possibili sono:
+			\item \textbf{Ruolo:} per ciascun server bisognerà mostrare il ruolo che esso ricopre in un dato momento. I ruoli possibili sono:
 				\begin{itemize}
 					\item \emph{Leader (0-1)}
 					\item \emph{Candidate (0-n)}
@@ -38,32 +38,16 @@
 		\end{itemize}
 
 	\subsection{Requisiti di interazione}
-	All'utente dovrà essere fornito un modo per interagire con il sistema. I modi in cui il sistema potrà essere manovrato dall'utente sono i seguenti:
+	L'applicativo dovrà avere un'interfaccia utente che permetta di interagire con il sistema agendo su determinati parametri. I modi in cui il sistema potrà essere manovrato dall'utente sono i seguenti:
 		\begin{itemize}
-			\item \textbf{Operazione:}
-			\item \textbf{Stop/Resume:}
-			\item \textbf{Perdita dei messaggi:}
-			\item \textbf{Timer:}
+			\item \textbf{Operazione:} dovrà essere reso disponibile un modo per effettuare una richiesta (da parte del client) a uno dei server.
+			\item \textbf{Stop/Resume:} il comando \textit{stop} servirà per simulare la temoranea assenza di un server, mentre il comando \textit{resume} ne farà ripartire l'attività. 
+			\item \textbf{Perdita dei messaggi:} l'utente potrà impostare una percentuale di perdita di messaggi per ogni server, in maniera indipendente. Questa funzionalità permetterà di testare la resistenza a questo tipo di fault.
+			\item \textbf{Timer:} sarà possibile provocare lo scadere del timer. Tale azione assumerà significati di versi a seconda del ruolo che il server ricoprirà in quel momento:
+				\begin{itemize}
+					\item \textbf{Leader:} lo scadere del timer porterà all'invio degli heartbeat.
+					\item \textbf{Candidate:} la scadenza del timer lo porterà ad aumentare il proprio term e ricandidarsi
+					\item \textbf{Follower:} allo scattare del timer, il follower, non avendo ricevuto notizie dal leader, deciderà di aumentare il proprio term e cambiare il proprio stato in \textit{candidate}.
+				\end{itemize}
 
 		\end{itemize}
-
-
-	
-
-	Detailed description of the project goals, requirements, and expected outcomes.
-	%
-	Use case Diagrams, examples, or Q/A simulations are welcome.
-
-	\subsection{Scenarios}
-
-	Informal description of the ways users are expected to interact with your project.
-	%
-	It should describe \emph{how} and \emph{why} a user should use / interact with the system.
-
-	\subsection{Self-assessment policy}
-
-	\begin{itemize}
-	    \item How should the \emph{quality} of the \emph{produced software} be assessed?
-	    
-	    \item How should the \emph{effectiveness} of the project outcomes be assessed?
-	\end{itemize}
