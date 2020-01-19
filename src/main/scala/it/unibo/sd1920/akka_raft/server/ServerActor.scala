@@ -58,14 +58,12 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
    */
   case class MessageInterceptor(receiver: Receive) extends Receive {
     def apply(msg: Any): Unit = {
-      //clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
       receiver.apply(msg)
-      clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries)) //TODO da cancellare
+      clients.last._2 ! GuiServerState(ServerVolatileState(currentRole, serverLog.getCommitIndex, lastApplied, votedFor, currentTerm, serverLog.nextIndex, lastMatched, serverLog.getEntries))
     }
     def isDefinedAt(msg: Any): Boolean = {
       if ((stopped || Random.nextDouble() > messageLossThreshold && (!classOf[InternalMessage].isAssignableFrom(msg.getClass))) && (!classOf[ControlMessage].isAssignableFrom(msg.getClass))) {
-        logWithRole("Messaggio bloccato:: " + msg.toString
-        )
+        logWithRole(s"Blocked:: $msg")
         return false
       }
       receiver.isDefinedAt(msg)
@@ -81,12 +79,9 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
    */
   protected def controlBehaviour: Receive = clusterDiscoveryBehaviour orElse {
     case GuiStopServer(_) => stopped = true
-      logWithRole("\n\t\tStopped:")
     case GuiResumeServer(_) => stopped = false
-      logWithRole("\n\t\tReasume:")
     case GuiTimeoutServer(_) => handleRequestTimeOut()
-    case GuiMsgLossServer(_, loss) => logWithRole("\n\t\tvalore:" + loss)
-      messageLossThreshold = loss
+    case GuiMsgLossServer(_, loss) => messageLossThreshold = loss
   }
 
   /**
@@ -186,9 +181,10 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
    */
   protected def becomingFollower(term: Int) {
     currentTerm = term
+    currentRole = ServerRole.FOLLOWER
+    votedFor = None
     context.become(followerBehaviour)
     startTimeoutTimer()
-    currentRole = ServerRole.FOLLOWER
   }
 
 
