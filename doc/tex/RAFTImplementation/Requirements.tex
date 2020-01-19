@@ -1,20 +1,32 @@
 % -*- root: ../main.tex -*-
-\section{Goal/Requirements}
+\section{Obiettivi e requisiti}
+	L'implementazione che si intende realizzare mira allo sviluppo di un sistema che simuli un ambiente distribuito in cui n server utilizzano l'algoritmo RAFT per raggiungere il consenso. In particolare si è deciso di utilizzare, come scenario, quello di un client che contatta i server per effettuare delle operazioni su un conto corrente bancario.
+	Il sistema dovrà rispettare i seguenti requisiti:
+		\begin{itemize}
+			\item \textbf{Richieste del client:} il client deve poter sottomettere ai server delle operazioni da eseguire sul database dei conti corrente. Le operazioni consentite saranno:
+				\begin{itemize}
+					\item \emph{Deposito}
+					\item \emph{Prelievo}
+					\item \emph{Richiesta saldo}
+				\end{itemize}
+			\item \textbf{Gestione lato server:} i server devono gestire le richieste provenienti dal client e rispondere con un risultato contente l'esito dell'operazione e il saldo dopo che questa è stata effettuata.
+			\item \textbf{Replicazione database:} il database dei conti correnti deve essere replicati su tutti i server in maniera tale che questi ultimi eseguano le stesse identiche istruzioni nello stesso identico ordine ottenendo il medesimo risultato.
+		\end{itemize}
 
-Detailed description of the project goals, requirements, and expected outcomes.
-%
-Use case Diagrams, examples, or Q/A simulations are welcome.
+	Detailed description of the project goals, requirements, and expected outcomes.
+	%
+	Use case Diagrams, examples, or Q/A simulations are welcome.
 
-\subsection{Scenarios}
+	\subsection{Scenarios}
 
-Informal description of the ways users are expected to interact with your project.
-%
-It should describe \emph{how} and \emph{why} a user should use / interact with the system.
+	Informal description of the ways users are expected to interact with your project.
+	%
+	It should describe \emph{how} and \emph{why} a user should use / interact with the system.
 
-\subsection{Self-assessment policy}
+	\subsection{Self-assessment policy}
 
-\begin{itemize}
-    \item How should the \emph{quality} of the \emph{produced software} be assessed?
-    
-    \item How should the \emph{effectiveness} of the project outcomes be assessed?
-\end{itemize}
+	\begin{itemize}
+	    \item How should the \emph{quality} of the \emph{produced software} be assessed?
+	    
+	    \item How should the \emph{effectiveness} of the project outcomes be assessed?
+	\end{itemize}
