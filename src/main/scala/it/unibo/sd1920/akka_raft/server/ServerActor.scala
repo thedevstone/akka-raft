@@ -65,7 +65,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
     def isDefinedAt(msg: Any): Boolean = {
 
 
-      if ((stopped || Random.nextDouble() > messageLossThreshold  && (!classOf[InternalMessage].isAssignableFrom(msg.getClass))) && (!classOf[ControlMessage].isAssignableFrom(msg.getClass))) {
+      if ((stopped || Random.nextDouble() > messageLossThreshold && (!classOf[InternalMessage].isAssignableFrom(msg.getClass))) && (!classOf[ControlMessage].isAssignableFrom(msg.getClass))) {
         logWithRole("Messaggio bloccato:: " + msg.toString
         )
         return false
@@ -157,7 +157,7 @@ private class ServerActor extends Actor with ServerActorDiscovery with LeaderBeh
    *
    * @param msg the message
    */
-  protected def logWithRole(msg: String): Unit = log info s"${self.path.name}:$currentRole -> $msg"
+  protected def logWithRole(msg: String): Unit = log debug s"${self.path.name}:$currentRole -> $msg"
 }
 
 object ServerActor {

@@ -27,6 +27,7 @@ private trait FollowerBehaviour {
    *
    */
   private def followerTimeout(): Unit = {
+    logWithRole(s"Becoming Candidate")
     leaderRef = None
     currentTerm += 1
     context.become(candidateBehaviour)
