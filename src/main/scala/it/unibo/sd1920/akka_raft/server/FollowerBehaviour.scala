@@ -36,19 +36,6 @@ private trait FollowerBehaviour {
     currentRole = ServerRole.CANDIDATE
   }
 
-
-  /**
-   * Check if candidate term is more updated than follower term, if so update follower term.
-   *
-   * @param term candidate term
-   */
-  private def checkAndUpdateTerm(term: Int): Unit = {
-    if (term > currentTerm) {
-      currentTerm = term
-      votedFor = None
-    }
-  }
-
   //APPEND ENTRIES FROM LEADER
   /**
    * Handles AppendEntries message
@@ -97,6 +84,18 @@ private trait FollowerBehaviour {
     lastMatched = lastMatchedIndex
     sender() ! AppendEntriesResult(success, lastMatchedIndex, currentTerm)
     startTimeoutTimer()
+  }
+
+  /**
+   * Check if candidate term is more updated than follower term, if so update follower term.
+   *
+   * @param term candidate term
+   */
+  private def checkAndUpdateTerm(term: Int): Unit = {
+    if (term > currentTerm) {
+      currentTerm = term
+      votedFor = None
+    }
   }
 
   private def handleCommit(leaderLastCommit: Int): Unit = {

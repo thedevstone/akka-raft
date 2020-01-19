@@ -65,7 +65,6 @@ private trait LeaderBehaviour {
    * Handles AppendEntriesResult message
    * <p>
    * When a '''positive response''' arrives from followers then the leader has to:
-   *
    *    - retrieve follower info from map
    *    - check if the majority of the followers share the same new entry/entries
    *    - check if the last entry to commit is from the leader term -> safe to commit
@@ -83,8 +82,8 @@ private trait LeaderBehaviour {
     checkBehindTerm(term)
     if (currentRole == ServerRole.LEADER) {
       if (success) {
-        followersStatusMap = followersStatusMap + (name -> FollowerStatus(matchIndex + 1, matchIndex))
-        val followerStatus = followersStatusMap(name)
+        val followerStatus = FollowerStatus(matchIndex + 1, matchIndex)
+        followersStatusMap = followersStatusMap + (name -> followerStatus)
         val indexToCommit = getIndexToCommit
         if (checkCommitFromEarlierTerm(indexToCommit)) {
           callCommit(indexToCommit)
@@ -93,7 +92,7 @@ private trait LeaderBehaviour {
           val entryToSend = serverLog.getEntryAtIndex(followerStatus.nextIndexToSend)
           sender() ! AppendEntries(currentTerm, serverLog.getPreviousEntry(entryToSend.get), entryToSend, serverLog.getCommitIndex)
         }
-      } else { //Leader Consistency check
+      } else {
         val followerStatus = followersStatusMap(name)
         followersStatusMap = followersStatusMap + (name -> FollowerStatus(followerStatus.nextIndexToSend - 1, matchIndex))
       }

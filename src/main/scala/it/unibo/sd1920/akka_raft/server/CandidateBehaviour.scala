@@ -66,9 +66,6 @@ private trait CandidateBehaviour {
     followerStateInitialization()
     currentRole = ServerRole.LEADER
     self ! SchedulerTick
-    //val lastEntry: Option[Entry[BankCommand]] = serverLog.getLastEntry
-    //broadcastMessage(AppendEntries(currentTerm,
-    // if (lastEntry.isEmpty) None else serverLog.getPreviousEntry(lastEntry.get), lastEntry, serverLog.getCommitIndex))
   }
 
   /**
