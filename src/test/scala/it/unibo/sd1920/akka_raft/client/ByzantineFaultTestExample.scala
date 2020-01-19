@@ -84,6 +84,13 @@ class ByzantineFaultTestExample
     }
   }
 
+  private def randomBehavior(actorRef: ActorRef): Any = {
+    Stream.range(0,Random.nextInt(6)).foreach(_ => {
+      var byzantineTarget: ActorRef = getRandomServerRef
+      byzantineTarget.tell(getRandomMessage(actorRef),actorRef)
+    })
+  }
+
   //Inizializzo il cluster generando 5 e un solo client
   override def beforeAll(): Unit = {
     serversName = List("S0","S1","S2","S3","S4")
@@ -114,13 +121,13 @@ class ByzantineFaultTestExample
     "" in {
       //Attendo che tutto sia online
       Thread.sleep(20000)
+      //S0 è considerato il server byzzantino
       //Sottometto al cluster una serie di richieste, seguite da una serie di messaggi "bizzantini", messaggi generati e spediti con
       //L'indirizzo di in un server casuale che portano scompiglio, l'effetto più immediato è l'assenza nel server di un Leader fisso.
       //Possono presentarsi anche comportamenti non conteplati.
       Stream.range(0,40).foreach(x => {
         clientGuiActor.tell(GuiSendMessage(getRandomServerName , CommandType(Random.nextInt(3)), Random.nextInt(100).toString , Random.nextInt(100).toString), clientGuiActor)
-          var server: ActorRef = getRandomServerRef
-          getRandomServerRef.tell(getRandomMessage(server),server)
+        randomBehavior(serverActor0)
         Thread.sleep(500)
       })
 
