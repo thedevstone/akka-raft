@@ -21,8 +21,14 @@
 	 	Per la generazione di un singolo \texttt{jar} eseguibile completo, è stato scelto l'utilizzo del plugin \texttt{Gradle Shadow}\cite{GradleShadowSite} che permette la generazione di un jar asestante che soddisfi tutte le dipendenze internamente.\\
 	 	Per compilare il progetto è sufficiente recarsi nella cartella principale e lanciare il seguente comando:
 	 	\begin{itemize}
-	 		\item Per i sistemi \textbf{Unix}: \texttt{./gradlew build} 
-	 		\item Per i sistemi \textbf{Windows}: \texttt{gradlew.bat build} 
+	 		\item Per i sistemi \textbf{Unix}: 
+	 			\begin{lstlisting}[language=bash]
+	 				./gradlew build
+	 			\end{lstlisting}
+	 		\item Per i sistemi \textbf{Windows}: 
+	 			\begin{lstlisting}[language=bash]
+	 				gradlew.bat build
+	 			\end{lstlisting} 
 	 	\end{itemize}
 		Il comando procederà alla compilazione dei sorgeti scala, fornendo in uscita un \texttt{jar} eseguibile che sarà collocato nella cartella /build/libs sotto il nome di \texttt{akka-raft-0.0.1-SNAPSHOT-all.jar}\\
 		Il \texttt{jar} esegue internamente il main presente nell'\texttt{object JarLaunher} del pakage akka\_raft.
@@ -35,16 +41,29 @@
 		Per l'esecuzione del cluster akka è necessario lanciare due seed node, i quali devono possedere una porta specifica(rispettivamente 5000 e 5001), definite nel file cluster.conf.\\
 		Si consigia di eseguire sei istanze del jar seguendo il seguente ordine:
 		  \begin{enumerate}
-			  \item scala akka-raft-0.0.1-SNAPSHOT-all.jar client C0 5000
-				\item scala akka-raft-0.0.1-SNAPSHOT-all.jar client S0 5001
-				\item scala akka-raft-0.0.1-SNAPSHOT-all.jar client Sn 0
+			  \item 
+			  	\begin{lstlisting}[language=bash]
+			  		scala akka-raft-0.0.1-SNAPSHOT-all.jar client C0 5000
+			  	\end{lstlisting}
+			  	\begin{lstlisting}[language=bash]
+						scala akka-raft-0.0.1-SNAPSHOT-all.jar client S0 5001
+					\end{lstlisting}
+			  	\begin{lstlisting}[language=bash]
+						scala akka-raft-0.0.1-SNAPSHOT-all.jar client Sn 0
+					\end{lstlisting}			  
 			\end{enumerate}	
 		Sarà necessario eseguire il terzo comando con porta zero altre quattro volte, per raggiungere il numero esatto necessario per la partenza del cluster.
  
  \subsection{Test}
  Sono stati prodotti vari test, automatizzati e grafici; per il lancio dei test è stato creto un task chiamato \texttt{spec}, utilizzato per eseguire i test scala con \texttt{org.scalatest.tools.Runner}.\\
-	Per l'esecuzione dei test è sufficente eseguire gradle tramite il comando:
+	Per l'esecuzione dei test è sufficente eseguire gradle dalla cartella principale del progetto, tramite il lancio del comando:
 	\begin{itemize}
-		\item Per i sistemi \textbf{Unix}: \texttt{./gradlew test} 
-		\item Per i sistemi \textbf{Windows}: \texttt{gradlew.bat test} 
+		\item Per i sistemi \textbf{Unix}: 
+			\begin{lstlisting}[language=bash]
+				./gradlew test
+			\end{lstlisting}
+		\item Per i sistemi \textbf{Windows}: 
+			\begin{lstlisting}[language=bash]
+				gradlew.bat test
+			\end{lstlisting}
 	\end{itemize}
