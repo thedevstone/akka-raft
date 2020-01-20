@@ -71,7 +71,7 @@ E' necessario dunque completare l'algoritmo aggiungendo la proprietà chiave di 
   \end{figure}
 
   \paragraph{Commiting di Entries del term corrente}
-  Vediamo ora un esempio di quello che è stato detto fino ad ora. Nella figura \ref{fig:figure11} possiamo vedere che all'indice 4 il leader $S1$ al term 2 è riuscito a \textbf{replicare con successo} la propria entry sulla maggioranza dei server; la entry è dunque \textbf{committed}. A questo punto nel caso in cui il leader $S1$ crashasse, per l'\textbf{election restriction} introdotta sopra, i server $S4$ e $S5$ non potrebbero essere eletti leader.\\
+  Vediamo ora un esempio di quello che è stato detto fino ad ora. Nella figura \ref{fig:figure11} possiamo vedere che all'indice 4 il leader $S1$ al term 2 è riuscito a \textbf{replicare con successo} la propria entry sulla maggioranza dei server; la entry è dunque \textbf{committed}. A questo punto nel caso in cui il leader $S1$ crashasse, per l'\textbf{election restriction} introdotta sopra, i server $S4$ e $S5$ non potrebbero essere eletti leader.
   \begin{itemize}
     \item {$S5$ non può essere eletto perché non possiede un term più piccolo di tutti gli altri $\rightarrow$ \textbf{condizione n:1}}
     \item{$S4$ non può essere eletto poiché anche se possiede un term aggiornato non ha un log completo (più corto) $\rightarrow$ \textbf{condizione n:2} }
