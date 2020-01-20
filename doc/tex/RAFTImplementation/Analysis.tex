@@ -4,18 +4,30 @@ L'applicativo è una rappresentazione operativa di RAFT; per questo motivo, i de
 
 Il sistema dovrà consistere in un insieme di nodi che rappresentano due entità principali:
 	\begin{itemize}
-		\item \textbf{Un client:} è l'entità che si occupa di inoltrare le richieste ai server e ricevere gli esiti.
-		\item \textbf{$n$ server:} è l'entità che accoglie le richieste del client, le esegue e comunica il risultato. Ognuna di queste entità, in un dato istante, ricopre uno e un solo ruolo tra \textit{Leader, Candidate} e \textit{Follower}
+		\item \textbf{Un client:} si occupa di inoltrare le richieste ai server e ricevere gli esiti.
+		\item \textbf{$n$ server:} accolgono le richieste del client, le eseguono e comunicano il risultato. Ognuna di queste entità, in un dato istante, ricopre uno e un solo ruolo tra \textit{Leader, Candidate} e \textit{Follower}
 	\end{itemize}
 
-Dal momento che queste entità devono essere indipendenti ed interagire tra loro, si è scelto di utilizzare il paradigma ad attori, che rende possibile agire ad un livello di astrazione molto elevato permettendo di facilitare la gestione delle dinamiche di interazione.
+Dal momento che queste entità devono essere \textbf{indipendenti} ed interagire tra loro, si è scelto di utilizzare il \textbf{paradigma ad attori}, che rende possibile agire ad un livello di astrazione molto elevato permettendo di facilitare la gestione delle dinamiche di interazione.
 
 
 	\subsection{Il paradigma ad attori} \label{Actors}
-	Un attore rappresenta una entità indipendente che ha le seguenti caraterristiche:
+	Si tratta di un paradigma nato per riuscire a sfruttare al meglio le potenzialità della programmazione ad \textbf{oggetti} in ambito \textbf{concorrente}, interamente basato sul concetto di \textbf{attore}: \emph{everything is an actor}.
+
+	Per \textbf{attore} si intende un' entità indipendente, univocamente identificata, caratterizzata dai seguenti elementi:
 	\begin{itemize}
-		\item \emph{possiede un proprio flusso di controllo}
-		\item \emph{mantiene uno stato, non accessibile dall'esterno}
-		\item \emph{può ricevere messaggi da altri attori e agire di conseguenza.}
-		\item \emph{può inviare messaggi ad altri attori.}
+		\item \emph{Una mailbox, alla quale arrivano messaggi provenienti da altri attori.}
+		\item \emph{Uno \textbf{stato}, non accessibile dall'esterno.}
+		\item \emph{Un \textbf{comportamento} (behaviour), che definisce il modo in cui l'attore reagisce ai messaggi ricevuti.}
+		\item \emph{Un \textbf{flusso di controllo} indipendente.}
 	\end{itemize}
+
+	Per rendere possibile la realizzazione di un sistema ad attori, sono necessarie tre primitive:
+	\begin{itemize}
+		\item \textbf{Send:} per inviare un messaggio ad un altro attore, compreso il mittente.
+		\item \textbf{Create:} per creare un attore figlio.
+		\item \textbf{Become:} per cambiare il comportamento dell'attore. Ogni comportamento è caratterizzato da una diversa reazione ai messaggi ricevuti.
+	\end{itemize}
+
+	
+
