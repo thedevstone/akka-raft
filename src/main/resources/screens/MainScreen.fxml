@@ -22,7 +22,7 @@
                 <Insets />
             </BorderPane.margin>
             <content>
-                <ScrollPane id="scrollPane" fx:id="scrollLog" maxHeight="350.0" maxWidth="800.0" minHeight="350.0" minWidth="800.0">
+                <ScrollPane id="scrollPane" fx:id="scrollLog" maxHeight="350.0" minHeight="350.0" minWidth="1000.0">
                     <content>
                         <BorderPane id="borderLog" fx:id="borderLog" minHeight="350.0" minWidth="800.0">
                             <left>
@@ -31,6 +31,9 @@
                             <center>
                                 <VBox fx:id="vBoxServerLogs" alignment="CENTER_LEFT" BorderPane.alignment="CENTER" />
                             </center>
+                     <padding>
+                        <Insets left="10.0" right="10.0" />
+                     </padding>
                         </BorderPane>
                     </content>
                 </ScrollPane>
@@ -41,7 +44,7 @@
         </TitledPane>
     </top>
     <center>
-        <TitledPane collapsible="false" maxHeight="350.0" maxWidth="1000.0" minHeight="350.0" minWidth="1000.0" text="Server Dashboard" BorderPane.alignment="CENTER">
+        <TitledPane collapsible="false" maxHeight="350.0" minHeight="350.0" minWidth="1000.0" text="Server Dashboard" BorderPane.alignment="CENTER">
             <font>
                 <Font size="15.0" />
             </font>
