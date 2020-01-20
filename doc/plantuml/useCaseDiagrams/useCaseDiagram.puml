@@ -1,0 +1,49 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+:Client: <<Actor>>
+:Server: <<Actor>>
+:Leader: <<Actor>> 
+
+Leader -right-|> Server
+
+
+rectangle "Bank Actions" {
+  (Witdraw) as Witdraw
+  (Deposit) as Deposit
+  (Get Balance) as Balance
+  (Request Result) as Res
+  
+  Client --> Deposit
+  Client --> Witdraw
+  Client --> Balance
+
+  Deposit --> Leader
+  Witdraw --> Leader
+  Balance --> Leader
+  Leader --> Res
+  Res --> Client
+}
+
+rectangle "Control Actions" {
+   (Stop/Reasume) as StartStop
+   (Set loss) as SetLoss
+   (Trigger timeout) as Timeout
+
+  Client --> SetLoss
+  Client --> StartStop
+  Client --> Timeout
+
+  Timeout --> Server
+  SetLoss --> Server
+  StartStop --> Server
+}
+
+skinparam{
+    UsecaseFontSize 12
+    RectangleFontSize 15
+    ActorFontSize 16
+    RectangleBackgroundColor Lightblue
+    BackgroundColor Transparent
+}
+@enduml
