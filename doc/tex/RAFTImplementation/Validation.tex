@@ -1,9 +1,73 @@
 % -*- root: ../../main.tex -*-
 \section{Validazione e Testing}
 \label{Testing}
+La metodologia di sviluppo utilizzata per questo progetto è stata di tipo \textbf{Agile} con approccio \textbf{Test-Driven} e \textbf{Model-First}.
+  
+  \subsection{Approccio Model-First}
+  Lo sviluppo si è concentrato inizialmente sulle classi di modello, nel nostro caso le uniche classi di modello presenti sono: 
+  \begin{itemize}
+    \item \texttt{Bank}
+    \item \texttt{CommandLog}
+  \end{itemize}
+  Un caso particolare è quello della \texttt{BankStateMachine} la quale possiede una natura piuttosto strana; essa infatti è un attore ma rappresenta un concetto che può riferirsi anche al modello.
+  
+  \subsection{Approccio Test-Driven}
+  Ogni classe di modello è stata sviluppata con approccio Test-Driven, ossia seguendo lo schema \textbf{\textit{Red, Green, Refactor}}. L'approccio consiste in:
+  \begin{enumerate}
+    \item{\emph{\textbf{Red:}}}
+    \emph{Scrivere test che falliscano}
+    \item{\emph{\textbf{Green:}}}
+    \emph{Scrivere codice che faccia passare i test}
+    \item{\emph{\textbf{Refactor:}}}
+    \emph{Rifattorizzare il codice al meglio}
+  \end{enumerate}
 
-Qui parliamo dei test che abbiamo ofatto e di come sono andati. 
+  \subsection{Test Automatici}
+  I test automatici hanno riguardato solamente le classi di modello. Ogni test è stato eseguito automaticamente tramite \textit{gradle} e ad ogni build ci si è premurati che tutti i test dessero esito positivo. Di seguito vengono riportate le \textbf{statistiche} relative ai \textbf{test} e la \textbf{coverage}:
 
-Spieghiamo perchè ciò che abbiamo ottenuto soddisfa tutti i requisiti elencati nel primo capitolo dell'implementazione.
+  \begin{center}
+    \begin{tcolorbox}[title=\em{Risultati Test},hbox,    %%<<---- here
+       lifted shadow={1mm}{-2mm}{3mm}{0.1mm}%
+       {black!50!white}]
+        \begin{tabular}{ |lc|}
+          \hline
+          \emph{Numero totale di test}  & \em{25}\\ 
+          \hline
+          \emph{Suites completate}      & \em{6}\\ 
+          \hline
+          \em{Test completati}          & \em{23}\\
+          \hline
+          \em{Test ignorati}            & \em{2}\\  
+          \hline
+        \end{tabular}
+      \end{tcolorbox}
+  \end{center}
 
- report the amount of passing tests, the total amount of tests and, possibly, the test coverage.
+  \begin{center}
+    \begin{tcolorbox}[title=\em{Coverage},hbox,    %%<<---- here
+       lifted shadow={1mm}{-2mm}{3mm}{0.1mm}%
+       {black!50!white}]
+        \begin{tabular}{ |lccc|}
+        \hline
+          \em{\textbf{Class}}           & \em{\textbf{Class \%}}  & \em{\textbf{Methods \%}}  & \em{\textbf{Line \%}} \\ 
+          \hline
+          \emph{Bank.scala}             & \em{75}                & \em{88}                  & \em{85}                 \\ 
+          \hline
+          \emph{CommandLog.scala}       & \em{100}               & \em{61}                  & \em{52}                 \\
+          \hline
+          \em{Entry.scala}              & \em{50}                & \em{85}                  & \em{87}                 \\
+          \hline
+          \em{BankStateMaachine.scala}  & \em{69}                & \em{82}                  & \em{89}                 \\
+          \hline
+        \end{tabular}
+      \end{tcolorbox}
+  \end{center}
+
+  \subsection{Integration Test}
+  Sono stati svolti infine due tipologie di integration test sull'intero sistema: 
+  \begin{itemize}
+    \item{\textbf{\emph{Byzantine test:}}}
+    Test volto a verificare la vulnerabilità dell'algoritmo contro nodi di tipo \textbf{Byzantino}.   
+    \item{\textbf{\emph{Normal operation test:}}}
+    Test dedicato a verificare la correttezza dell'algoritmo sull'intero cluster.
+  \end{itemize}
