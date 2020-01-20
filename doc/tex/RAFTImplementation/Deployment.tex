@@ -8,62 +8,70 @@
 	 \begin{enumerate}
 	 	\item \textbf{Java Development Kit:}
 	 		Nonostante sià possibile utilizzare un qualunque \texttt{JDK} superiore alla versione 8, consigliamo di utilizzare l'\texttt{Oracle JDK-8}.
-	 		Un altra valida alternativa è la distribuzione \texttt{Amazon Corretto-8}\cite{AmazonCorrettoSite}.
+	 		Un altra valida alternativa è la distribuzione \texttt{Amazon Corretto-8} \cite{AmazonCorrettoSite}.
 	 		Queste distribuzioni incorporano nativamente \texttt{JavaFX}, permettendo di risparmiare così ulteriori installazioni.
 	 		
 	 	\item \textbf{Scala: }
-	 		Per l'esecuzione del programma è necessario munirsi di \texttt{Scala 2.12.10}, non garantiamo che un installazione più recente sia retrocompatibile.
+	 		Per l'esecuzione del programma è necessario munirsi di \texttt{Scala 2.12.10}, non garantiamo che un installazione più recente sia retro-compa-tibile.
 	 	 
 	 \end{enumerate}
  		
  	\subsection{Build e run}
 	 	L'adozione di \texttt{Gradle} ha reso molto semplice la compilazione del progetto.
-	 	Per la generazione di un singolo \texttt{jar} eseguibile completo, è stato scelto l'utilizzo del plugin \texttt{Gradle Shadow}\cite{GradleShadowSite} che permette la generazione di un jar asestante che soddisfi tutte le dipendenze internamente.\\
+	 	Per la generazione di un singolo \texttt{jar} eseguibile completo, è stato scelto l'utilizzo del plugin \texttt{Gradle Shadow} \cite{GradleShadowSite} che permette la generazione di un jar a sé stante che soddisfi tutte le dipendenze internamente.\\
 	 	Per compilare il progetto è sufficiente recarsi nella cartella principale e lanciare il seguente comando:
 	 	\begin{itemize}
 	 		\item Per i sistemi \textbf{Unix}: 
 	 			\begin{lstlisting}[language=bash]
-	 				./gradlew build
+./gradlew build
 	 			\end{lstlisting}
 	 		\item Per i sistemi \textbf{Windows}: 
 	 			\begin{lstlisting}[language=bash]
-	 				gradlew.bat build
+gradlew.bat build
 	 			\end{lstlisting} 
 	 	\end{itemize}
-		Il comando procederà alla compilazione dei sorgeti scala, fornendo in uscita un \texttt{jar} eseguibile che sarà collocato nella cartella /build/libs sotto il nome di \texttt{akka-raft-0.0.1-SNAPSHOT-all.jar}\\
+		Il comando procederà alla compilazione dei sorgenti scala, fornendo in uscita un \texttt{jar} eseguibile che sarà collocato nella cartella \emph{/build/libs} sotto il nome di \texttt{akka-raft-1.0.0-all.jar}\\
 		Il \texttt{jar} esegue internamente il main presente nell'\texttt{object JarLaunher} del pakage akka\_raft.
-	  Per lanciare il jar è necessario eseguire il comando \texttt{scala tipologia id porta}.\\
-		Dove le \textbf{tipologie} disponibili sono: client e server, la tipologia client esegue il \texttt{Client};
-		mentre la tipologia server lancia un solo \texttt{Server}.
-		Per l'esecuzione completa del cluster è necessario eseguire un solo client e esattamente cinque server, l'esecuzione di un numero diverso non permetterà al cluster di proseguire proseguire correttamente.\\
-		L'\textbf{id} è una stringa identificativa dell'attore che viene eseguito, è possibile scegliere la stringa che più piace, a patto che sià univoca.\\
-		Infine la \textbf{porta} è il numero di porta utilizzato da akka remoting per ogni attore, la porta zero equivale a fornire una porta random libera.\\
-		Per l'esecuzione del cluster akka è necessario lanciare due seed node, i quali devono possedere una porta specifica(rispettivamente 5000 e 5001), definite nel file cluster.conf.\\
-		Si consigia di eseguire sei istanze del jar seguendo il seguente ordine:
+	  Per lanciare il jar è necessario eseguire il comando
+    \[
+      \texttt{scala akka-raft.jar tipologia id porta}
+    \]
+    \begin{itemize}
+      \item{\textbf{Tipologia:}}
+      Le \textbf{tipologie} disponibili sono: client e server, la tipologia client esegue il \texttt{Client};
+      mentre la tipologia server lancia un solo \texttt{Server}.
+      Per l'esecuzione completa del cluster è necessario eseguire un solo client e esattamente cinque server, l'esecuzione di un numero diverso non permetterà al cluster di proseguire proseguire correttamente.
+      \item{\textbf{ID:}}
+      L'\textbf{id} è una stringa identificativa dell'attore che viene eseguito, è possibile scegliere la stringa che più ci piace, a patto che sia univoca.
+      \item{\textbf{Porta:}}
+      Infine la \textbf{porta} è il numero di porta utilizzato da akka remoting per ogni attore, la porta zero equivale a fornire una porta random libera.
+    \end{itemize}
+		Per l'esecuzione del cluster Akka è necessario lanciare due \textbf{seed node}, i quali devono possedere una porta specifica(rispettivamente 5000 e 5001), definite nel file \texttt{cluster.conf}.\\
+		Si consiglia di eseguire \textbf{sei istanze} del jar seguendo il seguente ordine:
 		  \begin{enumerate}
-			  \item 
+			  \item
 			  	\begin{lstlisting}[language=bash]
-			  		scala akka-raft-0.0.1-SNAPSHOT-all.jar client C0 5000
+scala akka-raft-1.0.0-all.jar client C0 5000
 			  	\end{lstlisting}
 			  	\begin{lstlisting}[language=bash]
-						scala akka-raft-0.0.1-SNAPSHOT-all.jar client S0 5001
+scala akka-raft-1.0.0-all.jar client S0 5001
 					\end{lstlisting}
 			  	\begin{lstlisting}[language=bash]
-						scala akka-raft-0.0.1-SNAPSHOT-all.jar client Sn 0
+scala akka-raft-1.0.0-all.jar client Sn 0
 					\end{lstlisting}			  
 			\end{enumerate}	
-		Sarà necessario eseguire il terzo comando con porta zero altre quattro volte, per raggiungere il numero esatto necessario per la partenza del cluster.
+		Sarà necessario eseguire il terzo comando con porta $0$ altre quattro volte, per raggiungere il numero esatto necessario per la partenza del cluster.
  
  \subsection{Test}
- Sono stati prodotti vari test, automatizzati e grafici; per il lancio dei test è stato creto un task chiamato \texttt{spec}, utilizzato per eseguire i test scala con \texttt{org.scalatest.tools.Runner}.\\
-	Per l'esecuzione dei test è sufficente eseguire gradle dalla cartella principale del progetto, tramite il lancio del comando:
+ Sono stati prodotti vari test, automatizzati e grafici; per il lancio dei test è stato creato un task chiamato \texttt{spec}, utilizzato per eseguire i test scala con \texttt{org.scalatest.tools.Runner}.\\
+	Per l'esecuzione dei test è sufficiente eseguire gradle dalla cartella principale del progetto, tramite il lancio del comando:
 	\begin{itemize}
 		\item Per i sistemi \textbf{Unix}: 
 			\begin{lstlisting}[language=bash]
-				./gradlew test
+./gradlew test
 			\end{lstlisting}
 		\item Per i sistemi \textbf{Windows}: 
 			\begin{lstlisting}[language=bash]
-				gradlew.bat test
+gradlew.bat test
 			\end{lstlisting}
 	\end{itemize}
