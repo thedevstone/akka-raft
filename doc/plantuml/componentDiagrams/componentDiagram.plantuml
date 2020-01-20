@@ -1,0 +1,26 @@
+@startuml
+
+() Mailbox as ClientMailbox
+() Mailbox as ServerMailbox
+
+component "ClientActor <<Actor>>" as ClientActor {
+  View -- [Main Screen]
+}
+
+cloud "Server" {
+    [ServerActor] as ServerActor
+    database "DB" as DB
+} 
+DB -left- ServerActor
+
+ServerActor -left- ServerMailbox
+ClientActor -right- ClientMailbox
+
+ClientActor -d-> ServerMailbox
+ServerActor -r-> ClientMailbox
+
+
+skinparam {
+    CloudBackgroundColor lightblue
+    InterfaceFontSize 13
+}
