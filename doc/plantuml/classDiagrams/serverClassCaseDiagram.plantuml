@@ -27,20 +27,6 @@ package akka_raft.model as model{
   class CommandLog
 }
 
-
-package akka_raft.view as view{
-  interface ClientObserver
-  class MainScreenView
-  class Client
-  interface ActorRef  
-}
-
-MainScreenView --|> ClientObserver
-Client ..o ClientObserver
-Client -|> ActorRef
-MainScreenView ..o ActorRef
-
-
 ServerActor --|> CandidateBehavior
 ServerActor --|> FollowerBehavior
 ServerActor --|> LeaderBehavior
