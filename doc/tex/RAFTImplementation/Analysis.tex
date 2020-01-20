@@ -36,13 +36,13 @@ Dal momento che queste entità devono essere \textbf{indipendenti} ed interagire
 
 	Il paradigma ad attori garantisce inoltre le seguenti proprietà fondamentali: 
 	\begin{itemize}
-		\item{\textbf{Reactiveness:}} l'attore è reattivo poichè reagisce in maniera individuale ai messaggi ricevuti, dal momento che ha un proprio, unico, eventloop. Bisogna però seguire una \textbf{golden rule:} \emph{Never block the event loop}.
-		\item{\textbf{State encapsulation:}}
-		\item{\textbf{Macrostep semantics:}}
-		\item{\textbf{Fairness:}}
-		\item{\textbf{Location transparency:}}
+		\item{\textbf{Reactiveness:}} l'attore è reattivo poichè reagisce in maniera \textbf{individuale} ai messaggi ricevuti, dal momento che ha un proprio, unico, \textbf{event loop}. Bisogna però seguire una \textbf{golden rule:} \emph{Never block the event loop}.
+		\item{\textbf{State encapsulation:}} lo stato dell'attore, descritto dai parametri che esso assume in un dato momento, è incapsulato all'interno dello stesso, \textbf{impedendo accessi dall'esterno}. 
+		\item{\textbf{Macrostep semantics:}} si inizia ad eseguire una nuova operazione solo dopo aver concluso la precedente. Questo rende la gestione di ciascun messaggio \textbf{atomica}.
+		\item{\textbf{Fairness:}} i messaggi accodati, \textbf{prima o poi} verranno gestiti. 
+		\item{\textbf{Location transparency:}} gli attori possono comunicare tra di loro \textbf{senza} essere a conoscenza delle rispettive posizioni.
 	\end{itemize}
 
-	Esistono diverse implementazioni del paradigma ad attori, che differiscono per il tipo e la gestione della \textbf{receive}. I sistemi più moderni preferiscono un approccio \textit{a receive implicita}, dove la ricezione dei messaggi è gestita in maniera trasparente. Nelle sezioni successive si vedrà che la scelta è ricaduta proprio su questo tipo di implementazione.
+	Esistono diverse implementazioni del paradigma ad attori, che differiscono per il tipo e la gestione della \textbf{receive}. I sistemi più moderni preferiscono un approccio \textit{a receive implicita}, dove la ricezione dei messaggi è gestita in maniera trasparente. Nelle sezioni successive si vedrà che, per quanto riguarda la realizzazione di questo progetto, la scelta è ricaduta proprio su questo tipo di implementazione.
 
 
