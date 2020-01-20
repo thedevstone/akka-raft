@@ -1,2 +1,33 @@
 % -*- root: ../../main.tex -*-
 \section{Tecnologie}
+Come abbiamo visto in \ref{Actors} il paradigma utilizzato per implementare l'algoritmo RAFT è quello ad \textbf{Attori}. Generalmente le tecnologie che implementano il paradigma ad attori assumono due forme fondamentali:
+\begin{itemize}
+  \item{\textbf{Linguaggi ad attori: }}
+  sono linguaggi in cui il concetto di attore è parte del linguaggio stesso. Non si può non citare \textbf{Erlang}, esso rappresenta uno dei primi linguaggi basati unicamente sul concetto di attore, (\textbf{Actor-Based language}). Successivamente altri linguaggi hanno incluso il concetto di attore ma in modo più sfumato; solitamente vengono usati DSL o librerie proprietarie al fine di garantire un'integrazione semi-nativa. Questo è il caso di \textbf{Scala} in cui esiste un'estensione ad attori.
+  \item{\textbf{Framework ad attori: }}
+  in questo caso il paradigma ad attori non è integrato nel linguaggio ma viene esteso da un \textbf{framework} esterno. La maggior parte delle implementazioni del paradigma ad attori al giorno d'oggi viene fornita attraverso librerie esterne. Fra le librerie più conosciute troviamo \textbf{Akka} e \textbf{Vertx}.
+\end{itemize}
+
+\subsection{Akka}
+Akka è una libreria opensource gratuita che ha lo scopo di semplificare la costruzione e la progettazione di \textbf{applicazioni concorrenti e distribuite} in ambiente JVM \cite{akkaSite}. La libreria è scritta in Scala e supporta sia Scala che Java; inoltre la suddivisione in moduli permette di poter estendere il numero di funzionalità in modo molto semplice. Nel nostro specifico caso sono stati utilizzati i seguenti moduli:
+\begin{itemize}
+  \item{\textbf{Akka Actor}}
+  \item{\textbf{Akka Cluster}}
+  \item{\textbf{Akka Testkit}}
+\end{itemize} 
+
+  \subsubsection{Akka Actors}
+  Il modulo \textbf{Actors} rappresenta il modulo fondamentale di Akka: esso fornisce l'astrazione di \textbf{Attore} e \textbf{Actor System}. Grazie a questo modulo è possibile creare un sistema ad attori estremamente complesso, l'unica limitazione sta nel fatto che il sistema è deployabile solamente su una sola macchina locale. La creazione di un attore viene delegata a un unico Actor System che ha lo scopo di gestirne lo \textbf{stato} e l'\textbf{esecuzione}. L'Actor System infine gestisce il multithreading garantendo così che in qualsiasi momento un attore possa essere eseguito in maniera safe da un thread per volta.   
+  \subsubsection{Akka Cluster}
+  Dato che il paradigma ad attori fornisce la sua massima espressione nel \textbf{distribuito}, si è deciso di includere anche l'estensione \textbf{Akka Cluster}. Akka Cluster permette di trasformare la propria architettura locale in una architettura \textbf{distribuita} o a  \textbf{microservizi}.
+  \footnote{ Data la \textit{natura indipendente} dei microservizi, essi permettono di \textit{disaccoppiare} in modo molto più netto il flusso di lavoro, garantendo così cicli di sviluppo molto brevi e delivery estremamente veloci. Akka fornisce inoltre un modulo che permette di lavorare con il paradigma \textbf{Reactive Streams} insieme al paradigma ad attori. Questo nuovo paradigma chiamato \textbf{Reactive Microsystems} permette di gestire in modo estremamente agevole i flussi di dati.}\\
+  Akka Cluster sposta il concetto di attore nel distribuito, in questo senso un attore non è più locale alla macchina ma può trovarsi in qualsiasi \textbf{Nodo} del \textbf{Cluster}. Un cluster quindi, si comporrà di vari nodi (macchine) i quali al loro interno avranno in esecuzione un \textbf{Actor System}. L' Actor System acquista un ulteriore ruolo, esso infatti non dovrà limitarsi a creare singoli attori ma dovrà anche gestirne la \textbf{mobilità} e l'\textbf{interazione} nel cluster.
+  \subsubsection{Akka Testkit}
+  Modulo dedicato al \textbf{testing} di attori verrà approfondito nella sezione \ref{Testing} dedicata al testing.
+
+\subsection{Scala}
+Come abbiamo visto nella sottosezione precedente, Akka è un framework scritto fondamentalmente in Scala e proprio in Scala definisce un \textbf{DSL} (Domain Specific Language) particolare che permette di esprimere concetti complessi in modo semplice ed immediato. Per esempio, in Scala, l'invio di un messaggio viene fatto usando il metodo \texttt{tell} o alternativamente usando \texttt{!}; questo aspetto simbolico rende Akka molto simile ad una libreria nativa per Scala.
+\footnote{Fun Fact: Scala ha da poco deprecato la propria liberia ad attori in favore di Akka perché più affidabile e potente.}\\
+La scelta di Scala è stata guidata anche dalla curiosità verso un nuovo linguaggio più \textbf{potente}, \textbf{conciso} ed \textbf{espressivo} di Java. Scala inoltre introduce un nuovo paradigma di programmazione, quello \textbf{funzionale} che permette di lavorare in maniera molto più \textbf{snella} ed \textbf{elegante} rispetto ad un \textbf{OOP castrato} come in Java.
+
+
