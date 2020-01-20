@@ -1,12 +1,16 @@
 plugins {
-    id 'scala'
-    id 'java-library'
+    id "java"
+    id "scala"
+    id "java-library"
+    id "application"
+    id "org.scoverage" version "4.0.1"
+    id "com.github.johnrengelman.shadow" version "5.2.0"
 }
 
-group 'sd-1920'
-version '1.0-SNAPSHOT'
+group project.project_group
+version project.project_version
 
-sourceCompatibility = 1.8
+sourceCompatibility = project.jdkVersion
 
 repositories {
     jcenter()
@@ -14,21 +18,59 @@ repositories {
 
 dependencies {
     //JAVAFX
-    implementation 'com.jfoenix:jfoenix:8.0.8' // Java 8
-    implementation 'org.kordamp.ikonli:ikonli-core:2.4.0'
-    implementation 'org.kordamp.ikonli:ikonli-javafx:2.4.0'
-    implementation 'org.kordamp.ikonli:ikonli-material-pack:2.4.0'
-    implementation 'eu.hansolo.enzo:Enzo:0.3.6'
+    implementation "com.jfoenix:jfoenix:${project.jfoenixVersion}" // Java 8
+    implementation "org.kordamp.ikonli:ikonli-core:${project.ikonli_coreVersion}"
+    implementation "org.kordamp.ikonli:ikonli-javafx:${project.ikonli_javafxVersion}"
+    implementation "org.kordamp.ikonli:ikonli-material-pack:${project.ikonli_material_packVersion}"
+    implementation "org.kordamp.ikonli:ikonli-devicons-pack:${project.ikonli_material_packVersion}"
+    implementation "org.kordamp.ikonli:ikonli-ionicons-pack:${project.ikonli_material_packVersion}"
+    implementation "eu.hansolo.enzo:Enzo:${project.enzoVersion}"
     //SCALA
-    implementation 'org.scala-lang:scala-library:2.12.9'
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.scalatest:scalatest_2.12:3.0.8'
-    testRuntimeOnly 'org.scala-lang.modules:scala-xml_2.12:1.2.0'
+    implementation "org.scala-lang:scala-library:${project.scala_library}"
+    testImplementation "junit:junit:${project.junit}"
+    testImplementation "org.scalatest:scalatest_2.12:${project.scalatest}"
+    testRuntimeOnly "org.scala-lang.modules:scala-xml_2.12:${project.scala_xml}"
     //LOGGING
-    implementation group: 'com.typesafe.akka', name: 'akka-slf4j_2.12', version: '2.5.23'
-    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    implementation group: "com.typesafe.akka", name: "akka-slf4j_2.12", version: "${project.akka_slf4j}"
+    implementation group: "ch.qos.logback", name: "logback-classic", version: "${project.logback_classic}"
     //AKKA
-    implementation group: 'com.typesafe.akka', name: 'akka-actor_2.12', version: '2.5.23'
-    implementation group: 'com.typesafe.akka', name: 'akka-cluster_2.12', version: '2.5.23'
-    implementation group: 'com.typesafe.akka', name: 'akka-cluster-tools_2.12', version: '2.5.23'
+    implementation group: "com.typesafe.akka", name: "akka-actor_2.12", version: "${project.akka_actor}"
+    implementation group: "com.typesafe.akka", name: "akka-cluster_2.12", version: "${project.akka_cluster}"
+    implementation group: "com.typesafe.akka", name: "akka-cluster-tools_2.12", version: "${project.akka_cluster_tool}"
+    testImplementation group: "com.typesafe.akka", name: "akka-testkit_2.12", version: "${project.akka_test}"
 }
+
+configurations {
+    scalaCompilerPlugin
+}
+
+mainClassName = 'it.unibo.sd1920.akka_raft.JarLauncher'
+
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
+
+
+import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransformer
+
+shadowJar {
+    transform(AppendingTransformer) {
+        resource = 'reference.conf'
+    }
+    mergeServiceFiles()
+    with jar
+}
+
+task spec(dependsOn: ['testClasses'], type: JavaExec) {
+    main = 'org.scalatest.tools.Runner'
+    args = ['-R', 'build/classes/scala/test', '-o']
+    classpath = sourceSets.test.runtimeClasspath
+}
+
+test.dependsOn spec
+check.dependsOn spec
