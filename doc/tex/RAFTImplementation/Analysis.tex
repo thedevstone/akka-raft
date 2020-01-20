@@ -1,11 +1,15 @@
 % -*- root: ../../main.tex -*-               
 \section{Analisi dei Requisiti} \label{Actors}
-L'applicativo è una rappresentazione operativa di RAFT, trattato ampiamente nei precedenti capitoli. Per questo motivo, l'analisi dei requisiti corrisponde a quella dell'algoritmo.
-Sommariamente si dovrà fare attenzione nel garantire tutte le proprietà dell'algoritmo:
-\begin{itemize}
-	\item 
-\end{itemize}
+L'applicativo è una rappresentazione operativa di RAFT; per questo motivo, i dettagli dei requisiti che deve avere sono insiti nelle caratteristiche dell'algoritmo discusse in precedenza. 
+
+Il sistema dovrà consistere in un insieme di nodi che rappresentano due entità principali:
+	\begin{itemize}
+		\item \textbf{Un client:} è l'entità che si occupa di inoltrare le richieste ai server e ricevere gli esiti.
+		\item \textbf{$n$ server:} è l'entità che accoglie le richieste del client, le esegue e comunica il risultato. Ognuna di queste entità, in un dato istante, ricopre uno e un solo ruolo tra \textit{Leader, Candidate} e \textit{Follower}
+	\end{itemize}
+
+Dal momento che queste entità devono essere indipendenti ed interagire tra loro, si è scelto di utilizzare il paradigma ad attori, che rende possibile agire ad un livello di astrazione molto elevato permettendo di facilitare la gestione delle dinamiche di interazione.
 
 
-In questo capitolo parliamo del fatto che abbiamo deciso di usare il paradigma ad attori, spieghiamo i motivi.
-
+	\subsection{Il paradigma ad attori}
+	Un attore rappresenta una entità con un proprio flusso di controllo e un proprio stato, che riceve dei messaggi e agisce di conseguenza. 
