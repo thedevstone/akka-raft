@@ -2,13 +2,13 @@
 \section{Obiettivi e Requisiti}
 	L'implementazione che si intende realizzare mira allo sviluppo di un sistema che simuli un ambiente distribuito in cui $n$ server utilizzano l'algoritmo RAFT per raggiungere il consenso. In particolare si è deciso di utilizzare, come scenario, quello di un client che contatta i server per effettuare delle \textbf{ operazioni sul database dei conti correnti bancari}.
 	\begin{itemize}
-			\item \textbf{Richieste del client:} il client deve poter sottomettere ai server delle operazioni da eseguire sul database dei conti corrente. Le operazioni consentite saranno:
+			\item \textbf{Richieste del client:} il client deve poter sottomettere ai server delle operazioni da eseguire sul database dei conti correnti. Le operazioni consentite saranno:
 				\begin{itemize}
 					\item \emph{Deposito}
 					\item \emph{Prelievo}
 					\item \emph{Saldo}
 				\end{itemize}
-			\item \textbf{Gestione lato server:} i server devono gestire le richieste provenienti dal client e rispondere con un risultato contenente l'esito dell'operazione e il \textbf{saldo} dopo che questa è stata effettuata.
+			\item \textbf{Gestione lato server:} i server devono gestire le richieste provenienti dal client e rispondere con un risultato contenente l'\textbf{esito} dell'operazione e il \textbf{saldo} dopo che questa è stata effettuata.
 			\item \textbf{Replicazione database:} il database dei conti correnti deve essere replicato su tutti i server in maniera tale che questi ultimi eseguano \textbf{le stesse identiche istruzioni nello stesso identico ordine} ottenendo il \textbf{medesimo risultato}.
 		\end{itemize}
 
