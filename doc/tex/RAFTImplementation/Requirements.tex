@@ -12,7 +12,7 @@
 			\item \textbf{Replicazione database:} il database dei conti correnti deve essere replicato su tutti i server in maniera tale che questi ultimi eseguano \textbf{le stesse identiche istruzioni nello stesso identico ordine} ottenendo il \textbf{medesimo risultato}.
 		\end{itemize}
 
-	Il sistema dovrà inoltre rispettare requisiti che riguardano la visualizzazione delle informazioni rilevanti e l'interazione con l'utente.
+	Il sistema dovrà inoltre rispettare requisiti che riguardano la \textbf{visualizzazione} delle informazioni rilevanti e l'\textbf{interazione} con l'utente.
 
 
 	\subsection{Requisiti di visualizzazione}
@@ -33,7 +33,7 @@
 					\item \textbf{Indice:} la \textbf{posizione} di quella determinata \textbf{entry} all'interno del log del relativo server.
 					\item \textbf{Stato:} se l'\textbf{entry} è \textbf{committed} o meno. Se una entry è committed, non dovrà in alcun modo essere possibile che ne compaia una non committata con indice precedente ad essa.
 				\end{itemize} 
-			\item \textbf{Stato di esecuzione:} dovrà esserci la possibilità di visualizzare le richieste sottomesse dal client e, per ognuna di esse, capire se essa è \textbf{già stata eseguita}
+			\item \textbf{Stato di esecuzione:} dovrà esserci la possibilità di visualizzare le richieste sottomesse dal client e, per ognuna di esse, capire se essa è \textbf{già stata eseguita.}
 			\item \textbf{Risultati:} nel caso in cui una richiesta del client sia stata eseguita, sarà necessario mostrare all'utente il risultato relativo, ricevuto dal client. Esso \textbf{non dovrà differire} dai risultati ottenuti su ciascuno dei server.
 		\end{itemize}
 
@@ -41,12 +41,12 @@
 	L'applicativo dovrà avere un'interfaccia utente che permetta di interagire con il sistema agendo su determinati parametri. I modi in cui il sistema potrà essere manovrato dall'utente sono i seguenti:
 		\begin{itemize}
 			\item \textbf{Operazione:} dovrà essere reso disponibile un modo per \textbf{effettuare una richiesta} (da parte del client) a uno dei server.
-			\item \textbf{Stop/Resume:} il comando \textit{stop} servirà per simulare la temoranea assenza di un server, mentre il comando \textit{resume} ne farà ripartire l'attività. 
+			\item \textbf{Stop/Resume:} il comando \textit{stop} servirà per simulare la temporanea assenza di un server, mentre il comando \textit{resume} ne farà ripartire l'attività. 
 			\item \textbf{Perdita dei messaggi:} l'utente potrà impostare una percentuale di perdita di messaggi per ogni server, in maniera indipendente. Questa funzionalità permetterà di testare la resistenza a questo tipo di fault.
-			\item \textbf{Timer:} sarà possibile provocare lo scadere del timer. Tale azione assumerà significati di versi a seconda del ruolo che il server ricoprirà in quel momento:
+			\item \textbf{Timer:} sarà possibile provocare lo scadere del timer. Tale azione assumerà significati diversi a seconda del ruolo che il server ricoprirà in quel momento:
 				\begin{itemize}
 					\item \textbf{Leader:} lo scadere del timer porterà all'invio degli heartbeat.
-					\item \textbf{Candidate:} la scadenza del timer lo porterà ad aumentare il proprio term e ricandidarsi
+					\item \textbf{Candidate:} la scadenza del timer lo porterà ad aumentare il proprio term e ricandidarsi.
 					\item \textbf{Follower:} allo scattare del timer, il follower, non avendo ricevuto notizie dal leader, deciderà di aumentare il proprio term e cambiare il proprio stato in \textit{candidate}.
 				\end{itemize}
 
