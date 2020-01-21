@@ -4,24 +4,24 @@ Giunti alle conclusioni di questo progetto possiamo affermare di ritenerci estre
 La realizzazione di un algoritmo di consenso richiede un enorme mole di studio e lavoro. Nel nostro caso il lavoro svolto si è suddiviso in questo modo: 
 \begin{itemize}
   \item{\emph{Studio e documentazione:}}
-  Abbiamo impiegato all'incirca una settimana di lavoro al fine comprendere e documentare al meglio l'algoritmo RAFT. Una volta che l'algoritmo è stato compreso si è potuto lavorare sull'effettiva implementazione concentrandosi inizialmente sulle varie tecnologie implementative. Dopo una breve indagine è stato scelto il framework Akka.
+  abbiamo impiegato all'incirca una settimana di lavoro al fine di comprendere e documentare al meglio l'algoritmo RAFT. Una volta che l'algoritmo è stato compreso si è potuto lavorare sull'effettiva implementazione concentrandosi inizialmente sulle varie tecnologie implementative. Dopo una breve indagine è stato scelto il framework Akka.
   \item{\emph{Studio di Scala:}}
-  Una volta che è stato individuato il framwork di sviluppo, la scelta del linguaggio è stata quasi obbligata. Akka infatti, come abbiamo già visto, in Scala permette di lavorare in modo estremamente conciso ed efficiente. Lo studio di Scala non è stato immediato e per apprenderlo al meglio abbiamo impiegato una settimana di studio full-time.
+  una volta che è stato individuato il framework di sviluppo, la scelta del linguaggio è stata quasi obbligata. Akka infatti, come abbiamo già visto, in Scala, permette di lavorare in modo estremamente conciso ed efficiente. L'apprendimento di Scala non è stato immediato e per comprenderlo al meglio abbiamo impiegato una settimana di studio full-time.
   \item{\emph{Studio di Akka:}}
-  Appreso il linguaggio Scala ci siamo concentrati sullo studio del framework Akka, in particolare ci siamo concentrati sulla libreria di Akka dedicata agli attori e al clustering.
+  appreso il linguaggio Scala ci siamo concentrati sullo studio del framework Akka, in particolare ci siamo concentrati sulla libreria di Akka dedicata agli attori e al clustering.
   \item{\emph{Implementazione vera e propria:}}
-  Finalmente appresi i linguaggi e le tecnologie necessarie ci siamo concentrati sull'implementazione dell'algoritmo RAFT. Siamo partiti dal modello e abbiamo proseguito a sviluppare in modo incrementale i vari attori.
+  finalmente appresi i linguaggi e le tecnologie necessarie ci siamo concentrati sull'implementazione dell'algoritmo RAFT. Siamo partiti dal modello e abbiamo proseguito a sviluppare in modo incrementale i vari attori.
   \item{\emph{Debugging:}}
-  Completata l'implementazione l'algoritmo ha presentato un numero considerevole di bugs. La fase di debugging è stata la fase più frustrante del progetto ma dopo grandi difficoltà siamo riusciti ad ottenere un'implementazione funzionante e pulita dell'algoritmo.
+  completata l'implementazione l'algoritmo ha presentato un numero considerevole di bug. La fase di debugging è stata la fase più frustrante del progetto ma dopo grandi difficoltà siamo riusciti ad ottenere un'implementazione funzionante e pulita dell'algoritmo.
 \end{itemize}
 
 
 \section{Lavori Futuri}
-  Il lavoro svolto come abbiamo visto è limitato a una semplice implementazione dell'algoritmo RAFT. Dato che l'algoritmo è stato sviluppato relativamente a un \textbf{caso d'uso specifico}, \textit{conti correnti bancari}, esso manca di estendibilità e genericità. Un sviluppo futuro potrebbe risiedere nella possibilità di fornire una \textbf{versione generica} dell'algoritmo che sarà poi estendibile concretamente in base al caso d'uso.\\
-  Un'altra possibile estensione futura dell'algoritmo consiste nell'inserimento delle \textit{features extra} fornite dall'algoritmo RAFT: \textbf{Log Compaction} e \textbf{Configuration Changes}.
+  Il lavoro svolto come abbiamo visto è limitato a una semplice implementazione dell'algoritmo RAFT. Dato che l'algoritmo è stato sviluppato relativamente a un \textbf{caso d'uso specifico}, \textit{conti correnti bancari}, esso manca di estendibilità e genericità. Uno sviluppo futuro potrebbe risiedere nella possibilità di fornire una \textbf{versione generica} dell'algoritmo che sarà poi estendibile concretamente in base al caso d'uso.\\
+  Un'altra possibile estensione futura dell'implementazione consiste nell'inserimento delle \textit{features extra} fornite dall'algoritmo RAFT: \textbf{Log Compaction} e \textbf{Configuration Changes}.
 
 \section{Cosa Abbiamo Imparato}
-  Quando si sceglie un \textbf{progetto ambizioso} spesso si rischia di rimanere sommersi dal carico di conoscenze necessarie per portare a termine il lavoro. Nel nostro caso ci sono stati momenti in cui si è pensato di abbandonare ma alla fine con grande forza di volontà siamo riusciti a superarli. Gli argomenti che inizialmente si sono mostrati più ostici alla fine sono entrati a far parte del nostro bagaglio conoscitivo.
+  Quando si sceglie un progetto sostanzioso spesso si rischia di rimanere sommersi dal carico di conoscenze necessarie per portare a termine il lavoro. Nel nostro caso ci sono stati momenti di sconforto che, con supporto reciproco, siamo riusciti a superare. Gli argomenti che inizialmente si sono mostrati più ostici alla fine sono entrati a far parte del nostro bagaglio conoscitivo.
   \begin{itemize}
     \item{\emph{Scala:}}
     Avendo a che fare con il linguaggio Scala la sua comprensione è avvenuta in modo passivo, inoltre essa ha portato con se interessanti conseguenze. Siamo entrati in contatto con un nuovo paradigma di programmazione quello \textbf{funzionale} e abbiamo imparato a lavorare in un ambiente OOP puro.
