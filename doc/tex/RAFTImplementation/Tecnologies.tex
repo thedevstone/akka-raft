@@ -16,14 +16,14 @@ Akka è una libreria opensource gratuita che ha lo scopo di semplificare la cost
   \item{\textbf{Akka Testkit}}
 \end{itemize} 
 
-  \subsubsection{Akka Actors}
-  Il modulo \textbf{Actors} rappresenta il modulo fondamentale di Akka: esso fornisce l'astrazione di \textbf{Attore} e \textbf{Actor System}. Grazie a questo modulo è possibile creare un sistema ad attori estremamente complesso, l'unica limitazione sta nel fatto che il sistema è deployabile solamente su una sola macchina locale. La creazione di un attore viene delegata a un unico Actor System che ha lo scopo di gestirne lo \textbf{stato} e l'\textbf{esecuzione}. L'Actor System infine gestisce il multithreading garantendo così che in qualsiasi momento un attore possa essere eseguito in maniera safe da un thread per volta.   
+  \subsubsection{Akka Actor}
+  Il modulo \textbf{Actor} rappresenta il modulo fondamentale di Akka: esso fornisce l'astrazione di \textbf{Attore} e \textbf{Actor System}. Grazie a questo modulo è possibile creare un sistema ad attori estremamente complesso, l'unica limitazione sta nel fatto che il sistema è deployabile solamente su una sola macchina locale. La creazione di un attore viene delegata a un unico Actor System che ha lo scopo di gestirne lo \textbf{stato} e l'\textbf{esecuzione}. L'Actor System infine gestisce il multithreading garantendo così che in qualsiasi momento un attore possa essere eseguito in maniera safe da un thread per volta.   
   \subsubsection{Akka Cluster}
   Dato che il paradigma ad attori fornisce la sua massima espressione nel \textbf{distribuito}, si è deciso di includere anche l'estensione \textbf{Akka Cluster}. Akka Cluster permette di trasformare la propria architettura locale in una architettura \textbf{distribuita} o a  \textbf{microservizi}.
   \footnote{ Data la \textit{natura indipendente} dei microservizi, essi permettono di \textit{disaccoppiare} in modo molto più netto il flusso di lavoro, garantendo così cicli di sviluppo molto brevi e delivery estremamente veloci. Akka fornisce inoltre un modulo che permette di lavorare con il paradigma \textbf{Reactive Streams} insieme al paradigma ad attori. Questo nuovo paradigma chiamato \textbf{Reactive Microsystems} permette di gestire in modo estremamente agevole i flussi di dati.}\\
   Akka Cluster sposta il concetto di attore nel distribuito, in questo senso un attore non è più locale alla macchina ma può trovarsi in qualsiasi \textbf{Nodo} del \textbf{Cluster}. Un cluster quindi, si comporrà di vari nodi (macchine) i quali al loro interno avranno in esecuzione un \textbf{Actor System}. L' Actor System acquista un ulteriore ruolo, esso infatti non dovrà limitarsi a creare singoli attori ma dovrà anche gestirne la \textbf{mobilità} e l'\textbf{interazione} nel cluster.
   \subsubsection{Akka Testkit}
-  Modulo dedicato al \textbf{testing} di attori verrà approfondito nella sezione \ref{Testing} dedicata al testing.
+  Modulo dedicato al \textbf{testing} di attori; verrà approfondito nella sezione \ref{Testing} relativa al testing.
 
 \subsection{Scala}
 Come abbiamo visto nella sottosezione precedente, Akka è un framework scritto fondamentalmente in Scala e proprio in Scala definisce un \textbf{DSL} (Domain Specific Language) particolare che permette di esprimere concetti complessi in modo semplice ed immediato. Per esempio, in Scala, l'invio di un messaggio viene fatto usando il metodo \texttt{tell} o alternativamente usando \texttt{!}; questo aspetto simbolico rende Akka molto simile ad una libreria nativa per Scala.

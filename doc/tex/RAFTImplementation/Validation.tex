@@ -9,17 +9,17 @@ La metodologia di sviluppo utilizzata per questo progetto è stata di tipo \text
     \item \texttt{Bank}
     \item \texttt{CommandLog}
   \end{itemize}
-  Un caso particolare è quello della \texttt{BankStateMachine} la quale possiede una natura particolare; essa infatti è un attore ma rappresenta un concetto che può riferirsi anche al modello.
+  Un caso speciale è quello della \texttt{BankStateMachine} la quale possiede una natura particolare; essa infatti è un attore ma rappresenta un concetto che può riferirsi anche al modello.
   
   \subsection{Approccio Test-Driven}
   Ogni classe di modello è stata sviluppata con approccio Test-Driven, ossia seguendo lo schema \textbf{\textit{Red, Green, Refactor}}. L'approccio consiste in:
   \begin{enumerate}
     \item{\emph{\textbf{Red:}}}
-    \emph{Scrivere test che falliscano}
+    \emph{scrivere test che falliscano}
     \item{\emph{\textbf{Green:}}}
-    \emph{Scrivere codice che faccia passare i test}
+    \emph{scrivere codice che faccia passare i test}
     \item{\emph{\textbf{Refactor:}}}
-    \emph{Rifattorizzare il codice al meglio}
+    \emph{rifattorizzare il codice al meglio}
   \end{enumerate}
 
   \subsection{Test Automatici}
@@ -67,7 +67,7 @@ La metodologia di sviluppo utilizzata per questo progetto è stata di tipo \text
   Sono stati svolti infine due tipologie di integration test sull'intero sistema: 
   \begin{itemize}
     \item{\textbf{\emph{Byzantine test:}}}
-    Test volto a verificare la vulnerabilità dell'algoritmo contro nodi di tipo \textbf{Byzantino}.   
+    test volto a verificare la vulnerabilità dell'algoritmo contro nodi di tipo \textbf{Bizantino}.   
     \item{\textbf{\emph{Normal operation test:}}}
-    Test dedicato a verificare la correttezza dell'algoritmo sull'intero cluster.
+    test dedicato a verificare la correttezza dell'algoritmo sull'intero cluster.
   \end{itemize}
