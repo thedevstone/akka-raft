@@ -3,18 +3,16 @@
 	Il progetto è stato scritto in \texttt{Scala} per la parte core, mentre la parte grafica è stata scritta con il supporto della libreria \texttt{JavaFX}.
 	Per la gestione delle dipendenze, per la compilazione e il testing abbiamo optato per il tool \texttt{Gradle}.
 
-	\subsection{Installazione dei requisiti}
+	\subsection{Installazione delle dipendenze software}
 	 Per compilare e eseguire l'applicativo è necessario munirsi di:
-	 \begin{enumerate}
+	 \begin{itemize}
 	 	\item \textbf{Java Development Kit:}
-	 		Nonostante sià possibile utilizzare un qualunque \texttt{JDK} superiore alla versione 8, consigliamo di utilizzare l'\texttt{Oracle JDK-8}.
-	 		Un altra valida alternativa è la distribuzione \texttt{Amazon Corretto-8} \cite{AmazonCorrettoSite}.
-	 		Queste distribuzioni incorporano nativamente \texttt{JavaFX}, permettendo di risparmiare così ulteriori installazioni.
+	 		nonostante sià possibile utilizzare un qualunque \texttt{JDK} superiore alla versione 8, consigliamo di utilizzare l'\texttt{Oracle JDK-8}.
+	 		Un'altra valida alternativa è la distribuzione \texttt{Amazon Corretto-8} \cite{AmazonCorrettoSite}. Queste distribuzioni incorporano nativamente \texttt{JavaFX}, permettendo di risparmiare così ulteriori installazioni.
 	 		
-	 	\item \textbf{Scala: }
-	 		Per l'esecuzione del programma è necessario munirsi di \texttt{Scala 2.12.10}, non garantiamo che un installazione più recente sia retro-compa-tibile.
+	 	\item \textbf{Scala:} per l'esecuzione del programma è necessario munirsi di \texttt{Scala 2.12.10}, non garantiamo che un'installazione più recente sia retro-compa-tibile.
 	 	 
-	 \end{enumerate}
+	 \end{itemize}
  		
  	\subsection{Build e run}
 	 	L'adozione di \texttt{Gradle} ha reso molto semplice la compilazione del progetto.
@@ -31,25 +29,25 @@ gradlew.bat build
 	 			\end{lstlisting} 
 	 	\end{itemize}
 		Il comando procederà alla compilazione dei sorgenti scala, fornendo in uscita un \texttt{jar} eseguibile che sarà collocato nella cartella \emph{/build/libs} sotto il nome di \texttt{akka-raft-1.0.0-all.jar}\\
-		Il \texttt{jar} esegue internamente il main presente nell'\texttt{object JarLaunher} del pakage akka\_raft.
-	  Per lanciare il jar è necessario eseguire il comando
-    \[
-      \texttt{scala akka-raft.jar tipologia id porta}
-    \]
+		Il \texttt{jar} esegue internamente il main presente nell'\texttt{object JarLauncher} del package akka\_raft.
+	  Per lanciare il jar è necessario eseguire il comando:
+
+	 \begin{lstlisting}[language=bash]
+		scala akka-raft.jar tipologia id porta
+	 \end{lstlisting}
+ 
     \begin{itemize}
-      \item{\textbf{Tipologia:}}
-      Le \textbf{tipologie} disponibili sono: client e server, la tipologia client esegue il \texttt{Client};
-      mentre la tipologia server lancia un solo \texttt{Server}.
-      Per l'esecuzione completa del cluster è necessario eseguire un solo client e esattamente cinque server, l'esecuzione di un numero diverso non permetterà al cluster di proseguire proseguire correttamente.
+      \item{\textbf{Tipologia:}} le \textbf{tipologie} disponibili sono client e server. Ogni tipologia esegue una sola istanza del nodo corrispondente.
+      Nell'attuale configurazione, per l'esecuzione completa del cluster è necessario eseguire un solo client e esattamente cinque server, l'esecuzione di un numero diverso non permetterà al cluster di proseguire correttamente.
       \item{\textbf{ID:}}
-      L'\textbf{id} è una stringa identificativa dell'attore che viene eseguito, è possibile scegliere la stringa che più ci piace, a patto che sia univoca.
+ 			l'\textbf{id} è una stringa identificativa dell'attore che viene eseguito, è possibile scegliere la stringa che più ci piace, a patto che sia univoca.
       \item{\textbf{Porta:}}
-      Infine la \textbf{porta} è il numero di porta utilizzato da akka remoting per ogni attore, la porta zero equivale a fornire una porta random libera.
+      la \textbf{porta} è il numero di porta assegnato da akka remoting ad ogni attore, inserire un valore pari a $0$ equivale a richiedere una porta random libera.
     \end{itemize}
 		Per l'esecuzione del cluster Akka è necessario lanciare due \textbf{seed node}, i quali devono possedere una porta specifica(rispettivamente 5000 e 5001), definite nel file \texttt{cluster.conf}.\\
-		Si consiglia di eseguire \textbf{sei istanze} del jar seguendo il seguente ordine:
-		  \begin{enumerate}
-			  \item
+		Si consiglia di eseguire \textbf{$6$ istanze} del jar seguendo il seguente ordine:
+		
+			  
 			  	\begin{lstlisting}[language=bash]
 scala akka-raft-1.0.0-all.jar client C0 5000
 			  	\end{lstlisting}
@@ -59,11 +57,11 @@ scala akka-raft-1.0.0-all.jar client S0 5001
 			  	\begin{lstlisting}[language=bash]
 scala akka-raft-1.0.0-all.jar client Sn 0
 					\end{lstlisting}			  
-			\end{enumerate}	
+		
 		Sarà necessario eseguire il terzo comando con porta $0$ altre quattro volte, per raggiungere il numero esatto necessario per la partenza del cluster.
  
  \subsection{Test}
- Sono stati prodotti vari test, automatizzati e grafici; per il lancio dei test è stato creato un task chiamato \texttt{spec}, utilizzato per eseguire i test scala con \texttt{org.scalatest.tools.Runner}.\\
+ Sono stati prodotti vari test, automatizzati e di integrazione. Per il lancio dei test è stato creato un task chiamato \texttt{spec}, utilizzato per eseguire i test scala con \texttt{org.scalatest.tools.Runner}.\\
 	Per l'esecuzione dei test è sufficiente eseguire gradle dalla cartella principale del progetto, tramite il lancio del comando:
 	\begin{itemize}
 		\item Per i sistemi \textbf{Unix}: 
